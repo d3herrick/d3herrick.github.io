@@ -450,7 +450,9 @@
   </p>
 </div>
 
-<!-- dah -->
+<!-- dah
+Changes to content begin here.
+-->
 <div class="sqs-html-content">
   <p class="" style="white-space:pre-wrap;">Are there empty spaces on the berms in your neighborhood where street trees formerly provided shade and beauty? Would you like to work with your neighbors and the Newton Tree Conservancy (NTC) to plant new trees? Then organize your neighbors and submit a neighborhood group application to our Community Tree Planting program! You can submit your application now or at any time to establish the group name, then give your neighbors the link and have them use that group name when they submit their information.
 </p>
@@ -533,7 +535,16 @@ Once the set of applications for a planting group is complete, the NTC director 
 </div></div><div class="sqs-block button-block sqs-block-button" data-block-type="53" id="block-yui_3_17_2_1_1588350829930_8704"><div class="sqs-block-content" id="yui_3_17_2_1_1688815330856_135">
 
 <div class="sqs-block-button-container sqs-block-button-container--left" data-animation-role="button" data-alignment="left" data-button-size="medium" data-button-type="primary" id="yui_3_17_2_1_1688815330856_134">
-<!-- dah -->
+<!-- dah
+The purpose of this bit of javascript is to append the value of (optional) parameter p_planting_group_name to
+the url used to invoke the google form. The intention is, if the planting group leader has selected a name for
+the group, the leader might send the potential homeowners in the group a link to this page with the name of the
+group assigned as the value of p_planting_group_name. Doing so would prepopulate the planting group name in
+the form, thus reducing the likelihood of other homeowners fat-fingering the group name.
+
+The code below is one of many ways to belay the value of p_planting_group_name. Feel free to recode in whatever
+way you would like.
+-->
 <script type="text/javascript">
 function get_form_params() {
   let form_params    = '';
