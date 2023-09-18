@@ -536,22 +536,22 @@ Once the set of applications for a planting group is complete, the NTC director 
 
 <div class="sqs-block-button-container sqs-block-button-container--left" data-animation-role="button" data-alignment="left" data-button-size="medium" data-button-type="primary" id="yui_3_17_2_1_1688815330856_134">
 <!-- dah
-The purpose of this bit of javascript is to append the value of (optional) parameter p_planting_group_name to
+The purpose of this bit of javascript is to append the value of (optional) parameter group_name to
 the url used to invoke the google form. The intention is, if the planting group leader has selected a name for
 the group, the leader might send the potential homeowners in the group a link to this page with the name of the
-group assigned as the value of p_planting_group_name. Doing so would prepopulate the planting group name in
+group assigned as the value of group_name. Doing so would prepopulate the planting group name in
 the form, thus reducing the likelihood of other homeowners fat-fingering the group name.
 
-The code below is one of many ways to belay the value of p_planting_group_name. Feel free to recode in whatever
+The code below is one of many ways to belay the value of group_name. Feel free to recode in whatever
 way you would like.
 -->
 <script type="text/javascript">
 function get_form_params() {
-  let form_params    = '';
-  let planting_group = new URLSearchParams(window.location.search).get('p_planting_group_name');
+  let form_params = '';
+  let group_name  = new URLSearchParams(window.location.search).get('group_name');
   
-  if (planting_group.length > 0) {
-    form_params += '?usp=pp_url&entry.2121398355=' + planting_group;
+  if (group_name.length > 0) {
+    form_params += '?usp=pp_url&entry.2121398355=' + group_name;
   }
 
   return form_params;
