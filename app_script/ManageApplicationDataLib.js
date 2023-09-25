@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                   = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion              = "14";
+const deploymentVersion              = "15";
 const formDataSheetId                = "1V6U8eDIYtzxjyaP_6aifgowaJkNFcCQtGzGkDPINZ_s";
 const formDataSheetRange             = "form_data";
 const plantingDateRange              = "planting_date";
@@ -22,7 +22,6 @@ const groupNameRange                 = "group_name";
 const groupDataRange                 = "group_data";
 const plantingDataFilter             = "planting_data_filter";
 const timestampDataFilter            = "timestamp_data_filter";
-const zipCodeDataFilter              = "zip_code_data_filter";
 const groupLeaderDataFilter          = "group_leader_data_filter";
 const lastDataRetrievalRange         = "last_data_retrieval";
 const totalRequestedTreeCountRange   = "total_requested_tree_count";
@@ -88,7 +87,6 @@ function onToggleDataFilterVisibility() {
   if ((isPlantingDataFilterVisible == null) || (isPlantingDataFilterVisible == "true")) {
     sheet.hideRow(sheet.getRange(plantingDataFilter));
     sheet.hideColumn(sheet.getRange(timestampDataFilter));
-    sheet.hideColumn(sheet.getRange(zipCodeDataFilter));
     sheet.hideColumn(sheet.getRange(groupLeaderDataFilter));
 
     userProperties.setProperty(plantingDataFilterVisibility, "false");
@@ -96,7 +94,6 @@ function onToggleDataFilterVisibility() {
   else {
     sheet.unhideRow(sheet.getRange(plantingDataFilter));
     sheet.unhideColumn(sheet.getRange(timestampDataFilter));
-    sheet.unhideColumn(sheet.getRange(zipCodeDataFilter));
     sheet.unhideColumn(sheet.getRange(groupLeaderDataFilter));
 
     userProperties.setProperty(plantingDataFilterVisibility, "true");
@@ -296,16 +293,25 @@ function listApplicationData_(sheet) {
 
     if (!isApplicationDataEmpty_(rows)) {
       rows.forEach(function(e) {
+        mergeZipcode_(e);
         mergeResidentName_(e);
         mergePlanterContact_(e);
       });
     }
 
-    rows.map(e => e.splice(4, 1));
+    rows.map(e => e.splice(2, 1));
+    rows.map(e => e.splice(3, 1));
     rows.map(e => e.splice(-4, 4));
   }
   
   return rows;
+}
+
+function mergeZipcode_(row) {
+  let streetAddress = row[1];
+  let zipcode       = row[2];
+
+  row[1] = streetAddress + "\n" + zipcode;
 }
 
 function mergeResidentName_(row) {
@@ -374,10 +380,6 @@ function compareApplicationData_(d1, d2) {
     let n2 = Number.parseInt(op2[0]);
 
     rc = (Number.isInteger(n1) ? n1 : 0) - (Number.isInteger(n2) ? n2 : 0);
-
-    if (rc == 0) {
-      rc = d1[2].localeCompare(d2[2]);
-    }
   }
 
   return rc;
