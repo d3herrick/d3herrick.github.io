@@ -13,30 +13,32 @@
 //
 // @OnlyCurrentDoc
 //
-const versionLabel                 = "V.1.0.0"
-const formDataSheetId              = "1V6U8eDIYtzxjyaP_6aifgowaJkNFcCQtGzGkDPINZ_s";
-const formDataSheetRange           = "form_data";
-const plantingDateRange            = "planting_date";
-const groupNameRange               = "group_name";
-const groupDataRange               = "group_data";
-const plantingDataFilter           = "planting_data_filter";
-const timestampDataFilter          = "timestamp_data_filter";
-const zipCodeDataFilter            = "zip_code_data_filter";
-const groupLeaderDataFilter        = "group_leader_data_filter";
-const lastDataRetrievalRange       = "last_data_retrieval";
-const totalTreeCountRange          = "total_tree_count";
-const plantingDataFilterVisibility = "is_planting_data_filter_visible";
-const newtonTreeConservancyMenu    = "Newton Tree Conservancy";
-const getApplicationDataMenuItem   = "Get application data";
-const toggleDataFilterMenuItem     = "Toggle data filter visibility";
-const generateFileNameMenuItem     = "Generate spreadsheet file name";
-const aboutThisMenuItem            = "About...";
-const additionalDataAvailableTitle = "Additional Application Data Available";
-const generateFileNameTitle        = "Generate Spreadsheet File Name";
-const specifyDataFilterTitle       = "Specify Application Data Filter Criteria";
-const aboutTitle                   = "About Community Tree Planting Spreadsheet";
-const plantingDateFilterLabel      = "Planting date";
-const groupNameFilterLabel         = "Group name";
+const deploymentId                   = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
+const deploymentVersion              = "14";
+const formDataSheetId                = "1V6U8eDIYtzxjyaP_6aifgowaJkNFcCQtGzGkDPINZ_s";
+const formDataSheetRange             = "form_data";
+const plantingDateRange              = "planting_date";
+const groupNameRange                 = "group_name";
+const groupDataRange                 = "group_data";
+const plantingDataFilter             = "planting_data_filter";
+const timestampDataFilter            = "timestamp_data_filter";
+const zipCodeDataFilter              = "zip_code_data_filter";
+const groupLeaderDataFilter          = "group_leader_data_filter";
+const lastDataRetrievalRange         = "last_data_retrieval";
+const totalRequestedTreeCountRange   = "total_requested_tree_count";
+const totalRecommendedTreeCountRange = "total_recommended_tree_count";
+const plantingDataFilterVisibility   = "is_planting_data_filter_visible";
+const newtonTreeConservancyMenu      = "Newton Tree Conservancy";
+const getApplicationDataMenuItem     = "Get application data";
+const toggleDataFilterMenuItem       = "Toggle data filter visibility";
+const generateFileNameMenuItem       = "Generate spreadsheet file name";
+const aboutThisMenuItem              = "About...";
+const additionalDataAvailableTitle   = "Additional Application Data Available";
+const generateFileNameTitle          = "Generate Spreadsheet File Name";
+const specifyDataFilterTitle         = "Specify Application Data Filter Criteria";
+const aboutTitle                     = "About Community Tree Planting Spreadsheet";
+const plantingDateFilterLabel        = "Planting date";
+const groupNameFilterLabel           = "Group name";
 
 function onOpen(e) {
   let ui = SpreadsheetApp.getUi();
@@ -79,7 +81,7 @@ function onEdit(e) {
 
 function onToggleDataFilterVisibility() {
   let sheet          = SpreadsheetApp.getActiveSheet();
-  let userProperties = PropertiesService.getUserProperties()
+  let userProperties = PropertiesService.getUserProperties();
 
   let isPlantingDataFilterVisible = userProperties.getProperty(plantingDataFilterVisibility);
 
@@ -105,7 +107,7 @@ function onToggleDataFilterVisibility() {
 
 function onGetApplicationData(sheet, rows) {
   if (sheet == null) {
-    sheet = SpreadsheetApp.getActiveSheet()
+    sheet = SpreadsheetApp.getActiveSheet();
   }
 
   let ui    = SpreadsheetApp.getUi();
@@ -125,7 +127,7 @@ function onGetApplicationData(sheet, rows) {
 
 function onGenerateSpreadsheetName(sheet) {
   if (sheet == null) {
-    sheet = SpreadsheetApp.getActiveSheet()
+    sheet = SpreadsheetApp.getActiveSheet();
   }
 
   let ui    = SpreadsheetApp.getUi();
@@ -141,13 +143,21 @@ function onGenerateSpreadsheetName(sheet) {
     if ((response.getSelectedButton() == ui.Button.OK) && (directorName.length > 0)) {
       let plantingDate   = sheet.getRange(plantingDateRange).getValue();
       let groupName      = sheet.getRange(groupNameRange).getValue();
-      let totalTreeCount = sheet.getRange(totalTreeCountRange).getValue();
+      let totalTreeCount = sheet.getRange(totalRecommendedTreeCountRange).getValue();
+
+      if ((totalTreeCount == null) || (totalTreeCount == 0)) {
+        totalTreeCount = sheet.getRange(totalRequestedTreeCountRange).getValue();
+
+        if (totalTreeCount == null) {
+          totalTreeCount = 0;
+        }
+      }
 
       let spreadSheetName = plantingDate + "-" + groupName + " (" + directorName + ") (" + totalTreeCount + ")";
 
       ui.alert(generateFileNameTitle,
         "Copy and paste the name below, setting it as the name of your spreadsheet:\n\n" + spreadSheetName,
-        ui.ButtonSet.OK)
+        ui.ButtonSet.OK);
     }
   }
   else {
@@ -161,7 +171,10 @@ function onAboutThis() {
   let ui = SpreadsheetApp.getUi();
 
   ui.alert(aboutTitle,
-    "Version: " + versionLabel + "\n\nNewton Tree Conservancy\nwww.newtontreeconservancy.org",
+    "Deployment ID\n" + deploymentId + "\n\n" +
+    "Version\n" + deploymentVersion + "\n\n\n" +
+    "Newton Tree Conservancy\n" +
+    "www.newtontreeconservancy.org",
     ui.ButtonSet.OK);
 }
 
@@ -261,7 +274,7 @@ function listApplicationData_(sheet) {
   // a zero-length string, for any number of consecutive columns that have no value on the end of a row's
   // array of values. To circumvent this, we include a constant ('$') as the last column in the query. We then
   // remove that slice of the array (and others, as necessary) before returning results from this function.
-  let query = "=query(importrange(\"" + formDataSheetId + "\", \"" + formDataSheetRange + "\"), \"SELECT Col1, Col6, Col7, Col4, Col5, Col8, Col9, Col10, Col14, Col15, Col19, Col20, Col21, '$' WHERE lower(Col2) = lower(\'" + plantingDate + "\') AND lower(Col3) = lower(\'" + groupName + "\') label '$' ''\", 0)";
+  let query = "=query(importrange(\"" + formDataSheetId + "\", \"" + formDataSheetRange + "\"), \"SELECT Col1, Col6, Col7, Col4, Col5, Col8, Col9, Col10, Col14, Col15, Col19, Col20, Col21, '$' WHERE Col1 IS NOT NULL AND lower(Col2) = lower(\'" + plantingDate + "\') AND lower(Col3) = lower(\'" + groupName + "\') label '$' ''\", 0)";
 
   let newSheet = file.insertSheet().hideSheet();
   newSheet.getRange(1, 1).setFormula(query);
