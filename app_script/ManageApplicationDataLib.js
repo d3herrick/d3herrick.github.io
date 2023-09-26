@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                   = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion              = "15";
+const deploymentVersion              = "17";
 const formDataSheetId                = "1V6U8eDIYtzxjyaP_6aifgowaJkNFcCQtGzGkDPINZ_s";
 const formDataSheetRange             = "form_data";
 const plantingDateRange              = "planting_date";
@@ -361,14 +361,13 @@ function sortApplicationData_(rows) {
 }
 
 function compareApplicationData_(d1, d2) {
-  let op1 = d1[1].split(" ");
-  let op2 = d2[1].split(" ");
-
+  let op1 = d1[1].split(/\s+/);
+  let op2 = d2[1].split(/\s+/);
+  let s1  = op1[1].toLowerCase();
+  let s2  = op2[1].toLowerCase();
+  
   let rc = 0;
 
-  let s1 = op1[1].toLowerCase();
-  let s2 = op2[1].toLowerCase();
-  
   if (s1 > s2) {
     rc = -1;
   }
@@ -376,10 +375,30 @@ function compareApplicationData_(d1, d2) {
     rc = 1;
   }
   else {
-    let n1 = Number.parseInt(op1[0]);
-    let n2 = Number.parseInt(op2[0]);
+    let t1 = op1[0].match(/\d+|\D+/g);
+    let t2 = op2[0].match(/\d+|\D+/g);
+    let n1 = Number.parseInt(t1[0]);
+    let n2 = Number.parseInt(t2[0]);
 
     rc = (Number.isInteger(n1) ? n1 : 0) - (Number.isInteger(n2) ? n2 : 0);
+
+    if (rc == 0) {
+      if (t1.length > 1) {
+        if (t2.length > 1) {
+          rc = t1[1].localeCompare(t2[1]);
+        }
+        else {
+          rc = 1;
+        }
+      }
+      else if (t2.length > 1 ) {
+        rc = -1;  
+      }
+
+      if (rc == 0) {
+        rc = op1[op1.length - 1].localeCompare(op2[op2.length - 1]);
+      }
+    }
   }
 
   return rc;
