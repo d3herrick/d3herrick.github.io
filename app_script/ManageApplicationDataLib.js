@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                   = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion              = "17";
+const deploymentVersion              = "18";
 const formDataSheetId                = "1V6U8eDIYtzxjyaP_6aifgowaJkNFcCQtGzGkDPINZ_s";
 const formDataSheetRange             = "form_data";
 const plantingDateRange              = "planting_date";
@@ -271,7 +271,7 @@ function listApplicationData_(sheet) {
   // a zero-length string, for any number of consecutive columns that have no value on the end of a row's
   // array of values. To circumvent this, we include a constant ('$') as the last column in the query. We then
   // remove that slice of the array (and others, as necessary) before returning results from this function.
-  let query = "=query(importrange(\"" + formDataSheetId + "\", \"" + formDataSheetRange + "\"), \"SELECT Col1, Col6, Col7, Col4, Col5, Col8, Col9, Col10, Col14, Col15, Col19, Col20, Col21, '$' WHERE Col1 IS NOT NULL AND lower(Col2) = lower(\'" + plantingDate + "\') AND lower(Col3) = lower(\'" + groupName + "\') label '$' ''\", 0)";
+  let query = "=query(importrange(\"" + formDataSheetId + "\", \"" + formDataSheetRange + "\"), \"SELECT Col1, Col6, Col7, Col4, Col5, Col8, Col9, Col10, Col14, Col15, Col16, Col17, Col18, Col19, Col20, Col21, '$' WHERE Col1 IS NOT NULL AND lower(Col2) = lower(\'" + plantingDate + "\') AND lower(Col3) = lower(\'" + groupName + "\') label '$' ''\", 0)";
 
   let newSheet = file.insertSheet().hideSheet();
   newSheet.getRange(1, 1).setFormula(query);
@@ -295,13 +295,17 @@ function listApplicationData_(sheet) {
       rows.forEach(function(e) {
         mergeZipcode_(e);
         mergeResidentName_(e);
+        mergeInfrastructureIssues_(e);
         mergePlanterContact_(e);
       });
     }
 
+/*delete me
     rows.map(e => e.splice(2, 1));
     rows.map(e => e.splice(3, 1));
+    rows.map(e => e.splice(-7, 3));
     rows.map(e => e.splice(-4, 4));
+*/
   }
   
   return rows;
@@ -312,20 +316,68 @@ function mergeZipcode_(row) {
   let zipcode       = row[2];
 
   row[1] = streetAddress + "\n" + zipcode;
+  row.splice(2, 1);
 }
 
 function mergeResidentName_(row) {
-  let residentFirstName = row[3];
-  let residentLastName  = row[4];
+  let residentFirstName = row[2];
+  let residentLastName  = row[3];
 
-  row[3] = residentFirstName + " " + residentLastName;
+  row[2] = residentFirstName + " " + residentLastName;
+  row.splice(3, 1);
+}
+
+function mergeInfrastructureIssues_(row) {
+  let residentNotes       = row[7];
+  let pendingConstruction = row[8];
+  let pendingUtilityWork  = row[9];
+  let naturalGasLeaks     = row[10];
+  let issueList           = [];
+
+  if ((pendingConstruction == "Yes") || (pendingUtilityWork == "Yes") ||  (naturalGasLeaks == "Yes")) {
+    if (residentNotes.length > 0) {
+        residentNotes += "\n\n";
+    }
+
+    residentNotes += "Possible infrastructure issues include";
+
+    if (pendingConstruction == "Yes") {
+      issueList.push("pending street construction");
+    }
+
+    if (pendingUtilityWork == "Yes") {
+      issueList.push("pending utility work");
+    }
+
+    if (naturalGasLeaks == "Yes") {
+      issueList.push("natural gas leaks");
+    }
+
+    switch (issueList.length) {
+      case 1:
+        residentNotes += " " + issueList[0];
+        break;
+
+      case 2:
+        residentNotes += " " + issueList[0] + " and " + issueList[1];
+        break;
+
+      case 3:
+        residentNotes += " " + issueList[0] + ", " + issueList[1] + " and " + issueList[2];
+        default:
+    }
+
+    row[7] = residentNotes + ".";
+  }
+
+  row.splice(8, 3);
 }
 
 function mergePlanterContact_(row) {
-  let residentNotes       = row[9];
-  let planterFirstName    = row[10];
-  let planterLastName     = row[11];
-  let planterEmailAddress = row[12];
+  let residentNotes       = row[7];
+  let planterFirstName    = row[8];
+  let planterLastName     = row[9];
+  let planterEmailAddress = row[10];
 
   if ((planterFirstName.length > 0) || (planterLastName.length > 0) || (planterEmailAddress.length > 0)) {
     if (residentNotes.length > 0) {
@@ -346,8 +398,10 @@ function mergePlanterContact_(row) {
       residentNotes += " at " + planterEmailAddress;
     }
 
-    row[9] = residentNotes;
+    row[7] = residentNotes + ".";
   }
+
+  row.splice(8, 4);
 }
 
 function sortApplicationData_(rows) {
