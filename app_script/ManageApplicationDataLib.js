@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                   = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion              = "18";
+const deploymentVersion              = "19";
 const formDataSheetId                = "1V6U8eDIYtzxjyaP_6aifgowaJkNFcCQtGzGkDPINZ_s";
 const formDataSheetRange             = "form_data";
 const plantingDateRange              = "planting_date";
@@ -299,13 +299,6 @@ function listApplicationData_(sheet) {
         mergePlanterContact_(e);
       });
     }
-
-/*delete me
-    rows.map(e => e.splice(2, 1));
-    rows.map(e => e.splice(3, 1));
-    rows.map(e => e.splice(-7, 3));
-    rows.map(e => e.splice(-4, 4));
-*/
   }
   
   return rows;
