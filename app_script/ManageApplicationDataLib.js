@@ -14,15 +14,17 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                   = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion              = "19";
+const deploymentVersion              = "20";
 const formDataSheetId                = "1V6U8eDIYtzxjyaP_6aifgowaJkNFcCQtGzGkDPINZ_s";
 const formDataSheetRange             = "form_data";
 const plantingDateRange              = "planting_date";
 const groupNameRange                 = "group_name";
+const groupLeaderDataFilter          = "group_leader_data_filter";
 const groupDataRange                 = "group_data";
+const wiresDataFilter                = "wires_data_filter";
+const curbDataFilter                 = "curb_data_filter";
 const plantingDataFilter             = "planting_data_filter";
 const timestampDataFilter            = "timestamp_data_filter";
-const groupLeaderDataFilter          = "group_leader_data_filter";
 const lastDataRetrievalRange         = "last_data_retrieval";
 const totalRequestedTreeCountRange   = "total_requested_tree_count";
 const totalRecommendedTreeCountRange = "total_recommended_tree_count";
@@ -75,6 +77,33 @@ function onEdit(e) {
     let groupName = sheet.getRange(groupNameRange);
 
     groupName.setValue(groupName.getDataValidation().getCriteriaValues()[0].getValues()[0]);
+  }
+
+  let range = sheet.getRange(groupDataRange);
+
+  if ((range.getRow() <= e.range.rowStart) && (range.getLastRow() >= e.range.rowEnd)) {
+    let needle = e.value.trim();
+
+    if ((needle.length > 0) && (needle != "Yes") && (needle != "No")) {
+      needle = needle.toLowerCase();
+
+      let rangeNames = [groupLeaderDataFilter, wiresDataFilter, curbDataFilter];
+
+      for (r of rangeNames) {
+        range = sheet.getRange(r);
+    
+        if (range.getLastColumn() == e.range.columnEnd) {
+          if ((needle == "y") || (needle == "yes")) {
+            e.range.setValue("Yes");
+          }
+          else if ((needle == "n") || (needle == "no")) {
+            e.range.setValue("No");
+          }
+
+          break;
+        }
+      }
+    }
   }
 }
 
