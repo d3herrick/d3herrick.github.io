@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                   = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion              = "20";
+const deploymentVersion              = "21";
 const formDataSheetId                = "1V6U8eDIYtzxjyaP_6aifgowaJkNFcCQtGzGkDPINZ_s";
 const formDataSheetRange             = "form_data";
 const plantingDateRange              = "planting_date";
@@ -70,40 +70,40 @@ function onOpen(e) {
 }
 
 function onEdit(e) {
-  let sheet                   = e.source.getActiveSheet();
-  let isPlantingDateSelection = (sheet.getRange(plantingDateRange).getA1Notation() == e.range.getA1Notation());
+  let sheet = e.source.getActiveSheet();
 
-  if (isPlantingDateSelection) {
-    let groupName = sheet.getRange(groupNameRange);
+  if (sheet.getRange(plantingDateRange).getA1Notation() != e.range.getA1Notation()) {
+    let range = sheet.getRange(groupDataRange);
 
-    groupName.setValue(groupName.getDataValidation().getCriteriaValues()[0].getValues()[0]);
-  }
+    if ((range.getRow() <= e.range.rowStart) && (range.getLastRow() >= e.range.rowEnd)) {
+      let needle = e.value.trim();
 
-  let range = sheet.getRange(groupDataRange);
+      if ((needle.length > 0) && (needle != "Yes") && (needle != "No")) {
+        needle = needle.toLowerCase();
 
-  if ((range.getRow() <= e.range.rowStart) && (range.getLastRow() >= e.range.rowEnd)) {
-    let needle = e.value.trim();
+        let rangeNames = [groupLeaderDataFilter, wiresDataFilter, curbDataFilter];
 
-    if ((needle.length > 0) && (needle != "Yes") && (needle != "No")) {
-      needle = needle.toLowerCase();
+        for (r of rangeNames) {
+          range = sheet.getRange(r);
+      
+          if (range.getLastColumn() == e.range.columnEnd) {
+            if ((needle == "y") || (needle == "yes")) {
+              e.range.setValue("Yes");
+            }
+            else if ((needle == "n") || (needle == "no")) {
+              e.range.setValue("No");
+            }
 
-      let rangeNames = [groupLeaderDataFilter, wiresDataFilter, curbDataFilter];
-
-      for (r of rangeNames) {
-        range = sheet.getRange(r);
-    
-        if (range.getLastColumn() == e.range.columnEnd) {
-          if ((needle == "y") || (needle == "yes")) {
-            e.range.setValue("Yes");
+            break;
           }
-          else if ((needle == "n") || (needle == "no")) {
-            e.range.setValue("No");
-          }
-
-          break;
         }
       }
     }
+  }
+  else {
+    let groupName = sheet.getRange(groupNameRange);
+
+    groupName.setValue(groupName.getDataValidation().getCriteriaValues()[0].getValues()[0]);
   }
 }
 
