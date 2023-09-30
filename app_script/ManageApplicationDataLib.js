@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                   = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion              = "22";
+const deploymentVersion              = "23";
 const formDataSheetId                = "1V6U8eDIYtzxjyaP_6aifgowaJkNFcCQtGzGkDPINZ_s";
 const formDataSheetRange             = "form_data";
 const plantingDateRange              = "planting_date";
@@ -290,8 +290,8 @@ function listApplicationData_(sheet) {
   let plantingDate   = sheet.getRange(plantingDateRange).getValue();
   let groupName      = sheet.getRange(groupNameRange).getValue();
   let dataRange      = sheet.getRange(groupDataRange);
-  let firstRow       = range.getRow();
-  let lastRow        = range.getLastRow();
+  let firstRow       = dataRange.getRow();
+  let lastRow        = dataRange.getLastRow();
   let currentRowKeys = new Set();
   let rows           = [];
 
