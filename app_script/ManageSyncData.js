@@ -16,7 +16,8 @@ const plantingDateRange = "planting_date";
 
 function onEdit(e) {
   let isLegalValue = true;
-  let range        = e.source.getActiveSheet().getRange(plantingDateRange);
+  let sheet        = e.source.getActiveSheet();
+  let range        = sheet.getRange(plantingDateRange);
 
   if (range.getLastColumn() == e.range.columnEnd) {
     let parts = e.value.trim().split(/\s+/);
@@ -45,10 +46,11 @@ function onEdit(e) {
   }
 
   if (!isLegalValue) {
-    let ui = SpreadsheetApp.getUi();
+    let ui         = SpreadsheetApp.getUi();
+    let columnName = sheet.getRange(1, range.getLastColumn()).getValue();
 
-    ui.alert("Invalid Value Specified for Planting Date",
-      "Value '" + e.value + "' is invalid. The format of Planting date is \"YYYY Spring|Fall\" with one space between the year and season.",
+    ui.alert("Invalid Value Specified for " + columnName,
+      "Value '" + e.value + "' is invalid. Please specify \"YYYY\" followed by \"Spring\" or \"Fall\" with one space between the year and season.",
       ui.ButtonSet.OK);
 
     e.range.setValue("");    

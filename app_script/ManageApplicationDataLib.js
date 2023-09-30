@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                   = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion              = "21";
+const deploymentVersion              = "22";
 const formDataSheetId                = "1V6U8eDIYtzxjyaP_6aifgowaJkNFcCQtGzGkDPINZ_s";
 const formDataSheetRange             = "form_data";
 const plantingDateRange              = "planting_date";
@@ -73,9 +73,9 @@ function onEdit(e) {
   let sheet = e.source.getActiveSheet();
 
   if (sheet.getRange(plantingDateRange).getA1Notation() != e.range.getA1Notation()) {
-    let range = sheet.getRange(groupDataRange);
+    let dataRange = sheet.getRange(groupDataRange);
 
-    if ((range.getRow() <= e.range.rowStart) && (range.getLastRow() >= e.range.rowEnd)) {
+    if ((dataRange.getRow() < e.range.rowStart) && (dataRange.getLastRow() > e.range.rowEnd)) {
       let needle = e.value.trim();
 
       if ((needle.length > 0) && (needle != "Yes") && (needle != "No")) {
@@ -84,7 +84,7 @@ function onEdit(e) {
         let rangeNames = [groupLeaderDataFilter, wiresDataFilter, curbDataFilter];
 
         for (r of rangeNames) {
-          range = sheet.getRange(r);
+          let range = sheet.getRange(r);
       
           if (range.getLastColumn() == e.range.columnEnd) {
             if ((needle == "y") || (needle == "yes")) {
@@ -92,6 +92,16 @@ function onEdit(e) {
             }
             else if ((needle == "n") || (needle == "no")) {
               e.range.setValue("No");
+            }
+            else {
+              let ui         = SpreadsheetApp.getUi();
+              let columnName = sheet.getRange(dataRange.getRow(), range.getLastColumn()).getValue();
+
+              ui.alert("Invalid Value Specified for " + columnName,
+                "Value '" + e.value + "' is invalid. Please specify either \"Yes\", or the letter \"Y\", or \"No\", or the letter \"N\".",
+                ui.ButtonSet.OK);
+
+              e.range.setValue("");    
             }
 
             break;
@@ -101,9 +111,7 @@ function onEdit(e) {
     }
   }
   else {
-    let groupName = sheet.getRange(groupNameRange);
-
-    groupName.setValue(groupName.getDataValidation().getCriteriaValues()[0].getValues()[0]);
+    dataRange.setValue(groupName.getDataValidation().getCriteriaValues()[0].getValues()[0]);
   }
 }
 
@@ -233,8 +241,9 @@ function insertApplicationData_(sheet, rows) {
   }
   
   if (!isApplicationDataEmpty_(rows)) {
-    let firstRow = sheet.getRange(groupDataRange).getRow();
-    let lastRow  = sheet.getRange(groupDataRange).getLastRow();
+    let dataRange = sheet.getRange(groupDataRange);
+    let firstRow  = dataRange.getRow();
+    let lastRow   = dataRange.getLastRow();
 
     if ((lastRow - firstRow) > 1) {
       rows.forEach(function(e) {
@@ -258,8 +267,9 @@ function insertApplicationData_(sheet, rows) {
         range.setValues([e]);
         range.setVerticalAlignment("top");
 
-        firstRow = sheet.getRange(groupDataRange).getRow();
-        lastRow  = sheet.getRange(groupDataRange).getLastRow();
+        dataRange = sheet.getRange(groupDataRange);
+        firstRow  = dataRange.getRow();
+        lastRow   = dataRange.getLastRow();
       });
     }
     else {
@@ -279,14 +289,14 @@ function listApplicationData_(sheet) {
   let file           = sheet.getParent();
   let plantingDate   = sheet.getRange(plantingDateRange).getValue();
   let groupName      = sheet.getRange(groupNameRange).getValue();
-  let range          = sheet.getRange(groupDataRange);
+  let dataRange      = sheet.getRange(groupDataRange);
   let firstRow       = range.getRow();
   let lastRow        = range.getLastRow();
   let currentRowKeys = new Set();
   let rows           = [];
 
   if ((lastRow - firstRow) > 1) {
-    range.offset(1, 0, (lastRow - firstRow - 1)).
+    dataRange.offset(1, 0, (lastRow - firstRow - 1)).
       getValues().
       map(v => v[0].valueOf()).
       forEach(function(e) {
