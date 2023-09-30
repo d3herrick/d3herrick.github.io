@@ -50,7 +50,7 @@ function onEdit(e) {
     let columnName = sheet.getRange(1, range.getLastColumn()).getValue();
 
     ui.alert("Invalid Value Specified for " + columnName,
-      "Value '" + e.value + "' is invalid. Please specify \"YYYY\" followed by \"Spring\" or \"Fall\" with one space between the year and season.",
+      "Value \"" + e.value + "\" is invalid. Please specify \"YYYY\" followed by \"Spring\" or \"Fall\" with one space between the year and season.",
       ui.ButtonSet.OK);
 
     e.range.setValue("");    

@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                   = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion              = "23";
+const deploymentVersion              = "24";
 const formDataSheetId                = "1V6U8eDIYtzxjyaP_6aifgowaJkNFcCQtGzGkDPINZ_s";
 const formDataSheetRange             = "form_data";
 const plantingDateRange              = "planting_date";
@@ -98,7 +98,7 @@ function onEdit(e) {
               let columnName = sheet.getRange(dataRange.getRow(), range.getLastColumn()).getValue();
 
               ui.alert("Invalid Value Specified for " + columnName,
-                "Value '" + e.value + "' is invalid. Please specify either \"Yes\", or the letter \"Y\", or \"No\", or the letter \"N\".",
+                "Value \"" + e.value + "\" is invalid. Please specify either \"Yes\", or the letter \"Y\", or \"No\", or the letter \"N\".",
                 ui.ButtonSet.OK);
 
               e.range.setValue("");    
