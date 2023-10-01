@@ -19,7 +19,7 @@ function onEdit(e) {
   let sheet        = e.source.getActiveSheet();
   let range        = sheet.getRange(plantingDateRange);
 
-  if (range.getLastColumn() == e.range.columnEnd) {
+  if ((e.range.rowEnd > 1) && (range.getLastColumn() == e.range.columnEnd)) {
     let parts = e.value.trim().split(/\s+/);
 
     if (parts.length == 2) {
