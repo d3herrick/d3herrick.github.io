@@ -551,7 +551,7 @@ function get_form_params() {
   let group_name  = new URLSearchParams(window.location.search).get('group_name');
   
   if (group_name.length > 0) {
-    form_params += '?usp=pp_url&entry.2121398355=' + group_name;
+    form_params = '?usp=pp_url&entry.2121398355=' + group_name;
   }
 
   return form_params;
