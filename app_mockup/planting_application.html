@@ -533,29 +533,7 @@ Once the set of applications for a planting group is complete, the NTC director 
 </div></div><div class="sqs-block button-block sqs-block-button" data-block-type="53" id="block-yui_3_17_2_1_1588350829930_8704"><div class="sqs-block-content" id="yui_3_17_2_1_1688815330856_135">
 
 <div class="sqs-block-button-container sqs-block-button-container--left" data-animation-role="button" data-alignment="left" data-button-size="medium" data-button-type="primary" id="yui_3_17_2_1_1688815330856_134">
-<!-- dah
-The purpose of this bit of javascript is to append the value of (optional) parameter group_name to
-the url used to invoke the google form. The intention is, if the planting group leader has selected a name for
-the group, the leader might send the potential homeowners in the group a link to this page with the name of the
-group assigned as the value of group_name. Doing so would prepopulate the planting group name in
-the form, thus reducing the likelihood of other homeowners fat-fingering the group name.
-
-The code below is one of many ways to belay the value of group_name. Feel free to recode in whatever
-way you would like.
--->
-<script type="text/javascript">
-function get_form_params() {
-  let form_params = '';
-  let group_name  = new URLSearchParams(window.location.search).get('group_name');
-  
-  if (group_name.length > 0) {
-    form_params = '?usp=pp_url&entry.2121398355=' + group_name;
-  }
-
-  return form_params;
-}
-</script>
-  <a href="https://docs.google.com/forms/d/e/1FAIpQLSfY84PyDJLISzWalM7o3dFcBXjIVW-7Y3bA7hytv_SBqgZ_dA/viewform" onClick="window.location.href=this.href+get_form_params();return false;" class="sqs-block-button-element--medium sqs-button-element--primary sqs-block-button-element" target="_self" data-initialized="true">
+  <a id="form_app_link" href="https://docs.google.com/forms/d/e/1FAIpQLSfY84PyDJLISzWalM7o3dFcBXjIVW-7Y3bA7hytv_SBqgZ_dA/viewform" target="_blank" class="sqs-block-button-element--medium sqs-button-element--primary sqs-block-button-element" data-initialized="true">
     Start Application
   </a>
 </div>
@@ -983,4 +961,23 @@ function get_form_params() {
 
   
 
-<div id="yui3-css-stamp" style="position: absolute !important; visibility: hidden !important"></div></body></html>
+<div id="yui3-css-stamp" style="position: absolute !important; visibility: hidden !important"></div>
+<!-- dah
+The purpose of this bit of javascript is to append the value of (optional) parameter group_name to
+the url used to invoke the google form. The intention is, if the planting group leader has selected a name for
+the group, the leader might send the potential homeowners in the group a link to this page with the name of the
+group assigned as the value of group_name. Doing so would prepopulate the planting group name in
+the form, thus reducing the likelihood of other homeowners fat-fingering the group name.
+-->
+<script type="text/javascript">
+let e = document.getElementById('form_app_link');
+
+if (e != null) {
+  let group_name = new URLSearchParams(window.location.search).get('group_name');
+
+  if (group_name != null) {
+    e.href += '?usp=pp_url&entry.2121398355=' + group_name;
+  }
+}
+</script>
+</body></html>
