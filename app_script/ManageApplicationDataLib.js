@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                   = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion              = "25";
+const deploymentVersion              = "28";
 const formDataSheetIdRange           = "form_data_spreadsheet_id";
 const formDataSheetRange             = "form_data";
 const plantingDateRange              = "planting_date";
@@ -33,9 +33,11 @@ const newtonTreeConservancyMenu      = "Newton Tree Conservancy";
 const getApplicationDataMenuItem     = "Get application data";
 const toggleDataFilterMenuItem       = "Toggle data filter visibility";
 const generateFileNameMenuItem       = "Generate spreadsheet file name";
+const insertEmptyRowsMenuItem        = "Insert empty rows";
 const aboutThisMenuItem              = "About...";
 const additionalDataAvailableTitle   = "Additional Application Data Available";
 const generateFileNameTitle          = "Generate Spreadsheet File Name";
+const insertEmptyRowsTitle           = "Insert Empty Rows";
 const specifyDataFilterTitle         = "Specify Application Data Filter Criteria";
 const aboutTitle                     = "About Community Tree Planting Spreadsheet";
 const plantingDateFilterLabel        = "Planting date";
@@ -51,6 +53,7 @@ function onOpen(e) {
       .addItem(toggleDataFilterMenuItem, "onToggleDataFilterVisibility")
       .addSeparator()
       .addItem(generateFileNameMenuItem, "onGenerateSpreadsheetName")
+      .addItem(insertEmptyRowsMenuItem, "onInsertEmptyRows")
       .addSeparator()
       .addItem(aboutThisMenuItem, "onAboutThis")
       .addToUi();
@@ -159,11 +162,8 @@ function onGetApplicationData(sheet, rows) {
   }
 }
 
-function onGenerateSpreadsheetName(sheet) {
-  if (sheet == null) {
-    sheet = SpreadsheetApp.getActiveSheet();
-  }
-
+function onGenerateSpreadsheetName() {
+  let sheet = SpreadsheetApp.getActiveSheet();
   let ui    = SpreadsheetApp.getUi();
   let alert = validateDataFilterCriteria_(sheet);
 
@@ -198,6 +198,28 @@ function onGenerateSpreadsheetName(sheet) {
     ui.alert(specifyDataFilterTitle, 
       "Please select " + alert + " and then click menu item " + getApplicationDataMenuItem + ", and then " + generateFileNameMenuItem + ".",
       ui.ButtonSet.OK);
+  }
+}
+
+function onInsertEmptyRows() {
+  let sheet = SpreadsheetApp.getActiveSheet();
+  let ui    = SpreadsheetApp.getUi();
+
+  let response = ui.prompt(insertEmptyRowsTitle,
+    "Enter the number of empty rows you would like to insert",
+    ui.ButtonSet.OK_CANCEL);
+
+  if (response.getSelectedButton() == ui.Button.OK) {
+    let rowCount = Number.parseInt(response.getResponseText());
+
+    if (Number.isInteger(rowCount) && (rowCount > 0)) {
+      sheet.insertRowsBefore(sheet.getRange(groupDataRange).getLastRow(), rowCount);
+    }
+    else {
+      ui.alert(insertEmptyRowsTitle,
+        response.getResponseText() + " is not a valid number.",
+        ui.ButtonSet.OK);
+    }
   }
 }
 
@@ -448,44 +470,55 @@ function sortApplicationData_(rows) {
 }
 
 function compareApplicationData_(d1, d2) {
-  let op1 = d1[1].split(/\s+/);
-  let op2 = d2[1].split(/\s+/);
-  let s1  = op1[1].toLowerCase();
-  let s2  = op2[1].toLowerCase();
-  
   let rc = 0;
 
-  if (s1 > s2) {
-    rc = -1;
-  }
-  else if (s1 < s2) {
-    rc = 1;
-  }
-  else {
-    let t1 = op1[0].match(/\d+|\D+/g);
-    let t2 = op2[0].match(/\d+|\D+/g);
-    let n1 = Number.parseInt(t1[0]);
-    let n2 = Number.parseInt(t2[0]);
+  let op1 = d1[1].split(/\s+/);
+  let op2 = d2[1].split(/\s+/);
 
-    rc = (Number.isInteger(n1) ? n1 : 0) - (Number.isInteger(n2) ? n2 : 0);
+  if (op1.length > 1) {
+    if (op2.length > 1) {
+      let s1 = op1[1].toLowerCase();
+      let s2 = op2[1].toLowerCase();
 
-    if (rc == 0) {
-      if (t1.length > 1) {
-        if (t2.length > 1) {
-          rc = t1[1].localeCompare(t2[1]);
-        }
-        else {
-          rc = 1;
-        }
+      if (s1 > s2) {
+        rc = -1;
       }
-      else if (t2.length > 1 ) {
-        rc = -1;  
+      else if (s1 < s2) {
+        rc = 1;
       }
+      else {
+        let t1 = op1[0].match(/\d+|\D+/g);
+        let t2 = op2[0].match(/\d+|\D+/g);
+        let n1 = Number.parseInt(t1[0]);
+        let n2 = Number.parseInt(t2[0]);
 
-      if (rc == 0) {
-        rc = op1[op1.length - 1].localeCompare(op2[op2.length - 1]);
+        rc = (Number.isInteger(n1) ? n1 : 0) - (Number.isInteger(n2) ? n2 : 0);
+
+        if (rc == 0) {
+          if (t1.length > 1) {
+            if (t2.length > 1) {
+              rc = t1[1].localeCompare(t2[1]);
+            }
+            else {
+              rc = 1;
+            }
+          }
+          else if (t2.length > 1 ) {
+            rc = -1;  
+          }
+
+          if (rc == 0) {
+            rc = op1[op1.length - 1].localeCompare(op2[op2.length - 1]);
+          }
+        }
       }
     }
+    else {
+      rc = -1;
+    }
+  }
+  else if (op2.length > 1) {
+    rc = 1;
   }
 
   return rc;

@@ -23,12 +23,16 @@ function onToggleDataFilterVisibility() {
   ManageApplicationDataLib.onToggleDataFilterVisibility();
 }
 
-function onGetApplicationData(sheet, rows) {
-  ManageApplicationDataLib.onGetApplicationData(sheet, rows);
+function onGetApplicationData() {
+  ManageApplicationDataLib.onGetApplicationData();
 }
 
-function onGenerateSpreadsheetName(sheet) {
-  ManageApplicationDataLib.onGenerateSpreadsheetName(sheet);
+function onGenerateSpreadsheetName() {
+  ManageApplicationDataLib.onGenerateSpreadsheetName();
+}
+
+function onInsertEmptyRows() {
+  ManageApplicationDataLib.onInsertEmptyRows();
 }
 
 function onAboutThis() {
