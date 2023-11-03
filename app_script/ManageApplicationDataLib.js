@@ -13,35 +13,37 @@
 //
 // @OnlyCurrentDoc
 //
-const deploymentId                   = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion              = "32";
-const formDataSheetIdRange           = "form_data_spreadsheet_id";
-const formDataSheetRange             = "form_data";
-const plantingDateRange              = "planting_date";
-const groupNameRange                 = "group_name";
-const groupLeaderDataFilter          = "group_leader_data_filter";
-const groupDataRange                 = "group_data";
-const wiresDataFilter                = "wires_data_filter";
-const curbDataFilter                 = "curb_data_filter";
-const plantingDataFilter             = "planting_data_filter";
-const timestampDataFilter            = "timestamp_data_filter";
-const lastDataRetrievalRange         = "last_data_retrieval";
-const totalRequestedTreeCountRange   = "total_requested_tree_count";
-const totalRecommendedTreeCountRange = "total_recommended_tree_count";
-const plantingDataFilterVisibility   = "is_planting_data_filter_visible";
-const newtonTreeConservancyMenu      = "Newton Tree Conservancy";
-const getApplicationDataMenuItem     = "Get application data";
-const toggleDataFilterMenuItem       = "Toggle data filter visibility";
-const generateFileNameMenuItem       = "Generate spreadsheet file name";
-const insertEmptyRowsMenuItem        = "Insert empty rows";
-const aboutThisMenuItem              = "About...";
-const additionalDataAvailableTitle   = "Additional Application Data Available";
-const generateFileNameTitle          = "Generate Spreadsheet File Name";
-const insertEmptyRowsTitle           = "Insert Empty Rows";
-const specifyDataFilterTitle         = "Specify Application Data Filter Criteria";
-const aboutTitle                     = "About Community Tree Planting Spreadsheet";
-const plantingDateFilterLabel        = "Planting date";
-const groupNameFilterLabel           = "Group name";
+const deploymentId                     = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
+const deploymentVersion                = "33";
+const formDataSheetIdRange             = "form_data_spreadsheet_id";
+const formDataSheetRange               = "form_data";
+const plantingDateRange                = "planting_date";
+const groupNameRange                   = "group_name";
+const groupLeaderDataFilter            = "group_leader_data_filter";
+const groupDataRange                   = "group_data";
+const wiresDataFilter                  = "wires_data_filter";
+const curbDataFilter                   = "curb_data_filter";
+const plantingDataFilter               = "planting_data_filter";
+const timestampDataFilter              = "timestamp_data_filter";
+const lastDataRetrievalRange           = "last_data_retrieval";
+const totalRequestedTreeCountRange     = "total_requested_tree_count";
+const totalRecommendedTreeCountRange   = "total_recommended_tree_count";
+const plantingDataFilterVisibility     = "is_planting_data_filter_visible";
+const insertEmptyRowsMax               = 30;
+const newtonTreeConservancyMenu        = "Newton Tree Conservancy";
+const getApplicationDataMenuItem       = "Get application data";
+const toggleDataFilterMenuItem         = "Toggle data filter visibility";
+const generateFileNameMenuItem         = "Generate spreadsheet file name";
+const insertEmptyRowsMenuItem          = "Insert empty rows";
+const aboutThisMenuItem                = "About...";
+const additionalDataAvailableTitle     = "Additional Application Data Available";
+const generateFileNameTitle            = "Generate Spreadsheet File Name";
+const insertEmptyRowsTitle             = "Insert Empty Rows";
+const specifyDataFilterTitle           = "Specify Application Data Filter Criteria";
+const specifiedInvalidColumnValueTitle = "Invalid Value Specified for ";
+const aboutTitle                       = "About Community Tree Planting Spreadsheet";
+const plantingDateFilterLabel          = "Planting date";
+const groupNameFilterLabel             = "Group name";
 
 function onOpen(e) {
   let ui = SpreadsheetApp.getUi();
@@ -100,7 +102,7 @@ function onEdit(e) {
               let ui         = SpreadsheetApp.getUi();
               let columnName = sheet.getRange(dataRange.getRow(), range.getLastColumn()).getValue();
 
-              ui.alert("Invalid Value Specified for " + columnName,
+              ui.alert(specifiedInvalidColumnValueTitle + columnName,
                 "Value \"" + e.value + "\" is invalid. Please specify either \"Yes\", or the letter \"Y\", or \"No\", or the letter \"N\".",
                 ui.ButtonSet.OK);
 
@@ -169,7 +171,7 @@ function onGenerateSpreadsheetName() {
 
   if (alert.length == 0) {
     let response = ui.prompt(generateFileNameTitle,
-      "Enter the first name of the director assigned to this planting group",
+      "Enter the first name of the director assigned to this planting group:",
       ui.ButtonSet.OK_CANCEL);
 
     let directorName = response.getResponseText();
@@ -195,7 +197,7 @@ function onGenerateSpreadsheetName() {
     }
   }
   else {
-    ui.alert(specifyDataFilterTitle, 
+    ui.alert(generateFileNameTitle, 
       "Please select " + alert + " and then click menu item " + getApplicationDataMenuItem + ", and then " + generateFileNameMenuItem + ".",
       ui.ButtonSet.OK);
   }
@@ -206,14 +208,21 @@ function onInsertEmptyRows() {
   let ui    = SpreadsheetApp.getUi();
 
   let response = ui.prompt(insertEmptyRowsTitle,
-    "Enter the number of empty rows you would like to insert",
+    "Enter the number of empty rows to insert. You may specify up to " + insertEmptyRowsMax + " rows:",
     ui.ButtonSet.OK_CANCEL);
 
   if (response.getSelectedButton() == ui.Button.OK) {
     let rowCount = Number.parseInt(response.getResponseText());
 
     if (Number.isInteger(rowCount) && (rowCount > 0)) {
-      sheet.insertRowsBefore(sheet.getRange(groupDataRange).getLastRow(), rowCount);
+      if (rowCount <= insertEmptyRowsMax) {
+        sheet.insertRowsBefore(sheet.getRange(groupDataRange).getLastRow(), rowCount);
+      }
+      else {
+        ui.alert(insertEmptyRowsTitle,
+          "You may not specify more than " + insertEmptyRowsMax + " rows.",
+          ui.ButtonSet.OK);
+      }
     }
     else {
       ui.alert(insertEmptyRowsTitle,
