@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                   = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion              = "28";
+const deploymentVersion              = "32";
 const formDataSheetIdRange           = "form_data_spreadsheet_id";
 const formDataSheetRange             = "form_data";
 const plantingDateRange              = "planting_date";
@@ -58,7 +58,7 @@ function onOpen(e) {
       .addItem(aboutThisMenuItem, "onAboutThis")
       .addToUi();
 
-  let sheet = e.source.getActiveSheet();
+  let sheet = getMainSheet_();
   let rows  = listApplicationData_(sheet);
 
   if (!isApplicationDataEmpty_(rows)) {
@@ -73,7 +73,7 @@ function onOpen(e) {
 }
 
 function onEdit(e) {
-  let sheet = e.source.getActiveSheet();
+  let sheet = getMainSheet_();
 
   if (sheet.getRange(plantingDateRange).getA1Notation() != e.range.getA1Notation()) {
     let dataRange = sheet.getRange(groupDataRange);
@@ -119,7 +119,7 @@ function onEdit(e) {
 }
 
 function onToggleDataFilterVisibility() {
-  let sheet          = SpreadsheetApp.getActiveSheet();
+  let sheet          = getMainSheet_();
   let userProperties = PropertiesService.getUserProperties();
 
   let isPlantingDataFilterVisible = userProperties.getProperty(plantingDataFilterVisibility);
@@ -144,7 +144,7 @@ function onToggleDataFilterVisibility() {
 
 function onGetApplicationData(sheet, rows) {
   if (sheet == null) {
-    sheet = SpreadsheetApp.getActiveSheet();
+    sheet = getMainSheet_();
   }
 
   let ui    = SpreadsheetApp.getUi();
@@ -163,7 +163,7 @@ function onGetApplicationData(sheet, rows) {
 }
 
 function onGenerateSpreadsheetName() {
-  let sheet = SpreadsheetApp.getActiveSheet();
+  let sheet = getMainSheet_();
   let ui    = SpreadsheetApp.getUi();
   let alert = validateDataFilterCriteria_(sheet);
 
@@ -202,7 +202,7 @@ function onGenerateSpreadsheetName() {
 }
 
 function onInsertEmptyRows() {
-  let sheet = SpreadsheetApp.getActiveSheet();
+  let sheet = getMainSheet_();
   let ui    = SpreadsheetApp.getUi();
 
   let response = ui.prompt(insertEmptyRowsTitle,
@@ -522,6 +522,20 @@ function compareApplicationData_(d1, d2) {
   }
 
   return rc;
+}
+
+function getMainSheet_() {
+  let sheet = undefined;
+  let range = SpreadsheetApp.getActiveSpreadsheet().getRangeByName(groupDataRange);
+
+  if (range != null) {
+    sheet = range.getSheet();
+  }
+  else {
+    throw new Error("Main sheet could not be resolved");
+  }
+
+  return sheet;
 }
 
 function isApplicationDataEmpty_(rows) {
