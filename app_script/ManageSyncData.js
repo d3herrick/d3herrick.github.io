@@ -15,44 +15,50 @@
 const plantingDateRange = "planting_date";
 
 function onEdit(e) {
-  let isLegalValue = true;
-  let sheet        = e.source.getActiveSheet();
-  let range        = sheet.getRange(plantingDateRange);
+  let sheet = e.source.getActiveSheet();
+  let range = sheet.getRange(plantingDateRange);
 
-  if ((e.range.rowEnd > 1) && (range.getLastColumn() == e.range.columnEnd)) {
-    let parts = e.value.trim().split(/\s+/);
+  if (sheet.getSheetId() === range.getSheet().getSheetId()) {
+    let isLegalValue = true;
 
-    if (parts.length == 2) {
-      if (!Number.isNaN(Number.parseInt(parts[0]))) {
-        if ((parts[1] == "Spring") || (parts[1] == "Fall")) {
-          e.range.setValue(parts[0] + " " + parts[1]);
+    if ((e.range.rowEnd > 1) && (range.getLastColumn() == e.range.columnEnd)) {
+      let parts = e.value.trim().split(/\s+/);
+
+      if (parts.length == 2) {
+        if (!Number.isNaN(Number.parseInt(parts[0])) && (parts[0].length == 4)) {
+          if ((parts[1] === "Spring") || (parts[1] === "Fall")) {
+            e.range.setValue(parts[0] + " " + parts[1]);
+          }
+          else {
+            isLegalValue = false;
+          }
+        }
+        else if (!Number.isNaN(Number.parseInt(parts[1])) && (parts[1].length == 4)) {
+          if ((parts[0] === "Spring") || (parts[0] === "Fall")) {
+            e.range.setValue(parts[1] + " " + parts[0]);
+          }
+          else {
+            isLegalValue = false;
+          }
         }
         else {
           isLegalValue = false;
-        }
-      }
-      else if (!Number.isNaN(Number.parseInt(parts[1]))) {
-        if ((parts[0] == "Spring") || (parts[0] == "Fall")) {
-          e.range.setValue(parts[1] + " " + parts[0]);
         }
       }
       else {
         isLegalValue = false;
       }
     }
-    else {
-      isLegalValue = false;
+
+    if (!isLegalValue) {
+      let ui         = SpreadsheetApp.getUi();
+      let columnName = sheet.getRange(1, range.getLastColumn()).getValue();
+
+      ui.alert("Invalid Value Specified for " + columnName,
+        "Value \"" + e.value + "\" is invalid. Please specify \"YYYY\" followed by \"Spring\" or \"Fall\" with one space between the year and season, and the first letter of the season capitalized.\n\nExample: 2024 Spring",
+        ui.ButtonSet.OK);
+
+      e.range.setValue("");    
     }
-  }
-
-  if (!isLegalValue) {
-    let ui         = SpreadsheetApp.getUi();
-    let columnName = sheet.getRange(1, range.getLastColumn()).getValue();
-
-    ui.alert("Invalid Value Specified for " + columnName,
-      "Value \"" + e.value + "\" is invalid. Please specify \"YYYY\" followed by \"Spring\" or \"Fall\" with one space between the year and season, and the first letter of the season capitalized.",
-      ui.ButtonSet.OK);
-
-    e.range.setValue("");    
   }
 }
