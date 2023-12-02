@@ -14,11 +14,12 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion                = "33";
+const deploymentVersion                = "34";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
 const groupNameRange                   = "group_name";
+const queryResultsRange                = "query_results"
 const groupLeaderDataFilter            = "group_leader_data_filter";
 const groupDataRange                   = "group_data";
 const wiresDataFilter                  = "wires_data_filter";
@@ -344,11 +345,17 @@ function listApplicationData_(sheet) {
   // remove that slice of the array (and others, as necessary) before returning results from this function.
   let query = "=query(importrange(\"" + formDataSheetId + "\", \"" + formDataSheetRange + "\"), \"SELECT Col1, Col6, Col7, Col4, Col5, Col8, Col9, Col10, Col14, Col15, Col16, Col17, Col18, Col19, Col20, Col21, '$' WHERE Col1 IS NOT NULL AND lower(Col2) = lower(\'" + plantingDate + "\') AND lower(Col3) = lower(\'" + groupName + "\') label '$' ''\", 0)";
 
-  let newSheet = file.insertSheet().hideSheet();
-  newSheet.getRange(1, 1).setFormula(query);
+  let queryResults = sheet.getRange(queryResultsRange);
+  let newData      = null;
 
-  let newData = newSheet.getDataRange().getValues();
-  file.deleteSheet(newSheet);
+  try {
+    queryResults.setFormula(query);
+
+    newData = queryResults.getSheet().getDataRange().getValues();
+  }
+  finally {
+    queryResults.clear();
+  }
 
   if (!isApplicationDataEmpty_(newData)) {
     if (currentRowKeys.size > 0) {
