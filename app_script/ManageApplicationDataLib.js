@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion                = "34";
+const deploymentVersion                = "37";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -84,7 +84,7 @@ function onEdit(e) {
     if ((dataRange.getRow() < e.range.rowStart) && (dataRange.getLastRow() > e.range.rowEnd)) {
       let needle = e.value.trim();
 
-      if ((needle.length > 0) && (needle != "Yes") && (needle != "No")) {
+      if ((needle.length > 0) && (needle !== "Yes") && (needle !== "No")) {
         needle = needle.toLowerCase();
 
         let rangeNames = [groupLeaderDataFilter, wiresDataFilter, curbDataFilter];
@@ -93,10 +93,10 @@ function onEdit(e) {
           let range = sheet.getRange(r);
       
           if (range.getLastColumn() == e.range.columnEnd) {
-            if ((needle == "y") || (needle == "yes")) {
+            if ((needle === "y") || (needle === "yes")) {
               e.range.setValue("Yes");
             }
-            else if ((needle == "n") || (needle == "no")) {
+            else if ((needle === "n") || (needle === "no")) {
               e.range.setValue("No");
             }
             else {
@@ -488,8 +488,8 @@ function sortApplicationData_(rows) {
 function compareApplicationData_(d1, d2) {
   let rc = 0;
 
-  let op1 = d1[1].split(/\s+/);
-  let op2 = d2[1].split(/\s+/);
+  let op1 = normalizeStreetAddress(d1[1].split(/\s+/));
+  let op2 = normalizeStreetAddress(d2[1].split(/\s+/))
 
   if (op1.length > 1) {
     if (op2.length > 1) {
@@ -538,6 +538,41 @@ function compareApplicationData_(d1, d2) {
   }
 
   return rc;
+}
+
+function normalizeStreetAddress(parts) {
+  if (parts.length > 0) {
+    let index = parts[0].indexOf("-");
+
+    if (index != -1) {
+      parts[0] = parts[0].slice(0, index);
+    }
+
+    if (parts.length > 3) {
+      if (parts[1] === '-') {
+        parts.splice(1, 1);
+
+        if (Number.isInteger(Number.parseInt(parts[1]))) {
+          parts.splice(1, 1);
+        }
+      }
+      else if (parts[1].indexOf("-") != -1) {
+        parts.splice(1, 1);
+      }
+    }
+
+    if (parts.length > 4) {
+      if (parts[1].match(/^[a-zA-Z]+$/) != null) {
+        parts[0] += parts[1];
+        parts.splice(1, 1);
+      }
+      else if (Number.isInteger(Number.parseInt(parts[1]))) {
+        parts.splice(1, 1);
+      }
+    }
+  }
+
+  return parts;
 }
 
 function getMainSheet_() {
