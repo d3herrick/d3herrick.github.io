@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion                = "38";
+const deploymentVersion                = "40";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -488,8 +488,8 @@ function sortApplicationData_(rows) {
 function compareApplicationData_(d1, d2) {
   let rc = 0;
 
-  let op1 = normalizeStreetAddress(d1[1].split(/\s+/));
-  let op2 = normalizeStreetAddress(d2[1].split(/\s+/))
+  let op1 = parseStreetAddress_(d1[1]);
+  let op2 = parseStreetAddress_(d2[1])
 
   if (op1.length > 1) {
     if (op2.length > 1) {
@@ -540,8 +540,26 @@ function compareApplicationData_(d1, d2) {
   return rc;
 }
 
-function normalizeStreetAddress(parts) {
+function parseStreetAddress_(streetAddress) {
+  let parts = streetAddress.split(/\s+/);
+
   if (parts.length > 0) {
+    let commaIndexes = [];
+
+    let count = parts.length;
+    let i     = 0;
+
+    while (i < count) {   
+      let index = parts[i].indexOf(",");
+
+      if (index != -1) {
+        commaIndexes.push(i);
+        parts[i] = parts[i].slice(0, index);
+      }
+
+      i++;
+    }
+
     let index = parts[0].indexOf("-");
 
     if (index != -1) {
@@ -562,7 +580,13 @@ function normalizeStreetAddress(parts) {
     }
 
     if (parts.length > 4) {
-      if (parts[1].match(/^[a-zA-Z]+$/) != null) {
+      commaIndexes.forEach(function(e) {
+        if (e == (parts.length - 3)) {
+          parts.splice(e + 1, 1);
+        }
+      });
+
+      if ((parts.length > 4) && (parts[1].match(/^[a-zA-Z]+$/) != null)) {
         parts[0] += parts[1];
         parts.splice(1, 1);
       }
