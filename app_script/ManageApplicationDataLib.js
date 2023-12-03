@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion                = "41";
+const deploymentVersion                = "42";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -541,9 +541,11 @@ function compareApplicationData_(d1, d2) {
 }
 
 function parseStreetAddress_(streetAddress) {
-  streetAddress = streetAddress.replace("- ", "-");
-  streetAddress = streetAddress.replace(" -", "-");
-  streetAddress = streetAddress.replace(" - ", "-");
+  [" - ", "- ", " -"].forEach(function(e) {
+    while (streetAddress.indexOf(e) != -1) {
+      streetAddress = streetAddress.replace(e, "-");
+    }
+  });
 
   let start  = streetAddress.indexOf(",");
   let end    = start + 1;
