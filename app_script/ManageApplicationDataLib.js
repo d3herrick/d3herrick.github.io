@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion                = "37";
+const deploymentVersion                = "38";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -331,7 +331,7 @@ function listApplicationData_(sheet) {
   if ((lastRow - firstRow) > 1) {
     dataRange.offset(1, 0, (lastRow - firstRow - 1)).
       getValues().
-      map(v => v[0].valueOf()).
+      map(v => v[0].getTime()).
       forEach(function(e) {
         currentRowKeys.add(e);
       });
@@ -360,7 +360,7 @@ function listApplicationData_(sheet) {
   if (!isApplicationDataEmpty_(newData)) {
     if (currentRowKeys.size > 0) {
       newData.forEach(function(e) {
-        if (!currentRowKeys.has(e[0].valueOf())) {
+        if (!currentRowKeys.has(e[0].getTime())) {
           rows.push(e);
         }
       });
