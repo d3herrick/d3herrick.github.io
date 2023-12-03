@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion                = "40";
+const deploymentVersion                = "41";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -541,52 +541,40 @@ function compareApplicationData_(d1, d2) {
 }
 
 function parseStreetAddress_(streetAddress) {
+  streetAddress = streetAddress.replace("- ", "-");
+  streetAddress = streetAddress.replace(" -", "-");
+  streetAddress = streetAddress.replace(" - ", "-");
+
+  let start  = streetAddress.indexOf(",");
+  let end    = start + 1;
+  let length = streetAddress.length;
+
+  for (let i = end; i < length; i++) {
+    let c = streetAddress.charAt(i);
+
+    if (!Number.isInteger(Number.parseInt(c))) {
+      end++;
+    }
+    else {
+      break;
+    }
+  }
+
+  if (end > start) {
+    streetAddress = streetAddress.replace(streetAddress.slice(start, end - 1), "");
+  }
+
   let parts = streetAddress.split(/\s+/);
 
   if (parts.length > 0) {
-    let commaIndexes = [];
-
-    let count = parts.length;
-    let i     = 0;
-
-    while (i < count) {   
-      let index = parts[i].indexOf(",");
-
-      if (index != -1) {
-        commaIndexes.push(i);
-        parts[i] = parts[i].slice(0, index);
-      }
-
-      i++;
-    }
-
     let index = parts[0].indexOf("-");
 
     if (index != -1) {
       parts[0] = parts[0].slice(0, index);
     }
 
-    if (parts.length > 3) {
-      if (parts[1] === '-') {
-        parts.splice(1, 1);
-
-        if (Number.isInteger(Number.parseInt(parts[1]))) {
-          parts.splice(1, 1);
-        }
-      }
-      else if (parts[1].indexOf("-") != -1) {
-        parts.splice(1, 1);
-      }
-    }
-
     if (parts.length > 4) {
-      commaIndexes.forEach(function(e) {
-        if (e == (parts.length - 3)) {
-          parts.splice(e + 1, 1);
-        }
-      });
-
-      if ((parts.length > 4) && (parts[1].match(/^[a-zA-Z]+$/) != null)) {
+      if (parts[1].match(/^[a-zA-Z]+$/) != null) {
         parts[0] += parts[1];
         parts.splice(1, 1);
       }
