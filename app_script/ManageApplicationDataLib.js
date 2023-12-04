@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion                = "42";
+const deploymentVersion                = "43";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -541,9 +541,9 @@ function compareApplicationData_(d1, d2) {
 }
 
 function parseStreetAddress_(streetAddress) {
-  [" - ", "- ", " -"].forEach(function(e) {
-    while (streetAddress.indexOf(e) != -1) {
-      streetAddress = streetAddress.replace(e, "-");
+  [[" - ", "-"], ["- ", "-"], [" -", "-"], [".", ""]].forEach(function(e) {
+    while (streetAddress.indexOf(e[0]) != -1) {
+      streetAddress = streetAddress.replace(e[0], e[1]);
     }
   });
 
@@ -552,9 +552,7 @@ function parseStreetAddress_(streetAddress) {
   let length = streetAddress.length;
 
   for (let i = end; i < length; i++) {
-    let c = streetAddress.charAt(i);
-
-    if (!Number.isInteger(Number.parseInt(c))) {
+    if (!Number.isInteger(Number.parseInt(streetAddress.charAt(i)))) {
       end++;
     }
     else {
