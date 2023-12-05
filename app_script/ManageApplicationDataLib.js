@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion                = "43";
+const deploymentVersion                = "44";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -493,8 +493,8 @@ function compareApplicationData_(d1, d2) {
 
   if (op1.length > 1) {
     if (op2.length > 1) {
-      let s1 = op1[1].toLowerCase();
-      let s2 = op2[1].toLowerCase();
+      let s1 = op1[1];
+      let s2 = op2[1];
 
       if (s1 > s2) {
         rc = -1;
@@ -503,8 +503,8 @@ function compareApplicationData_(d1, d2) {
         rc = 1;
       }
       else {
-        let t1 = op1[0].match(/\d+|\D+/g);
-        let t2 = op2[0].match(/\d+|\D+/g);
+        let t1 = op1[0].match(/\d+|\D+/);
+        let t2 = op2[0].match(/\d+|\D+/);
         let n1 = Number.parseInt(t1[0]);
         let n2 = Number.parseInt(t2[0]);
 
@@ -541,18 +541,60 @@ function compareApplicationData_(d1, d2) {
 }
 
 function parseStreetAddress_(streetAddress) {
-  [[" - ", "-"], ["- ", "-"], [" -", "-"], [".", ""]].forEach(function(e) {
-    while (streetAddress.indexOf(e[0]) != -1) {
-      streetAddress = streetAddress.replace(e[0], e[1]);
-    }
-  });
+  let parts = [];
 
-  let start  = streetAddress.indexOf(",");
-  let end    = start + 1;
-  let length = streetAddress.length;
+  let tokens = normalizeStreetAddress_(streetAddress);
+  let apt    = "";
+  let start  = 0;
+  let end    = start;
+  let length = tokens.length;
 
   for (let i = end; i < length; i++) {
-    if (!Number.isInteger(Number.parseInt(streetAddress.charAt(i)))) {
+    let c = tokens.charAt(i);
+
+    if (Number.isInteger(Number.parseInt(c))) {
+      end++;
+    }
+    else if ((/^[a-z]/.test(c))) {
+      end++;
+    }
+    else if (c === ' ') {
+      if (i < (length - 2)) {
+        if ((/^[a-z]/.test(tokens.charAt(i + 1)) && (tokens.charAt(i + 2) === ' '))) {
+          apt = tokens.charAt(i + 1);
+          end += 2;
+          break;
+        }
+        else {
+          break;
+        }
+      }
+      else {
+        break;
+      }
+    }
+    else {
+      break;
+    }
+  }
+
+  if (end > start) {
+    parts.push((tokens.substring(start, (end - apt.length)).trim()) + apt);
+  }
+  else {
+    parts.push("0");
+  }
+
+  start = end;
+  end   = start;
+
+  for (let i = end; i < length; i++) {
+    let c = tokens.charAt(i);
+
+    if ((c === ' ') || (c === '-')) {
+      end++;
+    }
+    else if (Number.isInteger(Number.parseInt(c))) {
       end++;
     }
     else {
@@ -561,30 +603,65 @@ function parseStreetAddress_(streetAddress) {
   }
 
   if (end > start) {
-    streetAddress = streetAddress.replace(streetAddress.slice(start, end - 1), "");
+    start = end;
+    end   = length - 1;
   }
 
-  let parts = streetAddress.split(/\s+/);
+  for (let i = end; i > start; i--) {
+    let c = tokens.charAt(i);
 
-  if (parts.length > 0) {
-    let index = parts[0].indexOf("-");
-
-    if (index != -1) {
-      parts[0] = parts[0].slice(0, index);
+    if (Number.isInteger(Number.parseInt(c))) {
+      end--;
     }
-
-    if (parts.length > 4) {
-      if (parts[1].match(/^[a-zA-Z]+$/) != null) {
-        parts[0] += parts[1];
-        parts.splice(1, 1);
-      }
-      else if (Number.isInteger(Number.parseInt(parts[1]))) {
-        parts.splice(1, 1);
-      }
+    else {
+      break;
     }
+  }
+
+  if (end > start) {
+    parts.push(tokens.substring(start, end));
+    parts.push(tokens.substring(end + 1));
+  }
+  else {
+    parts.push("");
+    parts.push("00000");
   }
 
   return parts;
+}
+
+function normalizeStreetAddress_(streetAddress) {
+  let tokens = (streetAddress).toLowerCase();
+
+  [[" - ", "-"], ["- ", "-"], [" -", "-"], [".", ""], ["  ", " "]].forEach(function(e) {
+    while (tokens.indexOf(e[0]) != -1) {
+      tokens = tokens.replace(e[0], e[1]);
+    }
+  });
+
+  let start = tokens.indexOf(",");
+
+  if (start != -1) {
+    let end    = start + 1;
+    let length = tokens.length;
+
+    for (let i = end; i < length; i++) {
+      let c = tokens.charAt(i);
+
+      if (!Number.isInteger(Number.parseInt(c))) {
+        end++;
+      }
+      else {
+        break;
+      }
+    }
+
+    if (end > start) {
+      tokens = tokens.replace(tokens.slice(start, end - 1), "");
+    }
+  }
+
+  return tokens;
 }
 
 function getMainSheet_() {
