@@ -12,7 +12,9 @@
 //
 // @OnlyCurrentDoc
 //
-const plantingDateRange = "planting_date";
+const plantingDateRange          = "planting_date";
+const groupNameRange             = "group_name";
+const numberOfTreeRequestedRange = "number_of_trees_requested";
 
 function onEdit(e) {
   let sheet = e.source.getActiveSheet();
@@ -60,5 +62,39 @@ function onEdit(e) {
 
       e.range.setValue("");    
     }
+  }
+}
+
+function onSubmit(e) {
+  let sheet    = e.range.getSheet();
+  let rowIndex = e.range.getRow();
+  let cellRange = sheet.getRange(rowIndex, sheet.getRange(groupNameRange).getColumn());
+  let cellValue = cellRange.getValue();
+
+  cellValue = cellValue.toLowerCase().
+    replaceAll("group", "").
+    replaceAll("  ", " ").
+    trim();
+
+  let cellParts = cellValue.split(" ");
+  let cellIndex = 0;
+
+  cellValue = "";
+
+  cellParts.forEach(function(e) {
+    if (cellIndex > 0) {
+      cellValue += " ";  
+    }
+
+    cellValue += e.charAt(0).toUpperCase() + e.slice(1);
+    cellIndex++;    
+  });
+
+  cellRange.setValue(cellValue);
+  cellRange = sheet.getRange(rowIndex, sheet.getRange(numberOfTreeRequestedRange).getColumn());
+  cellValue = cellRange.getValue();
+
+  if (cellValue === "") {
+    cellRange.setValue(0);
   }
 }
