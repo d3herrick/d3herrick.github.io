@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion                = "44";
+const deploymentVersion                = "45";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -634,9 +634,7 @@ function normalizeStreetAddress_(streetAddress) {
   let tokens = (streetAddress).toLowerCase();
 
   [[" - ", "-"], ["- ", "-"], [" -", "-"], [".", ""], ["  ", " "]].forEach(function(e) {
-    while (tokens.indexOf(e[0]) != -1) {
-      tokens = tokens.replace(e[0], e[1]);
-    }
+    tokens = tokens.replaceAll(e[0], e[1]);
   });
 
   let start = tokens.indexOf(",");
