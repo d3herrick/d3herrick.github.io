@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion                = "45";
+const deploymentVersion                = "46";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -556,7 +556,18 @@ function parseStreetAddress_(streetAddress) {
       end++;
     }
     else if ((/^[a-z]/.test(c))) {
-      end++;
+      if (i < (length - 1)) {
+        if (tokens.charAt(i + 1) === ' ') {
+          end++;
+          break;
+        }
+        else {
+          break;
+        }
+      }
+      else {
+        break;
+      }
     }
     else if (c === ' ') {
       if (i < (length - 2)) {
@@ -602,7 +613,7 @@ function parseStreetAddress_(streetAddress) {
     }
   }
 
-  if (end > start) {
+  if (end >= start) {
     start = end;
     end   = length - 1;
   }
