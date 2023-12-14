@@ -6,14 +6,20 @@
 //
 // https://opensource.org/licenses/MIT.
 //
-// This file includes functions to help manage data in the spreadsheet that is synchronized by a Google Form
-// that residents of Newton use to submit applications for one or more trees. That sheet provides data to
-// the sheet that Newton Tree Conservancy directors use to manage planting groups.
+// This file includes functions to help manage and normalize data in the spreadsheet that is synchronized
+// by a Google Form that residents of Newton use to submit applications for one or more trees. That sheet
+// provides data to the sheet that Newton Tree Conservancy directors use to manage planting groups.
 //
 // @OnlyCurrentDoc
 //
 const plantingDateRange          = "planting_date";
 const groupNameRange             = "group_name";
+const firstNameRange             = "first_name";
+const lastNameRange              = "last_name";
+const emailAddress               = "email_address";
+const planterFirstNameRange      = "planter_first_name";
+const planterLastNameRange       = "planter_last_name";
+const planterEmailAddress        = "planter_email_address";
 const numberOfTreeRequestedRange = "number_of_trees_requested";
 
 function onEdit(e) {
@@ -66,8 +72,8 @@ function onEdit(e) {
 }
 
 function onSubmit(e) {
-  let sheet    = e.range.getSheet();
-  let rowIndex = e.range.getRow();
+  let sheet     = e.range.getSheet();
+  let rowIndex  = e.range.getRow();
   let cellRange = sheet.getRange(rowIndex, sheet.getRange(groupNameRange).getColumn());
   let cellValue = cellRange.getValue();
 
@@ -96,5 +102,20 @@ function onSubmit(e) {
 
   if (cellValue === "") {
     cellRange.setValue(0);
+  }
+
+  let applicantContactDataRanges = [
+    sheet.getRange(rowIndex, sheet.getRange(firstNameRange).getColumn()),
+    sheet.getRange(rowIndex, sheet.getRange(lastNameRange).getColumn()),
+    sheet.getRange(rowIndex, sheet.getRange(emailAddress).getColumn())
+  ];
+  let planterContactDataRanges = [
+    sheet.getRange(rowIndex, sheet.getRange(planterFirstNameRange).getColumn()),
+    sheet.getRange(rowIndex, sheet.getRange(planterLastNameRange).getColumn()),
+    sheet.getRange(rowIndex, sheet.getRange(planterEmailAddress).getColumn())
+  ];
+
+  if (applicantContactDataRanges.every((e, i) => e.getValue().toLowerCase() === planterContactDataRanges[i].getValue().toLowerCase())) {
+    planterContactDataRanges.forEach((r) => r.setValue(""));
   }
 }
