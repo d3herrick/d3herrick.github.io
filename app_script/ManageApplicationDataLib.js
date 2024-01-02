@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion                = "48";
+const deploymentVersion                = "49";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -122,24 +122,24 @@ function onEdit(e) {
 }
 
 function onToggleDataFilterVisibility() {
-  let sheet            = getMainSheet_();
-  let scriptProperties = PropertiesService.getScriptProperties();
+  let sheet      = getMainSheet_();
+  let properties = PropertiesService.getDocumentProperties();
 
-  let isPlantingDataFilterVisible = scriptProperties.getProperty(plantingDataFilterVisibility);
+  let isPlantingDataFilterVisible = properties.getProperty(plantingDataFilterVisibility);
 
   if ((isPlantingDataFilterVisible == null) || (isPlantingDataFilterVisible == "true")) {
     sheet.hideRow(sheet.getRange(plantingDataFilter));
     sheet.hideColumn(sheet.getRange(timestampDataFilter));
     sheet.hideColumn(sheet.getRange(groupLeaderDataFilter));
 
-    scriptProperties.setProperty(plantingDataFilterVisibility, "false");
+    properties.setProperty(plantingDataFilterVisibility, "false");
   }
   else {
     sheet.unhideRow(sheet.getRange(plantingDataFilter));
     sheet.unhideColumn(sheet.getRange(timestampDataFilter));
     sheet.unhideColumn(sheet.getRange(groupLeaderDataFilter));
 
-    scriptProperties.setProperty(plantingDataFilterVisibility, "true");
+    properties.setProperty(plantingDataFilterVisibility, "true");
   }
 
   sheet.setActiveSelection(sheet.getRange("A1"));
