@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion                = "47";
+const deploymentVersion                = "48";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -497,10 +497,10 @@ function compareApplicationData_(d1, d2) {
       let s2 = op2[1];
 
       if (s1 > s2) {
-        rc = -1;
+        rc = 1;
       }
       else if (s1 < s2) {
-        rc = 1;
+        rc = -1;
       }
       else {
         let t1 = op1[0].match(/\d+|\D+/);
