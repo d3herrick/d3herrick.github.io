@@ -14,7 +14,8 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion                = "49";
+const deploymentVersion                = "51";
+const epochStart                       = new Date(1970, 0, 1);
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -82,42 +83,46 @@ function onEdit(e) {
     let dataRange = sheet.getRange(groupDataRange);
 
     if ((dataRange.getRow() < e.range.rowStart) && (dataRange.getLastRow() > e.range.rowEnd)) {
-      let needle = e.value.trim();
+      if (e.value !== undefined) {
+        let needle = e.value.trim();
 
-      if ((needle.length > 0) && (needle !== "Yes") && (needle !== "No")) {
-        needle = needle.toLowerCase();
+        if ((needle.length > 0) && (needle !== "Yes") && (needle !== "No")) {
+          needle = needle.toLowerCase();
 
-        let rangeNames = [groupLeaderDataFilter, wiresDataFilter, curbDataFilter];
+          let rangeNames = [groupLeaderDataFilter, wiresDataFilter, curbDataFilter];
 
-        for (r of rangeNames) {
-          let range = sheet.getRange(r);
-      
-          if (range.getLastColumn() == e.range.columnEnd) {
-            if ((needle === "y") || (needle === "yes")) {
-              e.range.setValue("Yes");
+          for (r of rangeNames) {
+            let range = sheet.getRange(r);
+        
+            if (range.getLastColumn() == e.range.columnEnd) {
+              if ((needle === "y") || (needle === "yes")) {
+                e.range.setValue("Yes");
+              }
+              else if ((needle === "n") || (needle === "no")) {
+                e.range.setValue("No");
+              }
+              else {
+                let ui         = SpreadsheetApp.getUi();
+                let columnName = sheet.getRange(dataRange.getRow(), range.getLastColumn()).getValue();
+
+                ui.alert(specifiedInvalidColumnValueTitle + columnName,
+                  "Value \"" + e.value + "\" is invalid. Please specify either \"Yes\", or the letter \"Y\", or \"No\", or the letter \"N\".",
+                  ui.ButtonSet.OK);
+
+                e.range.setValue("");    
+              }
+
+              break;
             }
-            else if ((needle === "n") || (needle === "no")) {
-              e.range.setValue("No");
-            }
-            else {
-              let ui         = SpreadsheetApp.getUi();
-              let columnName = sheet.getRange(dataRange.getRow(), range.getLastColumn()).getValue();
-
-              ui.alert(specifiedInvalidColumnValueTitle + columnName,
-                "Value \"" + e.value + "\" is invalid. Please specify either \"Yes\", or the letter \"Y\", or \"No\", or the letter \"N\".",
-                ui.ButtonSet.OK);
-
-              e.range.setValue("");    
-            }
-
-            break;
           }
         }
       }
     }
   }
   else {
-    dataRange.setValue(groupName.getDataValidation().getCriteriaValues()[0].getValues()[0]);
+    let range = sheet.getRange(groupNameRange);
+
+    range.setValue(range.getDataValidation().getCriteriaValues()[0].getValues()[0]);
   }
 }
 
@@ -331,9 +336,13 @@ function listApplicationData_(sheet) {
   if ((lastRow - firstRow) > 1) {
     dataRange.offset(1, 0, (lastRow - firstRow - 1)).
       getValues().
-      map(v => v[0].getTime()).
       forEach(function(e) {
-        currentRowKeys.add(e);
+        if (e[0] !== '') {
+          currentRowKeys.add(e[0].getTime());
+        }
+        else {
+          currentRowKeys.add(epochStart);
+        }
       });
   }
 
