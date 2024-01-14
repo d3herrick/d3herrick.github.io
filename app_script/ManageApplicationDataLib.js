@@ -14,8 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion                = "51";
-const epochStart                       = new Date(1970, 0, 1);
+const deploymentVersion                = "52";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -339,9 +338,6 @@ function listApplicationData_(sheet) {
       forEach(function(e) {
         if (e[0] !== '') {
           currentRowKeys.add(e[0].getTime());
-        }
-        else {
-          currentRowKeys.add(epochStart);
         }
       });
   }
