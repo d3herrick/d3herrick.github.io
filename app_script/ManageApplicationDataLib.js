@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion                = "52";
+const deploymentVersion                = "53";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -221,7 +221,16 @@ function onInsertEmptyRows() {
 
     if (Number.isInteger(rowCount) && (rowCount > 0)) {
       if (rowCount <= insertEmptyRowsMax) {
-        sheet.insertRowsBefore(sheet.getRange(groupDataRange).getLastRow(), rowCount);
+        let rowTimestamp = new Date();
+
+        for (let i = 0; i < rowCount; i++) {
+          let rowIndex = sheet.getRange(groupDataRange).getLastRow();
+
+          sheet.insertRowsBefore(rowIndex, 1);
+          sheet.getRange(rowIndex, 1).setValue(rowTimestamp);
+          
+          rowTimestamp.setSeconds(rowTimestamp.getSeconds() + 1);
+        }
       }
       else {
         ui.alert(insertEmptyRowsTitle,
