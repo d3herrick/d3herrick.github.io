@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion                = "53";
+const deploymentVersion                = "54";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -209,11 +209,12 @@ function onGenerateSpreadsheetName() {
 }
 
 function onInsertEmptyRows() {
-  let sheet = getMainSheet_();
-  let ui    = SpreadsheetApp.getUi();
+  let sheet    = getMainSheet_();
+  let ui       = SpreadsheetApp.getUi();
+  let rowIndex = sheet.getRange(groupDataRange).getLastRow();
 
   let response = ui.prompt(insertEmptyRowsTitle,
-    "Enter the number of empty rows to insert. You may specify up to " + insertEmptyRowsMax + " rows:",
+    "Enter the number of empty rows to insert. You may specify up to " + insertEmptyRowsMax + " rows. The empty rows will be inserted starting at row " + rowIndex + ":",
     ui.ButtonSet.OK_CANCEL);
 
   if (response.getSelectedButton() == ui.Button.OK) {
@@ -223,13 +224,17 @@ function onInsertEmptyRows() {
       if (rowCount <= insertEmptyRowsMax) {
         let rowTimestamp = new Date();
 
-        for (let i = 0; i < rowCount; i++) {
-          let rowIndex = sheet.getRange(groupDataRange).getLastRow();
-
-          sheet.insertRowsBefore(rowIndex, 1);
-          sheet.getRange(rowIndex, 1).setValue(rowTimestamp);
-          
-          rowTimestamp.setSeconds(rowTimestamp.getSeconds() + 1);
+        while (true) {
+          if (rowCount-- > 0) {
+            sheet.insertRowsBefore(rowIndex, 1);
+            sheet.getRange(rowIndex, 1).setValue(rowTimestamp);
+            
+            rowIndex++;
+            rowTimestamp.setSeconds(rowTimestamp.getSeconds() + 1);
+          }
+          else {
+            break;
+          }
         }
       }
       else {
