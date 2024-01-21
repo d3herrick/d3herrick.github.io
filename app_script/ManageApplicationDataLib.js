@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion                = "55";
+const deploymentVersion                = "57";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -609,7 +609,7 @@ function parseStreetAddress_(streetAddress) {
   }
 
   if (end > start) {
-    parts.push((tokens.substring(start, (end - apt.length)).trim()) + apt);
+    parts.push(((tokens.substring(start, (end - apt.length)).trim()) + apt).trim());
   }
   else {
     parts.push("0");
@@ -649,8 +649,19 @@ function parseStreetAddress_(streetAddress) {
   }
 
   if (end > start) {
-    parts.push(tokens.substring(start, end));
-    parts.push(tokens.substring(end + 1));
+    let token = tokens.substring(start, end);
+    let bits  = token.split(" ");
+
+    if (bits.length > 1) {
+      token = bits[0];
+
+      for (let i = 1; i < bits.length; i++) {
+        token += " " + bits[i].charAt(0);
+      }
+    }
+
+    parts.push(token.trim());
+    parts.push((tokens.substring(end + 1)).trim());
   }
   else {
     parts.push("");
