@@ -7,34 +7,34 @@
 // https://opensource.org/licenses/MIT.
 //
 // This collection of wrapper functions belay the interesting work to the library that manages
-// the application data.
+// the spreadsheets that Newton Tree Conservancy directors use to manage planting groups.
 //
 // @OnlyCurrentDoc
 //
 function onOpen(e) {
-  ManageApplicationDataLib.onOpen(e);
+  DirectorSheetLib.onOpen(e);
 }
 
 function onEdit(e) {
-  ManageApplicationDataLib.onEdit(e);
+  DirectorSheetLib.onEdit(e);
 }
 
 function onToggleDataFilterVisibility() {
-  ManageApplicationDataLib.onToggleDataFilterVisibility();
+  DirectorSheetLib.onToggleDataFilterVisibility();
 }
 
 function onGetApplicationData() {
-  ManageApplicationDataLib.onGetApplicationData();
+  DirectorSheetLib.onGetApplicationData();
 }
 
 function onGenerateSpreadsheetName() {
-  ManageApplicationDataLib.onGenerateSpreadsheetName();
+  DirectorSheetLib.onGenerateSpreadsheetName();
 }
 
 function onInsertEmptyRows() {
-  ManageApplicationDataLib.onInsertEmptyRows();
+  DirectorSheetLib.onInsertEmptyRows();
 }
 
 function onAboutThis() {
-  ManageApplicationDataLib.onAboutThis();
+  DirectorSheetLib.onAboutThis();
 }

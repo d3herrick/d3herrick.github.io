@@ -9,12 +9,12 @@
 // This library includes functions for the spreadsheets that directors of the Newton Tree Conservancy
 // use to manage neighborhood tree planting groups. The Google Sheet that provides data to the tree
 // planting group sheets is synchronized by a Google Form that residents of Newton use to submit
-// applications for one or more trees.
+// applications for trees to be planted on their property.
 //
 // @OnlyCurrentDoc
 //
-const deploymentId                     = "1WKo3XAKCpP1mwqEOKDm_IUDpv71mZsC-JiEQqnE7DKoit_OjzKUNmm6k";
-const deploymentVersion                = "58";
+const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
+const deploymentVersion                = "1";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";

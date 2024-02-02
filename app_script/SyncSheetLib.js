@@ -7,8 +7,9 @@
 // https://opensource.org/licenses/MIT.
 //
 // This file includes functions to help manage and normalize data in the spreadsheet that is synchronized
-// by a Google Form that residents of Newton use to submit applications for one or more trees. That sheet
-// provides data to the sheet that Newton Tree Conservancy directors use to manage planting groups.
+// by a Google Form that residents of Newton use to submit applications for trees to be planted on their
+// property. That sheet provides data to the sheets that Newton Tree Conservancy directors use to manage
+// planting groups.
 //
 // @OnlyCurrentDoc
 //
