@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const deploymentVersion                = "1";
+const deploymentVersion                = "2";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -149,11 +149,7 @@ function onToggleDataFilterVisibility() {
   sheet.setActiveSelection(sheet.getRange("A1"));
 }
 
-function onGetApplicationData(sheet, rows) {
-  if (sheet == null) {
-    sheet = getMainSheet_();
-  }
-
+function onGetApplicationData(sheet = getMainSheet_(), rows) {
   let ui    = SpreadsheetApp.getUi();
   let alert = validateDataFilterCriteria_(sheet);
 
@@ -285,11 +281,7 @@ function validateDataFilterCriteria_(sheet) {
   return alert;
 }
 
-function insertApplicationData_(sheet, rows) {
-  if (rows == null) {
-    rows = listApplicationData_(sheet);
-  }
-  
+function insertApplicationData_(sheet, rows = listApplicationData_(sheet)) {
   if (!isApplicationDataEmpty_(rows)) {
     let dataRange = sheet.getRange(groupDataRange);
     let firstRow  = dataRange.getRow();
