@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const deploymentVersion                = "2";
+const deploymentVersion                = "3";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -24,6 +24,7 @@ const groupLeaderDataFilter            = "group_leader_data_filter";
 const groupDataRange                   = "group_data";
 const wiresDataFilter                  = "wires_data_filter";
 const curbDataFilter                   = "curb_data_filter";
+const bermDataFilter                   = "berm_data_filter";
 const plantingDataFilter               = "planting_data_filter";
 const timestampDataFilter              = "timestamp_data_filter";
 const lastDataRetrievalRange           = "last_data_retrieval";
@@ -106,6 +107,29 @@ function onEdit(e) {
 
                 ui.alert(specifiedInvalidColumnValueTitle + columnName,
                   "Value \"" + e.value + "\" is invalid. Please specify either \"Yes\", or the letter \"Y\", or \"No\", or the letter \"N\".",
+                  ui.ButtonSet.OK);
+
+                e.range.setValue("");    
+              }
+
+              break;
+            }
+          }
+
+          rangeNames = [bermDataFilter];
+
+          for (r of rangeNames) {
+            let range = sheet.getRange(r);
+        
+            if (range.getLastColumn() == e.range.columnEnd) {
+              let cellValue = Number.parseInt(needle);
+
+              if (!Number.isInteger(cellValue)) {
+                let ui         = SpreadsheetApp.getUi();
+                let columnName = sheet.getRange(dataRange.getRow(), range.getLastColumn()).getValue();
+
+                ui.alert(specifiedInvalidColumnValueTitle + columnName,
+                  "Value \"" + e.value + "\" is invalid. Please specify an integer greater than or equal to zero.",
                   ui.ButtonSet.OK);
 
                 e.range.setValue("");    
