@@ -13,15 +13,49 @@
 //
 // @OnlyCurrentDoc
 //
-const plantingDateRange          = "planting_date";
-const groupNameRange             = "group_name";
-const firstNameRange             = "first_name";
-const lastNameRange              = "last_name";
-const emailAddress               = "email_address";
-const planterFirstNameRange      = "planter_first_name";
-const planterLastNameRange       = "planter_last_name";
-const planterEmailAddress        = "planter_email_address";
-const numberOfTreeRequestedRange = "number_of_trees_requested";
+const deploymentId                       = "1eNq3Z-0DFAqclht8OvXxPIM2IvR3J_Q1s4dzaZVERPYyVVB707MVdFPw";
+const deploymentVersion                  = "1";
+const plantingDateRange                  = "planting_date";
+const groupNameRange                     = "group_name";
+const firstNameRange                     = "first_name";
+const lastNameRange                      = "last_name";
+const emailAddress                       = "email_address";
+const planterFirstNameRange              = "planter_first_name";
+const planterLastNameRange               = "planter_last_name";
+const planterEmailAddress                = "planter_email_address";
+const numberOfTreeRequestedRange         = "number_of_trees_requested";
+const newtonTreeConservancyMenu          = "Newton Tree Conservancy";
+const aboutThisMenuItem                  = "About...";
+const archiveDataForPlantingDateMenuItem = "Archive data for planting date";
+const archiveDataForPlantingDateTitle    = "Archive Data for Planting Date";
+const countOfRowsArchivedTitle           = "Count of Rows Archived";
+const aboutTitle                         = "About Community Tree Planting Spreadsheet";
+
+const streetSuffixes = [ 
+  ["Ave",   "Avenue"], 
+  ["Cir",   "Circle"], 
+  ["Ln",    "Lane"], 
+  ["Pk",    "Park"], 
+  ["Prk",   "Park"], 
+  ["Pl",    "Place"], 
+  ["Rd",    "Road"], 
+  ["Sq",    "Square"],
+  ["St",    "Street"],
+  ["Ter",   "Terrace"],
+  ["Terr",  "Terrace"],
+  ["Wy",    "Way"]
+];
+
+function onOpen(e) {
+  let ui = SpreadsheetApp.getUi();
+
+  ui
+    .createMenu(newtonTreeConservancyMenu)
+      .addItem(archiveDataForPlantingDateMenuItem, "onArchiveDataForPlantingDate")
+      .addSeparator()
+      .addItem(aboutThisMenuItem, "onAboutThis")
+      .addToUi();
+}
 
 function onEdit(e) {
   let sheet = e.source.getActiveSheet();
@@ -85,6 +119,7 @@ function onSubmit(e) {
 
   let cellParts = cellValue.split(" ");
   let cellIndex = 0;
+  let cellToken = "";
 
   cellValue = "";
 
@@ -93,8 +128,21 @@ function onSubmit(e) {
       cellValue += " ";  
     }
 
-    cellValue += e.charAt(0).toUpperCase() + e.slice(1);
-    cellIndex++;    
+    cellToken = e.charAt(0).toUpperCase() + e.slice(1);
+
+    cellIndex++;
+
+    if (cellIndex === cellParts.length) {
+      cellToken = cellToken.replaceAll(".", "");
+
+      let cellSuffix = streetSuffixes.find((s) => (s[0] === cellToken));
+
+      if (cellSuffix !== undefined) {
+        cellToken = cellSuffix[1];
+      }
+    }
+
+    cellValue += cellToken;
   });
 
   cellRange.setValue(cellValue);
@@ -119,4 +167,55 @@ function onSubmit(e) {
   if (applicantContactDataRanges.every((e, i) => e.getValue().toLowerCase() === planterContactDataRanges[i].getValue().toLowerCase())) {
     planterContactDataRanges.forEach((r) => r.setValue(""));
   }
+}
+
+function onArchiveDataForPlantingDate() {
+  let ui = SpreadsheetApp.getUi();
+
+  let response = ui.prompt(archiveDataForPlantingDateTitle,
+    "Enter the planting date you want to archive. Please specify \"YYYY\" followed by \"Spring\" or \"Fall\" with one space between the year and season, and the first letter of the season capitalized.\n\nExample: 2024 Spring",
+    ui.ButtonSet.OK_CANCEL);
+
+  if (response.getSelectedButton() == ui.Button.OK) {
+    let plantingDate = response.getResponseText();
+
+    let file  = SpreadsheetApp.getActiveSpreadsheet();
+    let range = file.getRangeByName(plantingDateRange);
+    let sheet = range.getSheet();
+    let hits  = range.createTextFinder(plantingDate).matchEntireCell(true).findAll();
+
+    if (hits.length > 0) {
+      let deletions = [];
+      let archive   = file.insertSheet(plantingDate);
+
+      sheet.getRange(1, 1, 1, sheet.getLastColumn()).copyTo(archive.getRange("A1"));
+
+      let dstRow = 2;
+
+      hits.forEach(function(h) {
+        let srcRow = h.getRow();
+
+        sheet.getRange(srcRow, 1, 1, sheet.getLastColumn()).copyTo(archive.getRange(dstRow, 1));
+        deletions.push(srcRow);
+        dstRow++;
+      });
+
+      deletions.reverse().forEach(d => sheet.deleteRow(d));
+    }
+
+    ui.alert(countOfRowsArchivedTitle,
+      "Number of rows archived is " + hits.length + ".",
+      ui.ButtonSet.OK);
+  }
+}
+
+function onAboutThis() {
+  let ui = SpreadsheetApp.getUi();
+
+  ui.alert(aboutTitle,
+    "Deployment ID\n" + deploymentId + "\n\n" +
+    "Version\n" + deploymentVersion + "\n\n\n" +
+    "Newton Tree Conservancy\n" +
+    "www.newtontreeconservancy.org",
+    ui.ButtonSet.OK);
 }
