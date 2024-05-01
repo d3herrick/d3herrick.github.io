@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const deploymentVersion                = "3";
+const deploymentVersion                = "4";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -63,17 +63,30 @@ function onOpen(e) {
       .addToUi();
 
   let sheet = getMainSheet_();
-  let rows  = listApplicationData_(sheet);
 
-  if (!isApplicationDataEmpty_(rows)) {
-    let response = ui.alert(additionalDataAvailableTitle, 
-      "There " + ((rows.length > 1) ? "are" : "is") + " " + rows.length + " additional " + ((rows.length > 1) ? "applications" : "application") + " available for the " + plantingDateFilterLabel + " and " + groupNameFilterLabel + " you selected. Do you want to refresh your applicaton data now? If not, you may do so later by clicking menu item " + getApplicationDataMenuItem + ".",
-      ui.ButtonSet.YES_NO);
+  let plantingDate     = sheet.getRange(plantingDateRange);
+  let groupName        = sheet.getRange(groupNameRange);
+  let archivedDataNote = null;
 
-    if (response == ui.Button.YES) {
-      onGetApplicationData(sheet, rows);
+  if (plantingDate.getDataValidation().getCriteriaValues()[0].getValues().find((v) => (v[0] === plantingDate.getValue())) != undefined) {
+    let rows = listApplicationData_(sheet);
+
+    if (!isApplicationDataEmpty_(rows)) {
+      let response = ui.alert(additionalDataAvailableTitle, 
+        "There " + ((rows.length > 1) ? "are" : "is") + " " + rows.length + " additional " + ((rows.length > 1) ? "applications" : "application") + " available for the " + plantingDateFilterLabel + " and " + groupNameFilterLabel + " you selected. Do you want to refresh your applicaton data now? If not, you may do so later by clicking menu item " + getApplicationDataMenuItem + ".",
+        ui.ButtonSet.YES_NO);
+
+      if (response == ui.Button.YES) {
+        onGetApplicationData(sheet, rows);
+      }
     }
   }
+  else {
+    archivedDataNote = "The specified planting date has concluded, so data associated with the planting date has been archived."
+  }
+
+  plantingDate.setNote(archivedDataNote);
+  groupName.setNote(archivedDataNote);
 }
 
 function onEdit(e) {
