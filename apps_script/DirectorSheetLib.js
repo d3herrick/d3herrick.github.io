@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const deploymentVersion                = "4";
+const deploymentVersion                = "6";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -24,6 +24,10 @@ const groupLeaderDataFilter            = "group_leader_data_filter";
 const groupDataRange                   = "group_data";
 const wiresDataFilter                  = "wires_data_filter";
 const curbDataFilter                   = "curb_data_filter";
+const largeTreeCountFilter             = "large_tree_count_filter";
+const mediumTreeCountFilter            = "medium_tree_count_filter";
+const smallTreeCountFilter             = "small_tree_count_filter";
+const tbdTreeCountFilter               = "tbd_tree_count_filter";
 const bermDataFilter                   = "berm_data_filter";
 const plantingDataFilter               = "planting_data_filter";
 const timestampDataFilter              = "timestamp_data_filter";
@@ -46,6 +50,20 @@ const specifiedInvalidColumnValueTitle = "Invalid Value Specified for ";
 const aboutTitle                       = "About Community Tree Planting Spreadsheet";
 const plantingDateFilterLabel          = "Planting date";
 const groupNameFilterLabel             = "Group name";
+
+const booleanValidationFilters = [
+  [groupLeaderDataFilter, ""],
+  [wiresDataFilter, ""],
+  [curbDataFilter, ""]
+];
+
+const integerValidationFilters = [
+  [largeTreeCountFilter,  ""],
+  [mediumTreeCountFilter, ""],
+  [smallTreeCountFilter,  ""],
+  [tbdTreeCountFilter,    ""],
+  [bermDataFilter,        "If there is no berm, specify a width of zero."]
+];
 
 function onOpen(e) {
   let ui = SpreadsheetApp.getUi();
@@ -102,10 +120,8 @@ function onEdit(e) {
         if ((needle.length > 0) && (needle !== "Yes") && (needle !== "No")) {
           needle = needle.toLowerCase();
 
-          let rangeNames = [groupLeaderDataFilter, wiresDataFilter, curbDataFilter];
-
-          for (r of rangeNames) {
-            let range = sheet.getRange(r);
+          for (r of booleanValidationFilters) {
+            let range = sheet.getRange(r[0]);
         
             if (range.getLastColumn() == e.range.columnEnd) {
               if ((needle === "y") || (needle === "yes")) {
@@ -119,7 +135,7 @@ function onEdit(e) {
                 let columnName = sheet.getRange(dataRange.getRow(), range.getLastColumn()).getValue();
 
                 ui.alert(specifiedInvalidColumnValueTitle + columnName,
-                  "Value \"" + e.value + "\" is invalid. Please specify either \"Yes\", or the letter \"Y\", or \"No\", or the letter \"N\".",
+                  "Value \"" + e.value + "\" is invalid. Please specify either \"Yes\", or the letter \"Y\", or \"No\", or the letter \"N\". " + r[1],
                   ui.ButtonSet.OK);
 
                 e.range.setValue("");    
@@ -129,10 +145,8 @@ function onEdit(e) {
             }
           }
 
-          rangeNames = [bermDataFilter];
-
-          for (r of rangeNames) {
-            let range = sheet.getRange(r);
+          for (r of integerValidationFilters) {
+            let range = sheet.getRange(r[0]);
         
             if (range.getLastColumn() == e.range.columnEnd) {
               let cellValue = Number.parseInt(needle);
@@ -142,7 +156,7 @@ function onEdit(e) {
                 let columnName = sheet.getRange(dataRange.getRow(), range.getLastColumn()).getValue();
 
                 ui.alert(specifiedInvalidColumnValueTitle + columnName,
-                  "Value \"" + e.value + "\" is invalid. Please specify an integer greater than or equal to zero.",
+                  "Value \"" + e.value + "\" is invalid. Please specify an integer greater than or equal to zero. " + r[1],
                   ui.ButtonSet.OK);
 
                 e.range.setValue("");    
