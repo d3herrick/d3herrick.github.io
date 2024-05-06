@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                       = "1eNq3Z-0DFAqclht8OvXxPIM2IvR3J_Q1s4dzaZVERPYyVVB707MVdFPw";
-const deploymentVersion                  = "1";
+const deploymentVersion                  = "2";
 const plantingDateRange                  = "planting_date";
 const groupNameRange                     = "group_name";
 const firstNameRange                     = "first_name";
@@ -180,13 +180,13 @@ function onArchiveDataForPlantingDate() {
     let plantingDate = response.getResponseText();
 
     let file  = SpreadsheetApp.getActiveSpreadsheet();
-    let range = file.getRangeByName(plantingDateRange);
+    let range = file.getRange(plantingDateRange);
     let sheet = range.getSheet();
     let hits  = range.createTextFinder(plantingDate).matchEntireCell(true).findAll();
 
     if (hits.length > 0) {
       let deletions = [];
-      let archive   = file.insertSheet(plantingDate);
+      let archive   = file.insertSheet(plantingDate, file.getSheets().length);
 
       sheet.getRange(1, 1, 1, sheet.getLastColumn()).copyTo(archive.getRange("A1"));
 
