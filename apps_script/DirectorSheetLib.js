@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const deploymentVersion                = "6";
+const deploymentVersion                = "8";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -50,6 +50,7 @@ const specifiedInvalidColumnValueTitle = "Invalid Value Specified for ";
 const aboutTitle                       = "About Community Tree Planting Spreadsheet";
 const plantingDateFilterLabel          = "Planting date";
 const groupNameFilterLabel             = "Group name";
+const archivedDataNote                 = "Because it has concluded, data associated with the planting date has been archived.";
 
 const booleanValidationFilters = [
   [groupLeaderDataFilter, ""],
@@ -82,29 +83,40 @@ function onOpen(e) {
 
   let sheet = getMainSheet_();
 
-  let plantingDate     = sheet.getRange(plantingDateRange);
-  let groupName        = sheet.getRange(groupNameRange);
-  let archivedDataNote = null;
+  let plantingDate           = sheet.getRange(plantingDateRange);
+  let plantingDateValidation = plantingDate.getDataValidation();
+  let groupName              = sheet.getRange(groupNameRange);
+  let groupNameValidation    = groupName.getDataValidation();
+  let isDataArchived         = true;
 
-  if (plantingDate.getDataValidation().getCriteriaValues()[0].getValues().find((v) => (v[0] === plantingDate.getValue())) != undefined) {
-    let rows = listApplicationData_(sheet);
+  if ((plantingDateValidation !== null) && (groupNameValidation !== null)) { 
+    if (plantingDateValidation.getCriteriaValues()[0].getValues().find((v) => (v[0] === plantingDate.getValue())) != undefined) {
+      let rows = listApplicationData_(sheet);
 
-    if (!isApplicationDataEmpty_(rows)) {
-      let response = ui.alert(additionalDataAvailableTitle, 
-        "There " + ((rows.length > 1) ? "are" : "is") + " " + rows.length + " additional " + ((rows.length > 1) ? "applications" : "application") + " available for the " + plantingDateFilterLabel + " and " + groupNameFilterLabel + " you selected. Do you want to refresh your applicaton data now? If not, you may do so later by clicking menu item " + getApplicationDataMenuItem + ".",
-        ui.ButtonSet.YES_NO);
+      if (!isApplicationDataEmpty_(rows)) {
+        let response = ui.alert(additionalDataAvailableTitle, 
+          "There " + ((rows.length > 1) ? "are" : "is") + " " + rows.length + " additional " + ((rows.length > 1) ? "applications" : "application") + " available for the " + plantingDateFilterLabel + " and " + groupNameFilterLabel + " you selected. Do you want to refresh your applicaton data now? If not, you may do so later by clicking menu item " + getApplicationDataMenuItem + ".",
+          ui.ButtonSet.YES_NO);
 
-      if (response == ui.Button.YES) {
-        onGetApplicationData(sheet, rows);
+        if (response == ui.Button.YES) {
+          onGetApplicationData(sheet, rows);
+        }
       }
+
+      isDataArchived = false;
+    }
+    else {
+      plantingDate.setDataValidation(null);
+      plantingDate.protect().setWarningOnly(true);
+      groupName.setDataValidation(null);
+      groupName.protect().setWarningOnly(true);
     }
   }
-  else {
-    archivedDataNote = "The specified planting date has concluded, so data associated with the planting date has been archived."
-  }
 
-  plantingDate.setNote(archivedDataNote);
-  groupName.setNote(archivedDataNote);
+  if (isDataArchived) {
+    plantingDate.setNote(archivedDataNote);
+    groupName.setNote(archivedDataNote);
+  }
 }
 
 function onEdit(e) {
