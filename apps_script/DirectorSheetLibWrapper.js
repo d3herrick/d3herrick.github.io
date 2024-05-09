@@ -38,3 +38,7 @@ function onInsertEmptyRows() {
 function onAboutThis() {
   DirectorSheetLib.onAboutThis();
 }
+
+function onApplyUpdates() {
+  DirectorSheetLib.onApplyUpdates();
+}

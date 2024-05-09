@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const deploymentVersion                = "8";
+const deploymentVersion                = "10";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -47,7 +47,7 @@ const generateFileNameTitle            = "Generate Spreadsheet File Name";
 const insertEmptyRowsTitle             = "Insert Empty Rows";
 const specifyDataFilterTitle           = "Specify Application Data Filter Criteria";
 const specifiedInvalidColumnValueTitle = "Invalid Value Specified for ";
-const aboutTitle                       = "About Community Tree Planting Spreadsheet";
+const aboutThisTitle                   = "About Community Tree Planting Spreadsheet";
 const plantingDateFilterLabel          = "Planting date";
 const groupNameFilterLabel             = "Group name";
 const archivedDataNote                 = "Because it has concluded, data associated with the planting date has been archived.";
@@ -83,13 +83,13 @@ function onOpen(e) {
 
   let sheet = getMainSheet_();
 
-  let plantingDate           = sheet.getRange(plantingDateRange);
-  let plantingDateValidation = plantingDate.getDataValidation();
-  let groupName              = sheet.getRange(groupNameRange);
-  let groupNameValidation    = groupName.getDataValidation();
-  let isDataArchived         = true;
+  let plantingDate   = sheet.getRange(plantingDateRange);
+  let groupName      = sheet.getRange(groupNameRange);
+  let isDataArchived = true;
 
-  if ((plantingDateValidation !== null) && (groupNameValidation !== null)) { 
+  if (hasDataFilterValidators_()) { 
+    let plantingDateValidation = plantingDate.getDataValidation();
+
     if (plantingDateValidation.getCriteriaValues()[0].getValues().find((v) => (v[0] === plantingDate.getValue())) != undefined) {
       let rows = listApplicationData_(sheet);
 
@@ -99,7 +99,7 @@ function onOpen(e) {
           ui.ButtonSet.YES_NO);
 
         if (response == ui.Button.YES) {
-          onGetApplicationData(sheet, rows);
+          onGetApplicationData(rows);
         }
       }
 
@@ -182,9 +182,12 @@ function onEdit(e) {
     }
   }
   else {
-    let range = sheet.getRange(groupNameRange);
+    if (hasDataFilterValidators_()) { 
+      let range          = sheet.getRange(groupNameRange);
+      let dataValidation = range.getDataValidation();
 
-    range.setValue(range.getDataValidation().getCriteriaValues()[0].getValues()[0]);
+      range.setValue(dataValidation.getCriteriaValues()[0].getValues()[0]);
+    }
   }
 }
 
@@ -212,9 +215,10 @@ function onToggleDataFilterVisibility() {
   sheet.setActiveSelection(sheet.getRange("A1"));
 }
 
-function onGetApplicationData(sheet = getMainSheet_(), rows) {
+function onGetApplicationData(rows) {
+  let sheet = getMainSheet_();
   let ui    = SpreadsheetApp.getUi();
-  let alert = validateDataFilterCriteria_(sheet);
+  let alert = validateDataFilterCriteria_();
 
   if (alert.length == 0) {
     insertApplicationData_(sheet, rows);
@@ -231,7 +235,7 @@ function onGetApplicationData(sheet = getMainSheet_(), rows) {
 function onGenerateSpreadsheetName() {
   let sheet = getMainSheet_();
   let ui    = SpreadsheetApp.getUi();
-  let alert = validateDataFilterCriteria_(sheet);
+  let alert = validateDataFilterCriteria_();
 
   if (alert.length == 0) {
     let response = ui.prompt(generateFileNameTitle,
@@ -313,7 +317,7 @@ function onInsertEmptyRows() {
 function onAboutThis() {
   let ui = SpreadsheetApp.getUi();
 
-  ui.alert(aboutTitle,
+  ui.alert(aboutThisTitle,
     "Deployment ID\n" + deploymentId + "\n\n" +
     "Version\n" + deploymentVersion + "\n\n\n" +
     "Newton Tree Conservancy\n" +
@@ -321,24 +325,32 @@ function onAboutThis() {
     ui.ButtonSet.OK);
 }
 
-function validateDataFilterCriteria_(sheet) {
-  let plantingDate          = sheet.getRange(plantingDateRange).getValue();
-  let plantingDateFirstItem = sheet.getRange(plantingDateRange).getDataValidation().getCriteriaValues()[0].getValue();
-  let groupName             = sheet.getRange(groupNameRange).getValue();
-  let groupNameFirstItem    = sheet.getRange(groupNameRange).getDataValidation().getCriteriaValues()[0].getValue();
+function onApplyUpdates() {
+}
 
+function validateDataFilterCriteria_() {
   let alert = "";
 
-  if (plantingDate == plantingDateFirstItem) {
-    alert += plantingDateFilterLabel;
-  }
+  if (hasDataFilterValidators_()) {
+    let sheet                  = getMainSheet_();
+    let plantingDateValidation = sheet.getRange(plantingDateRange).getDataValidation();
+    let groupNameValidation    = sheet.getRange(groupNameRange).getDataValidation();
+    let plantingDate           = sheet.getRange(plantingDateRange).getValue();
+    let plantingDateFirstItem  = plantingDateValidation.getCriteriaValues()[0].getValue();
+    let groupName              = sheet.getRange(groupNameRange).getValue();
+    let groupNameFirstItem     = groupNameValidation.getCriteriaValues()[0].getValue();
 
-  if (groupName == groupNameFirstItem) {
-    if (alert.length > 0) {
-      alert += " and ";
+    if (plantingDate == plantingDateFirstItem) {
+      alert += plantingDateFilterLabel;
     }
 
-    alert += groupNameFilterLabel;
+    if (groupName == groupNameFirstItem) {
+      if (alert.length > 0) {
+        alert += " and ";
+      }
+
+      alert += groupNameFilterLabel;
+    }
   }
 
   return alert;
@@ -776,4 +788,12 @@ function getMainSheet_() {
 
 function isApplicationDataEmpty_(rows) {
   return !((rows != null) && (rows.length > 0) && (rows[0] != "#N/A") && (rows[0] != "#VALUE!") && (rows[0] != "#ERROR!"));
+}
+
+function hasDataFilterValidators_() {
+  let sheet                  = getMainSheet_();
+  let plantingDateValidation = sheet.getRange(plantingDateRange).getDataValidation();
+  let groupNameValidation    = sheet.getRange(groupNameRange).getDataValidation();
+
+  return ((plantingDateValidation !== null) && (groupNameValidation !== null));
 }
