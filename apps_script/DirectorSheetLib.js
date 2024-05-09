@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const deploymentVersion                = "10";
+const deploymentVersion                = "11";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -772,6 +772,17 @@ function normalizeStreetAddress_(streetAddress) {
   return tokens;
 }
 
+function hasDataFilterValidators_() {
+  let sheet         = getMainSheet_();
+  let hasValidators = (sheet.getRange(plantingDateRange).getDataValidation() !== null);
+
+  if (hasValidators) {
+    hasValidators = (sheet.getRange(groupNameRange).getDataValidation() !== null);
+  }
+
+  return hasValidators;
+}
+
 function getMainSheet_() {
   let sheet = undefined;
   let range = SpreadsheetApp.getActiveSpreadsheet().getRangeByName(groupDataRange);
@@ -788,12 +799,4 @@ function getMainSheet_() {
 
 function isApplicationDataEmpty_(rows) {
   return !((rows != null) && (rows.length > 0) && (rows[0] != "#N/A") && (rows[0] != "#VALUE!") && (rows[0] != "#ERROR!"));
-}
-
-function hasDataFilterValidators_() {
-  let sheet                  = getMainSheet_();
-  let plantingDateValidation = sheet.getRange(plantingDateRange).getDataValidation();
-  let groupNameValidation    = sheet.getRange(groupNameRange).getDataValidation();
-
-  return ((plantingDateValidation !== null) && (groupNameValidation !== null));
 }
