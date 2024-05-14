@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                       = "1eNq3Z-0DFAqclht8OvXxPIM2IvR3J_Q1s4dzaZVERPYyVVB707MVdFPw";
-const deploymentVersion                  = "3";
+const deploymentVersion                  = "4";
 const plantingDateRange                  = "planting_date";
 const groupNameRange                     = "group_name";
 const firstNameRange                     = "first_name";
@@ -64,7 +64,7 @@ function onEdit(e) {
   if (sheet.getSheetId() === range.getSheet().getSheetId()) {
     let isLegalValue = true;
 
-    if ((e.range.rowEnd > 1) && (range.getLastColumn() == e.range.columnEnd)) {
+    if ((e.value !== undefined) && (e.range.rowEnd > 1) && (range.getLastColumn() == e.range.columnEnd)) {
       let parts = e.value.trim().split(/\s+/);
 
       if (parts.length == 2) {
