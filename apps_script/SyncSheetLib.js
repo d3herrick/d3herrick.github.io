@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                       = "1eNq3Z-0DFAqclht8OvXxPIM2IvR3J_Q1s4dzaZVERPYyVVB707MVdFPw";
-const deploymentVersion                  = "4";
+const deploymentVersion                  = "5";
 const plantingDateRange                  = "planting_date";
 const groupNameRange                     = "group_name";
 const firstNameRange                     = "first_name";
@@ -146,6 +146,7 @@ function onSubmit(e) {
   });
 
   cellRange.setValue(cellValue);
+
   cellRange = sheet.getRange(rowIndex, sheet.getRange(numberOfTreeRequestedRange).getColumn());
   cellValue = cellRange.getValue();
 
@@ -167,6 +168,8 @@ function onSubmit(e) {
   if (applicantContactDataRanges.every((e, i) => e.getValue().toLowerCase() === planterContactDataRanges[i].getValue().toLowerCase())) {
     planterContactDataRanges.forEach((r) => r.setValue(""));
   }
+
+  sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn()).setVerticalAlignment("top");
 }
 
 function onArchiveDataForPlantingDate() {
