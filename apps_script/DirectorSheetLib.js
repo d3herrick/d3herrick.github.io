@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const deploymentVersion                = "11";
+const deploymentVersion                = "14";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
