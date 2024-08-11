@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const deploymentVersion                = "14";
+const deploymentVersion                = "15";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -127,9 +127,10 @@ function onEdit(e) {
 
     if ((dataRange.getRow() < e.range.rowStart) && (dataRange.getLastRow() > e.range.rowEnd)) {
       if (e.value !== undefined) {
-        let needle = e.value.trim();
+        let needle       = e.value.trim();
+        let isValidValue = true;
 
-        if ((needle.length > 0) && (needle !== "Yes") && (needle !== "No")) {
+        if (needle.length > 0) {
           needle = needle.toLowerCase();
 
           for (r of booleanValidationFilters) {
@@ -151,30 +152,32 @@ function onEdit(e) {
                   ui.ButtonSet.OK);
 
                 e.range.setValue("");    
-              }
+                isValidValue = false;
 
-              break;
+                break;
+              }
             }
           }
 
-          for (r of integerValidationFilters) {
-            let range = sheet.getRange(r[0]);
-        
-            if (range.getLastColumn() == e.range.columnEnd) {
-              let cellValue = Number.parseInt(needle);
+          if (isValidValue) {
+            for (r of integerValidationFilters) {
+              let range = sheet.getRange(r[0]);
+              
+              if (range.getLastColumn() == e.range.columnEnd) {
+                if (!Number.isInteger(Number(needle))) {
+                  let ui         = SpreadsheetApp.getUi();
+                  let columnName = sheet.getRange(dataRange.getRow(), range.getLastColumn()).getValue();
 
-              if (!Number.isInteger(cellValue)) {
-                let ui         = SpreadsheetApp.getUi();
-                let columnName = sheet.getRange(dataRange.getRow(), range.getLastColumn()).getValue();
+                  ui.alert(specifiedInvalidColumnValueTitle + columnName,
+                    "Value \"" + e.value + "\" is invalid. Please specify an integer greater than or equal to zero. " + r[1],
+                    ui.ButtonSet.OK);
 
-                ui.alert(specifiedInvalidColumnValueTitle + columnName,
-                  "Value \"" + e.value + "\" is invalid. Please specify an integer greater than or equal to zero. " + r[1],
-                  ui.ButtonSet.OK);
+                  e.range.setValue("");    
+                  isValidValue = false;
 
-                e.range.setValue("");    
+                  break;
+                }
               }
-
-              break;
             }
           }
         }
