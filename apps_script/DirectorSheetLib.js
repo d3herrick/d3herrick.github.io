@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const deploymentVersion                = "15";
+const deploymentVersion                = "16";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -472,26 +472,26 @@ function listApplicationData_(sheet) {
 }
 
 function mergeZipcode_(row) {
-  let streetAddress = row[1];
-  let zipcode       = row[2];
+  let streetAddress = row[1].trim();
+  let zipcode       = row[2].trim();
 
   row[1] = streetAddress + "\n" + zipcode;
   row.splice(2, 1);
 }
 
 function mergeResidentName_(row) {
-  let residentFirstName = row[2];
-  let residentLastName  = row[3];
+  let residentFirstName = row[2].trim();
+  let residentLastName  = row[3].trim();
 
   row[2] = residentFirstName + " " + residentLastName;
   row.splice(3, 1);
 }
 
 function mergeInfrastructureIssues_(row) {
-  let residentNotes       = row[7];
-  let pendingConstruction = row[8];
-  let pendingUtilityWork  = row[9];
-  let naturalGasLeaks     = row[10];
+  let residentNotes       = row[7].trim();
+  let pendingConstruction = row[8].trim();
+  let pendingUtilityWork  = row[9].trim();
+  let naturalGasLeaks     = row[10].trim();
   let issueList           = [];
 
   if ((pendingConstruction == "Yes") || (pendingUtilityWork == "Yes") ||  (naturalGasLeaks == "Yes")) {
@@ -534,10 +534,10 @@ function mergeInfrastructureIssues_(row) {
 }
 
 function mergePlanterContact_(row) {
-  let residentNotes       = row[7];
-  let planterFirstName    = row[8];
-  let planterLastName     = row[9];
-  let planterEmailAddress = row[10];
+  let residentNotes       = row[7].trim();
+  let planterFirstName    = row[8].trim();
+  let planterLastName     = row[9].trim();
+  let planterEmailAddress = row[10].trim();
 
   if ((planterFirstName.length > 0) || (planterLastName.length > 0) || (planterEmailAddress.length > 0)) {
     if (residentNotes.length > 0) {
@@ -720,7 +720,7 @@ function parseStreetAddress_(streetAddress) {
 
   if (end > start) {
     let token = tokens.substring(start, end);
-    let bits  = token.split(" ");
+    let bits  = token.split(/\s+/);
 
     if (bits.length > 1) {
       token = bits[0];
