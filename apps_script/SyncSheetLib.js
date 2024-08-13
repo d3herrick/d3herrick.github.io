@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                       = "1eNq3Z-0DFAqclht8OvXxPIM2IvR3J_Q1s4dzaZVERPYyVVB707MVdFPw";
-const deploymentVersion                  = "5";
+const deploymentVersion                  = "6";
 const plantingDateRange                  = "planting_date";
 const groupNameRange                     = "group_name";
 const firstNameRange                     = "first_name";
@@ -114,10 +114,9 @@ function onSubmit(e) {
 
   cellValue = cellValue.toLowerCase().
     replaceAll("group", "").
-    replaceAll("  ", " ").
     trim();
 
-  let cellParts = cellValue.split(" ");
+  let cellParts = cellValue.split(/\s+/);
   let cellIndex = 0;
   let cellToken = "";
 
@@ -165,7 +164,7 @@ function onSubmit(e) {
     sheet.getRange(rowIndex, sheet.getRange(planterEmailAddress).getColumn())
   ];
 
-  if (applicantContactDataRanges.every((e, i) => e.getValue().toLowerCase() === planterContactDataRanges[i].getValue().toLowerCase())) {
+  if (applicantContactDataRanges.every((e, i) => e.getValue().toLowerCase().trim() === planterContactDataRanges[i].getValue().toLowerCase().trim())) {
     planterContactDataRanges.forEach((r) => r.setValue(""));
   }
 
