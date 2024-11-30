@@ -14,15 +14,18 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                       = "1eNq3Z-0DFAqclht8OvXxPIM2IvR3J_Q1s4dzaZVERPYyVVB707MVdFPw";
-const deploymentVersion                  = "6";
+const deploymentVersion                  = "7";
 const plantingDateRange                  = "planting_date";
 const groupNameRange                     = "group_name";
 const firstNameRange                     = "first_name";
 const lastNameRange                      = "last_name";
-const emailAddress                       = "email_address";
+const applicationAckEmailReplyToRange    = "application_ack_email_reply_to";
+const applicationAckEmailSubjectRange    = "application_ack_email_subject";
+const applicationAckEmailBodyRange       = "application_ack_email_body";
+const emailAddressRange                  = "email_address";
 const planterFirstNameRange              = "planter_first_name";
 const planterLastNameRange               = "planter_last_name";
-const planterEmailAddress                = "planter_email_address";
+const planterEmailAddressRange           = "planter_email_address";
 const numberOfTreeRequestedRange         = "number_of_trees_requested";
 const newtonTreeConservancyMenu          = "Newton Tree Conservancy";
 const aboutThisMenuItem                  = "About...";
@@ -156,12 +159,12 @@ function onSubmit(e) {
   let applicantContactDataRanges = [
     sheet.getRange(rowIndex, sheet.getRange(firstNameRange).getColumn()),
     sheet.getRange(rowIndex, sheet.getRange(lastNameRange).getColumn()),
-    sheet.getRange(rowIndex, sheet.getRange(emailAddress).getColumn())
+    sheet.getRange(rowIndex, sheet.getRange(emailAddressRange).getColumn())
   ];
   let planterContactDataRanges = [
     sheet.getRange(rowIndex, sheet.getRange(planterFirstNameRange).getColumn()),
     sheet.getRange(rowIndex, sheet.getRange(planterLastNameRange).getColumn()),
-    sheet.getRange(rowIndex, sheet.getRange(planterEmailAddress).getColumn())
+    sheet.getRange(rowIndex, sheet.getRange(planterEmailAddressRange).getColumn())
   ];
 
   if (applicantContactDataRanges.every((e, i) => e.getValue().toLowerCase().trim() === planterContactDataRanges[i].getValue().toLowerCase().trim())) {
@@ -169,6 +172,24 @@ function onSubmit(e) {
   }
 
   sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn()).setVerticalAlignment("top");
+
+  let emailAddress = sheet.getRange(rowIndex, sheet.getRange(emailAddressRange).getColumn()).getValue();
+
+  if (emailAddress !== undefined) {
+    let replyTo = sheet.getRange(applicationAckEmailReplyToRange).getValue();
+    let subject = sheet.getRange(applicationAckEmailSubjectRange).getValue();
+    let body    = sheet.getRange(applicationAckEmailBodyRange).getValue();
+
+    MailApp.sendEmail(
+      emailAddress,
+      subject,
+      null,
+      {
+        htmlBody: body,
+        replyTo : replyTo
+      }
+    );
+  }
 }
 
 function onArchiveDataForPlantingDate() {
