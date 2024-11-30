@@ -14,11 +14,12 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                       = "1eNq3Z-0DFAqclht8OvXxPIM2IvR3J_Q1s4dzaZVERPYyVVB707MVdFPw";
-const deploymentVersion                  = "7";
+const deploymentVersion                  = "8";
 const plantingDateRange                  = "planting_date";
 const groupNameRange                     = "group_name";
 const firstNameRange                     = "first_name";
 const lastNameRange                      = "last_name";
+const applicationAckEmailSenderNameRange = "application_ack_email_sender_name"
 const applicationAckEmailReplyToRange    = "application_ack_email_reply_to";
 const applicationAckEmailSubjectRange    = "application_ack_email_subject";
 const applicationAckEmailBodyRange       = "application_ack_email_body";
@@ -176,9 +177,10 @@ function onSubmit(e) {
   let emailAddress = sheet.getRange(rowIndex, sheet.getRange(emailAddressRange).getColumn()).getValue();
 
   if (emailAddress !== undefined) {
-    let replyTo = sheet.getRange(applicationAckEmailReplyToRange).getValue();
-    let subject = sheet.getRange(applicationAckEmailSubjectRange).getValue();
-    let body    = sheet.getRange(applicationAckEmailBodyRange).getValue();
+    let senderName = sheet.getRange(applicationAckEmailSenderNameRange).getValue();
+    let replyTo    = sheet.getRange(applicationAckEmailReplyToRange).getValue();
+    let subject    = sheet.getRange(applicationAckEmailSubjectRange).getValue();
+    let body       = sheet.getRange(applicationAckEmailBodyRange).getValue();
 
     MailApp.sendEmail(
       emailAddress,
@@ -186,7 +188,8 @@ function onSubmit(e) {
       null,
       {
         htmlBody: body,
-        replyTo : replyTo
+        replyTo : replyTo,
+        name    : senderName
       }
     );
   }
