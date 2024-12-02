@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                       = "1eNq3Z-0DFAqclht8OvXxPIM2IvR3J_Q1s4dzaZVERPYyVVB707MVdFPw";
-const deploymentVersion                  = "8";
+const deploymentVersion                  = "9";
 const plantingDateRange                  = "planting_date";
 const groupNameRange                     = "group_name";
 const firstNameRange                     = "first_name";
@@ -68,11 +68,11 @@ function onEdit(e) {
   if (sheet.getSheetId() === range.getSheet().getSheetId()) {
     let isLegalValue = true;
 
-    if ((e.value !== undefined) && (e.range.rowEnd > 1) && (range.getLastColumn() == e.range.columnEnd)) {
+    if ((e.value !== undefined) && (e.range.rowEnd > 1) && (range.getLastColumn() === e.range.columnEnd)) {
       let parts = e.value.trim().split(/\s+/);
 
-      if (parts.length == 2) {
-        if (!Number.isNaN(Number.parseInt(parts[0])) && (parts[0].length == 4)) {
+      if (parts.length === 2) {
+        if (!Number.isNaN(Number.parseInt(parts[0])) && (parts[0].length === 4)) {
           if ((parts[1] === "Spring") || (parts[1] === "Fall")) {
             e.range.setValue(parts[0] + " " + parts[1]);
           }
@@ -80,7 +80,7 @@ function onEdit(e) {
             isLegalValue = false;
           }
         }
-        else if (!Number.isNaN(Number.parseInt(parts[1])) && (parts[1].length == 4)) {
+        else if (!Number.isNaN(Number.parseInt(parts[1])) && (parts[1].length === 4)) {
           if ((parts[0] === "Spring") || (parts[0] === "Fall")) {
             e.range.setValue(parts[1] + " " + parts[0]);
           }
@@ -202,7 +202,7 @@ function onArchiveDataForPlantingDate() {
     "Enter the planting date you want to archive. Please specify \"YYYY\" followed by \"Spring\" or \"Fall\" with one space between the year and season, and the first letter of the season capitalized.\n\nExample: 2024 Spring",
     ui.ButtonSet.OK_CANCEL);
 
-  if (response.getSelectedButton() == ui.Button.OK) {
+  if (response.getSelectedButton() === ui.Button.OK) {
     let plantingDate = response.getResponseText();
 
     let file  = SpreadsheetApp.getActiveSpreadsheet();
