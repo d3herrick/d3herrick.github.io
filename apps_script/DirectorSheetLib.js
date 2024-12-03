@@ -14,14 +14,17 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const deploymentVersion                = "17";
+const deploymentVersion                = "19";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
 const groupNameRange                   = "group_name";
 const queryResultsRange                = "query_results"
 const groupLeaderDataFilter            = "group_leader_data_filter";
+const numberOfTreeRequestedFilter      = "number_of_trees_requested";
+const residentNotesRange               = "resident_notes"
 const groupDataRange                   = "group_data";
+const recommendedTreeCountDataRange    = "recommended_tree_count_data"
 const wiresDataFilter                  = "wires_data_filter";
 const curbDataFilter                   = "curb_data_filter";
 const largeTreeCountFilter             = "large_tree_count_filter";
@@ -29,6 +32,7 @@ const mediumTreeCountFilter            = "medium_tree_count_filter";
 const smallTreeCountFilter             = "small_tree_count_filter";
 const tbdTreeCountFilter               = "tbd_tree_count_filter";
 const bermDataFilter                   = "berm_data_filter";
+const ntcNotesRange                    = "ntc_notes"
 const plantingDataFilter               = "planting_data_filter";
 const timestampDataFilter              = "timestamp_data_filter";
 const lastDataRetrievalRange           = "last_data_retrieval";
@@ -36,14 +40,20 @@ const totalRequestedTreeCountRange     = "total_requested_tree_count";
 const totalRecommendedTreeCountRange   = "total_recommended_tree_count";
 const plantingDataFilterVisibility     = "is_planting_data_filter_visible";
 const insertEmptyRowsMax               = 30;
+const directorNameProp                 = "director_name_prop";
+const duplicateRowColor                = "darkgray";
+const duplicateRowRequestedValue       = "X";
+const duplicateRowRequestedFontSize    = 45;
 const newtonTreeConservancyMenu        = "Newton Tree Conservancy";
 const getApplicationDataMenuItem       = "Get application data";
 const toggleDataFilterMenuItem         = "Toggle data filter visibility";
-const generateFileNameMenuItem         = "Generate spreadsheet file name";
+const setDirectorFileNameMenuItem      = "Set director for spreadsheet file name";
+const duplicateRowForCornerLotMenuItem = "Duplicate application row for corner lot"
 const insertEmptyRowsMenuItem          = "Insert empty rows";
 const aboutThisMenuItem                = "About...";
 const additionalDataAvailableTitle     = "Additional Application Data Available";
-const generateFileNameTitle            = "Generate Spreadsheet File Name";
+const setDirectorFileNameTitle         = "Set Director for Spreadsheet File Name";
+const duplicateRowForCornerLotTitle    = "Duplicate Application Row for Corner Lot"
 const insertEmptyRowsTitle             = "Insert Empty Rows";
 const specifyDataFilterTitle           = "Specify Application Data Filter Criteria";
 const specifiedInvalidColumnValueTitle = "Invalid Value Specified for ";
@@ -51,6 +61,8 @@ const aboutThisTitle                   = "About Community Tree Planting Spreadsh
 const plantingDateFilterLabel          = "Planting date";
 const groupNameFilterLabel             = "Group name";
 const archivedDataNote                 = "Because it has concluded, data associated with the planting date has been archived.";
+const cornerLotStreetTag               = "replace-with-street-name:\n\n"
+const cornerLotResidentNoteTag         = "Application row above was duplicated to accommodate planting on multiple streets that border the corner lot.";
 
 const booleanValidationFilters = [
   [groupLeaderDataFilter, ""],
@@ -75,7 +87,8 @@ function onOpen(e) {
       .addSeparator()
       .addItem(toggleDataFilterMenuItem, "onToggleDataFilterVisibility")
       .addSeparator()
-      .addItem(generateFileNameMenuItem, "onGenerateSpreadsheetName")
+      .addItem(setDirectorFileNameMenuItem, "onSetDirectorFileName")
+      .addItem(duplicateRowForCornerLotMenuItem, "onDuplicateRowForCornerLot")
       .addItem(insertEmptyRowsMenuItem, "onInsertEmptyRows")
       .addSeparator()
       .addItem(aboutThisMenuItem, "onAboutThis")
@@ -90,7 +103,7 @@ function onOpen(e) {
   if (hasDataFilterValidators_()) { 
     let plantingDateValidation = plantingDate.getDataValidation();
 
-    if (plantingDateValidation.getCriteriaValues()[0].getValues().find((v) => (v[0] === plantingDate.getValue())) != undefined) {
+    if (plantingDateValidation.getCriteriaValues()[0].getValues().find((v) => (v[0] == plantingDate.getValue())) != undefined) {
       let rows = listApplicationData_(sheet);
 
       if (!isApplicationDataEmpty_(rows)) {
@@ -117,6 +130,9 @@ function onOpen(e) {
     plantingDate.setNote(archivedDataNote);
     groupName.setNote(archivedDataNote);
   }
+  else {
+    setSpreadsheetFileName_();
+  }
 }
 
 function onEdit(e) {
@@ -126,7 +142,7 @@ function onEdit(e) {
     let dataRange = sheet.getRange(groupDataRange);
 
     if ((dataRange.getRow() < e.range.rowStart) && (dataRange.getLastRow() > e.range.rowEnd)) {
-      if (e.value !== undefined) {
+      if (e.value != undefined) {
         let needle       = e.value.trim();
         let isValidValue = true;
 
@@ -137,10 +153,10 @@ function onEdit(e) {
             let range = sheet.getRange(r[0]);
         
             if (range.getLastColumn() == e.range.columnEnd) {
-              if ((needle === "y") || (needle === "yes")) {
+              if ((needle == "y") || (needle == "yes")) {
                 e.range.setValue("Yes");
               }
-              else if ((needle === "n") || (needle === "no")) {
+              else if ((needle == "n") || (needle == "no")) {
                 e.range.setValue("No");
               }
               else {
@@ -178,6 +194,14 @@ function onEdit(e) {
                   break;
                 }
               }
+            }
+          }
+
+          if (isValidValue) {
+            dataRange = sheet.getRange(recommendedTreeCountDataRange);
+
+            if ((dataRange.getRow() < e.range.rowStart) && (dataRange.getLastRow() > e.range.rowEnd)) {
+              setSpreadsheetFileName_();
             }
           }
         }
@@ -230,46 +254,71 @@ function onGetApplicationData(rows) {
   }
   else {
     ui.alert(specifyDataFilterTitle, 
-      "Please select " + alert + " and then click menu item " + getApplicationDataMenuItem + ".",
+      "Please select " + alert + " and then click menu item " + getApplicationDataMenuItem + " again.",
       ui.ButtonSet.OK);
   }
 }
 
-function onGenerateSpreadsheetName() {
+function onSetDirectorFileName() {
   let sheet = getMainSheet_();
   let ui    = SpreadsheetApp.getUi();
   let alert = validateDataFilterCriteria_();
 
   if (alert.length == 0) {
-    let response = ui.prompt(generateFileNameTitle,
-      "Enter the first name of the director assigned to this planting group:",
+    let response = ui.prompt(setDirectorFileNameTitle,
+      "Enter the first name of the director assigned to this planting group. If multiple directors are assigned, separate their first names with \"and\":",
       ui.ButtonSet.OK_CANCEL);
 
     let directorName = response.getResponseText();
 
-    if ((response.getSelectedButton() == ui.Button.OK) && (directorName.length > 0)) {
-      let plantingDate   = sheet.getRange(plantingDateRange).getValue();
-      let groupName      = sheet.getRange(groupNameRange).getValue();
-      let totalTreeCount = sheet.getRange(totalRecommendedTreeCountRange).getValue();
-
-      if ((totalTreeCount == null) || (totalTreeCount == 0)) {
-        totalTreeCount = sheet.getRange(totalRequestedTreeCountRange).getValue();
-
-        if (totalTreeCount == null) {
-          totalTreeCount = 0;
-        }
+    if (response.getSelectedButton() == ui.Button.OK) {
+      if (directorName.length > 0) {
+        PropertiesService.getDocumentProperties().setProperty(directorNameProp, directorName);
+      }
+      else {
+        PropertiesService.getDocumentProperties().deleteProperty(directorNameProp);
       }
 
-      let spreadSheetName = plantingDate + "-" + groupName + " (" + directorName + ") (" + totalTreeCount + ")";
-
-      ui.alert(generateFileNameTitle,
-        "Copy and paste the name below, setting it as the name of your spreadsheet:\n\n" + spreadSheetName,
-        ui.ButtonSet.OK);
+      setSpreadsheetFileName_();
     }
   }
   else {
-    ui.alert(generateFileNameTitle, 
-      "Please select " + alert + " and then click menu item " + getApplicationDataMenuItem + ", and then " + generateFileNameMenuItem + ".",
+    ui.alert(setDirectorFileNameTitle, 
+      "Please select " + alert + " and then click menu item " + setDirectorFileNameMenuItem + " again.",
+      ui.ButtonSet.OK);
+  }
+}
+
+function onDuplicateRowForCornerLot() {
+  let sheet     = getMainSheet_();
+  let ui        = SpreadsheetApp.getUi();
+  let row       = sheet.getActiveCell().getRow();
+  let dataRange = sheet.getRange(groupDataRange);
+
+  if ((dataRange.getRow() < row) && (dataRange.getLastRow() > row)) {
+    let column = sheet.getRange(groupLeaderDataFilter).getLastColumn();
+    let newRow = row + 1;
+    let range  = sheet.getRange(row, 1, 1, column);
+
+    sheet.insertRowsAfter(row, 1);
+    range.copyTo(sheet.getRange(newRow, 1, 1, column));
+    sheet.getRange(newRow, 1, 1, column).setFontColor(duplicateRowColor);
+        
+    range = sheet.getRange(newRow, sheet.getRange(numberOfTreeRequestedFilter).getLastColumn());
+    range.setValue(duplicateRowRequestedValue).setFontSize(duplicateRowRequestedFontSize).setFontColor(duplicateRowColor);
+
+    range = sheet.getRange(row, sheet.getRange(ntcNotesRange).getLastColumn());
+    range.setValue(cornerLotStreetTag + range.getValue());
+
+    range = sheet.getRange(newRow, sheet.getRange(residentNotesRange).getLastColumn());
+    range.setValue(cornerLotResidentNoteTag).setFontStyle("italic").setFontColor(duplicateRowColor);
+
+    range = sheet.getRange(newRow, sheet.getRange(ntcNotesRange).getLastColumn());
+    range.setValue(cornerLotStreetTag);
+  }
+  else {
+    ui.alert(duplicateRowForCornerLotTitle, 
+      "Please select one of the applications located in rows " + (dataRange.getRow() + 1) + " through " + (dataRange.getLastRow() - 1) + ".",
       ui.ButtonSet.OK);
   }
 }
@@ -329,6 +378,25 @@ function onAboutThis() {
 }
 
 function onApplyUpdates() {
+  // insert any code-driven updates here
+}
+
+function setSpreadsheetFileName_() {
+  let alert = validateDataFilterCriteria_();
+
+  if (alert.length == 0) {
+    let sheet          = getMainSheet_();
+    let plantingDate   = sheet.getRange(plantingDateRange).getValue();
+    let groupName      = sheet.getRange(groupNameRange).getValue();
+    let totalTreeCount = sheet.getRange(totalRecommendedTreeCountRange).getValue() ?? 0;
+    let directorName   = PropertiesService.getDocumentProperties().getProperty(directorNameProp);
+
+    if (!isEmpty_(plantingDate) && !isEmpty_(groupName) && !isEmpty_(directorName)) {
+      let spreadSheetName = plantingDate + "-" + groupName + " (" + directorName + ") (" + totalTreeCount + ")";
+
+      SpreadsheetApp.getActiveSpreadsheet().rename(spreadSheetName);
+    }
+  }
 }
 
 function validateDataFilterCriteria_() {
@@ -420,7 +488,7 @@ function listApplicationData_(sheet) {
     dataRange.offset(1, 0, (lastRow - firstRow - 1)).
       getValues().
       forEach(function(e) {
-        if (e[0] !== '') {
+        if (e[0] != '') {
           currentRowKeys.add(e[0].getTime());
         }
       });
@@ -646,7 +714,7 @@ function parseStreetAddress_(streetAddress) {
     }
     else if ((/^[a-z]/.test(c))) {
       if (i < (length - 1)) {
-        if (tokens.charAt(i + 1) === ' ') {
+        if (tokens.charAt(i + 1) == ' ') {
           end++;
           break;
         }
@@ -658,9 +726,9 @@ function parseStreetAddress_(streetAddress) {
         break;
       }
     }
-    else if (c === ' ') {
+    else if (c == ' ') {
       if (i < (length - 2)) {
-        if ((/^[a-z]/.test(tokens.charAt(i + 1)) && (tokens.charAt(i + 2) === ' '))) {
+        if ((/^[a-z]/.test(tokens.charAt(i + 1)) && (tokens.charAt(i + 2) == ' '))) {
           apt = tokens.charAt(i + 1);
           end += 2;
           break;
@@ -691,7 +759,7 @@ function parseStreetAddress_(streetAddress) {
   for (let i = end; i < length; i++) {
     let c = tokens.charAt(i);
 
-    if ((c === ' ') || (c === '-')) {
+    if ((c == ' ') || (c == '-')) {
       end++;
     }
     else if (Number.isInteger(Number.parseInt(c))) {
@@ -777,10 +845,10 @@ function normalizeStreetAddress_(streetAddress) {
 
 function hasDataFilterValidators_() {
   let sheet         = getMainSheet_();
-  let hasValidators = (sheet.getRange(plantingDateRange).getDataValidation() !== null);
+  let hasValidators = (sheet.getRange(plantingDateRange).getDataValidation() != null);
 
   if (hasValidators) {
-    hasValidators = (sheet.getRange(groupNameRange).getDataValidation() !== null);
+    hasValidators = (sheet.getRange(groupNameRange).getDataValidation() != null);
   }
 
   return hasValidators;
@@ -798,6 +866,10 @@ function getMainSheet_() {
   }
 
   return sheet;
+}
+
+function isEmpty_(object) {
+  return ((object == null) || (object.length == 0));
 }
 
 function isApplicationDataEmpty_(rows) {

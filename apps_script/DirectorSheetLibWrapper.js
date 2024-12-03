@@ -27,10 +27,14 @@ function onGetApplicationData() {
   DirectorSheetLib.onGetApplicationData();
 }
 
-function onGenerateSpreadsheetName() {
-  DirectorSheetLib.onGenerateSpreadsheetName();
+function onSetDirectorFileName() {
+  DirectorSheetLib.onSetDirectorFileName();
 }
 
+function onDuplicateRowForCornerLot() {
+  DirectorSheetLib.onDuplicateRowForCornerLot();
+}
+  
 function onInsertEmptyRows() {
   DirectorSheetLib.onInsertEmptyRows();
 }
