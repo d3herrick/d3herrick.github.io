@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const deploymentVersion                = "19";
+const deploymentVersion                = "20";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -142,9 +142,10 @@ function onEdit(e) {
     let dataRange = sheet.getRange(groupDataRange);
 
     if ((dataRange.getRow() < e.range.rowStart) && (dataRange.getLastRow() > e.range.rowEnd)) {
+      let isValidValue = true;
+      
       if (e.value != undefined) {
-        let needle       = e.value.trim();
-        let isValidValue = true;
+        let needle = e.value.trim();
 
         if (needle.length > 0) {
           needle = needle.toLowerCase();
@@ -196,14 +197,17 @@ function onEdit(e) {
               }
             }
           }
+        }
+      }
+      else if (e.oldValue != undefined) {
+        isValidValue = true;
+      }
 
-          if (isValidValue) {
-            dataRange = sheet.getRange(recommendedTreeCountDataRange);
+      if (isValidValue) {
+        dataRange = sheet.getRange(recommendedTreeCountDataRange);
 
-            if ((dataRange.getRow() < e.range.rowStart) && (dataRange.getLastRow() > e.range.rowEnd)) {
-              setSpreadsheetFileName_();
-            }
-          }
+        if ((dataRange.getRow() < e.range.rowStart) && (dataRange.getLastRow() > e.range.rowEnd)) {
+          setSpreadsheetFileName_();
         }
       }
     }
