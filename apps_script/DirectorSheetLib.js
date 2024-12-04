@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const deploymentVersion                = "20";
+const deploymentVersion                = "21";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -84,12 +84,11 @@ function onOpen(e) {
   ui
     .createMenu(newtonTreeConservancyMenu)
       .addItem(getApplicationDataMenuItem, "onGetApplicationData")
-      .addSeparator()
-      .addItem(toggleDataFilterMenuItem, "onToggleDataFilterVisibility")
-      .addSeparator()
       .addItem(setDirectorFileNameMenuItem, "onSetDirectorFileName")
+      .addSeparator()
       .addItem(duplicateRowForCornerLotMenuItem, "onDuplicateRowForCornerLot")
       .addItem(insertEmptyRowsMenuItem, "onInsertEmptyRows")
+      .addItem(toggleDataFilterMenuItem, "onToggleDataFilterVisibility")
       .addSeparator()
       .addItem(aboutThisMenuItem, "onAboutThis")
       .addToUi();
@@ -222,30 +221,6 @@ function onEdit(e) {
   }
 }
 
-function onToggleDataFilterVisibility() {
-  let sheet      = getMainSheet_();
-  let properties = PropertiesService.getDocumentProperties();
-
-  let isPlantingDataFilterVisible = properties.getProperty(plantingDataFilterVisibility);
-
-  if ((isPlantingDataFilterVisible == null) || (isPlantingDataFilterVisible == "true")) {
-    sheet.hideRow(sheet.getRange(plantingDataFilter));
-    sheet.hideColumn(sheet.getRange(timestampDataFilter));
-    sheet.hideColumn(sheet.getRange(groupLeaderDataFilter));
-
-    properties.setProperty(plantingDataFilterVisibility, "false");
-  }
-  else {
-    sheet.unhideRow(sheet.getRange(plantingDataFilter));
-    sheet.unhideColumn(sheet.getRange(timestampDataFilter));
-    sheet.unhideColumn(sheet.getRange(groupLeaderDataFilter));
-
-    properties.setProperty(plantingDataFilterVisibility, "true");
-  }
-
-  sheet.setActiveSelection(sheet.getRange("A1"));
-}
-
 function onGetApplicationData(rows) {
   let sheet = getMainSheet_();
   let ui    = SpreadsheetApp.getUi();
@@ -278,12 +253,16 @@ function onSetDirectorFileName() {
     if (response.getSelectedButton() == ui.Button.OK) {
       if (directorName.length > 0) {
         PropertiesService.getDocumentProperties().setProperty(directorNameProp, directorName);
+
+        setSpreadsheetFileName_();
       }
       else {
         PropertiesService.getDocumentProperties().deleteProperty(directorNameProp);
-      }
 
-      setSpreadsheetFileName_();
+        ui.alert(setDirectorFileNameTitle,
+          "You did not specify the name of a director. Consequently, automatic update of the spreadsheet file name will be disabled.",
+          ui.ButtonSet.OK);
+      }
     }
   }
   else {
@@ -368,6 +347,30 @@ function onInsertEmptyRows() {
         ui.ButtonSet.OK);
     }
   }
+}
+
+function onToggleDataFilterVisibility() {
+  let sheet      = getMainSheet_();
+  let properties = PropertiesService.getDocumentProperties();
+
+  let isPlantingDataFilterVisible = properties.getProperty(plantingDataFilterVisibility);
+
+  if ((isPlantingDataFilterVisible == null) || (isPlantingDataFilterVisible == "true")) {
+    sheet.hideRow(sheet.getRange(plantingDataFilter));
+    sheet.hideColumn(sheet.getRange(timestampDataFilter));
+    sheet.hideColumn(sheet.getRange(groupLeaderDataFilter));
+
+    properties.setProperty(plantingDataFilterVisibility, "false");
+  }
+  else {
+    sheet.unhideRow(sheet.getRange(plantingDataFilter));
+    sheet.unhideColumn(sheet.getRange(timestampDataFilter));
+    sheet.unhideColumn(sheet.getRange(groupLeaderDataFilter));
+
+    properties.setProperty(plantingDataFilterVisibility, "true");
+  }
+
+  sheet.setActiveSelection(sheet.getRange("A1"));
 }
 
 function onAboutThis() {

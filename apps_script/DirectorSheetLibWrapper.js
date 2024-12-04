@@ -19,10 +19,6 @@ function onEdit(e) {
   DirectorSheetLib.onEdit(e);
 }
 
-function onToggleDataFilterVisibility() {
-  DirectorSheetLib.onToggleDataFilterVisibility();
-}
-
 function onGetApplicationData() {
   DirectorSheetLib.onGetApplicationData();
 }
@@ -37,6 +33,10 @@ function onDuplicateRowForCornerLot() {
   
 function onInsertEmptyRows() {
   DirectorSheetLib.onInsertEmptyRows();
+}
+
+function onToggleDataFilterVisibility() {
+  DirectorSheetLib.onToggleDataFilterVisibility();
 }
 
 function onAboutThis() {
