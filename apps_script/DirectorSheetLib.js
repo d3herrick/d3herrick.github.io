@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const deploymentVersion                = "21";
+const deploymentVersion                = "22";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -61,7 +61,7 @@ const aboutThisTitle                   = "About Community Tree Planting Spreadsh
 const plantingDateFilterLabel          = "Planting date";
 const groupNameFilterLabel             = "Group name";
 const archivedDataNote                 = "Because it has concluded, data associated with the planting date has been archived.";
-const cornerLotStreetTag               = "replace-with-street-name:\n\n"
+const cornerLotStreetTag               = "replace-with-street-name: "
 const cornerLotResidentNoteTag         = "Application row above was duplicated to accommodate planting on multiple streets that border the corner lot.";
 
 const booleanValidationFilters = [
