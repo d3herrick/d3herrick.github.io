@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const deploymentVersion                = "22";
+const deploymentVersion                = "25";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -41,6 +41,7 @@ const totalRecommendedTreeCountRange   = "total_recommended_tree_count";
 const plantingDataFilterVisibility     = "is_planting_data_filter_visible";
 const insertEmptyRowsMax               = 30;
 const directorNameProp                 = "director_name_prop";
+const directorNameNotSpecified         = "Not specified";
 const duplicateRowColor                = "darkgray";
 const duplicateRowRequestedValue       = "X";
 const duplicateRowRequestedFontSize    = 45;
@@ -79,7 +80,8 @@ const integerValidationFilters = [
 ];
 
 function onOpen(e) {
-  let ui = SpreadsheetApp.getUi();
+  let sheet = getMainSheet_();
+  let ui    = SpreadsheetApp.getUi();
 
   ui
     .createMenu(newtonTreeConservancyMenu)
@@ -92,8 +94,6 @@ function onOpen(e) {
       .addSeparator()
       .addItem(aboutThisMenuItem, "onAboutThis")
       .addToUi();
-
-  let sheet = getMainSheet_();
 
   let plantingDate   = sheet.getRange(plantingDateRange);
   let groupName      = sheet.getRange(groupNameRange);
@@ -374,11 +374,13 @@ function onToggleDataFilterVisibility() {
 }
 
 function onAboutThis() {
-  let ui = SpreadsheetApp.getUi();
+  let ui           = SpreadsheetApp.getUi();
+  let directorName = PropertiesService.getDocumentProperties().getProperty(directorNameProp) ?? directorNameNotSpecified;
 
   ui.alert(aboutThisTitle,
-    "Deployment ID\n" + deploymentId + "\n\n" +
-    "Version\n" + deploymentVersion + "\n\n\n" +
+    "Deployment ID\n " + deploymentId + "\n\n" +
+    "Version\n" + deploymentVersion + "\n\n" +
+    "Director name\n" + directorName + "\n\n\n" +
     "Newton Tree Conservancy\n" +
     "www.newtontreeconservancy.org",
     ui.ButtonSet.OK);
