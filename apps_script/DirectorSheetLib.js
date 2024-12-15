@@ -14,13 +14,14 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const deploymentVersion                = "25";
+const deploymentVersion                = "26";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
 const groupNameRange                   = "group_name";
 const queryResultsRange                = "query_results"
 const groupLeaderDataFilter            = "group_leader_data_filter";
+const phoneDataFilter                  = "phone_data_filter";
 const numberOfTreeRequestedFilter      = "number_of_trees_requested";
 const residentNotesRange               = "resident_notes"
 const groupDataRange                   = "group_data";
@@ -359,6 +360,7 @@ function onToggleDataFilterVisibility() {
     sheet.hideRow(sheet.getRange(plantingDataFilter));
     sheet.hideColumn(sheet.getRange(timestampDataFilter));
     sheet.hideColumn(sheet.getRange(groupLeaderDataFilter));
+    sheet.hideColumn(sheet.getRange(phoneDataFilter));
 
     properties.setProperty(plantingDataFilterVisibility, "false");
   }
@@ -366,6 +368,7 @@ function onToggleDataFilterVisibility() {
     sheet.unhideRow(sheet.getRange(plantingDataFilter));
     sheet.unhideColumn(sheet.getRange(timestampDataFilter));
     sheet.unhideColumn(sheet.getRange(groupLeaderDataFilter));
+    sheet.unhideColumn(sheet.getRange(phoneDataFilter));
 
     properties.setProperty(plantingDataFilterVisibility, "true");
   }
