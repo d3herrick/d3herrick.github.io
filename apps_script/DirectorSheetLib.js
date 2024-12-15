@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const deploymentVersion                = "26";
+const deploymentVersion                = "27";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -46,6 +46,7 @@ const directorNameNotSpecified         = "Not specified";
 const duplicateRowColor                = "darkgray";
 const duplicateRowRequestedValue       = "X";
 const duplicateRowRequestedFontSize    = 45;
+const retrievingDataStatus             = "Retrieving data..."
 const newtonTreeConservancyMenu        = "Newton Tree Conservancy";
 const getApplicationDataMenuItem       = "Get application data";
 const toggleDataFilterMenuItem         = "Toggle data filter visibility";
@@ -228,9 +229,16 @@ function onGetApplicationData(rows) {
   let alert = validateDataFilterCriteria_();
 
   if (alert.length == 0) {
-    insertApplicationData_(sheet, rows);
-
-    sheet.getRange(lastDataRetrievalRange).setValue(new Date());
+    let range  = sheet.getRange(lastDataRetrievalRange);
+    let format = range.getNumberFormat(); 
+ 
+    try {
+      range.setValue(retrievingDataStatus);
+      insertApplicationData_(sheet, rows);
+    }
+    finally {
+      range.setValue(new Date()).setNumberFormat(format);
+    }
   }
   else {
     ui.alert(specifyDataFilterTitle, 
