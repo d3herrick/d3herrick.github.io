@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                       = "1eNq3Z-0DFAqclht8OvXxPIM2IvR3J_Q1s4dzaZVERPYyVVB707MVdFPw";
-const deploymentVersion                  = "11";
+const deploymentVersion                  = "12";
 const plantingDateRange                  = "planting_date";
 const groupNameRange                     = "group_name";
 const firstNameRange                     = "first_name";
@@ -172,15 +172,17 @@ function onSubmit(e) {
     planterContactDataRanges.forEach((r) => r.setValue(""));
   }
 
-  let rowRange = sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn());
-
-  rowRange.setVerticalAlignment("top");
+  sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn()).setVerticalAlignment("top");
 
   let emailAddress = sheet.getRange(rowIndex, sheet.getRange(emailAddressRange).getColumn()).getValue();
 
   if (emailAddress != undefined) {
-    if (sheet.getDataRange().createTextFinder(emailAddress).matchEntireCell(true).findAll().length > 1) {
-      rowRange.setFontWeight("bold");
+    let hits = sheet.getDataRange().createTextFinder(emailAddress).matchEntireCell(true).findAll();
+
+    if (hits.length > 1) {
+      hits.forEach(function(h) {
+        sheet.getRange(h.getRow(), 1, 1, sheet.getLastColumn()).setFontWeight("bold");
+      });
     }
 
     let senderName = sheet.getRange(applicationAckEmailSenderNameRange).getValue();
