@@ -14,7 +14,8 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                       = "1eNq3Z-0DFAqclht8OvXxPIM2IvR3J_Q1s4dzaZVERPYyVVB707MVdFPw";
-const deploymentVersion                  = "12";
+const deploymentVersion                  = "13";
+const headerRow                          = 2;
 const plantingDateRange                  = "planting_date";
 const groupNameRange                     = "group_name";
 const firstNameRange                     = "first_name";
@@ -222,7 +223,7 @@ function onArchiveDataForPlantingDate() {
       let deletions = [];
       let archive   = file.insertSheet(plantingDate + " " + "Archive", file.getSheets().length);
 
-      sheet.getRange(1, 1, 1, sheet.getLastColumn()).copyTo(archive.getRange("A1"));
+      sheet.getRange(headerRow, 1, 1, sheet.getLastColumn()).copyTo(archive.getRange("A1"));
 
       let dstRow = 2;
 
