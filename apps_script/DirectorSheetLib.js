@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const deploymentVersion                = "28";
+const deploymentVersion                = "29";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -224,11 +224,11 @@ function onEdit(e) {
 }
 
 function onGetApplicationData(rows) {
-  let sheet = getMainSheet_();
-  let ui    = SpreadsheetApp.getUi();
-  let alert = validateDataFilterCriteria_();
+  let sheet    = getMainSheet_();
+  let ui       = SpreadsheetApp.getUi();
+  let criteria = validateDataFilterCriteria_();
 
-  if (alert.length == 0) {
+  if (criteria.isComplete) {
     let range  = sheet.getRange(lastDataRetrievalRange);
     let format = range.getNumberFormat(); 
  
@@ -242,17 +242,17 @@ function onGetApplicationData(rows) {
   }
   else {
     ui.alert(specifyDataFilterTitle, 
-      "Please select " + alert + " and then click menu item " + getApplicationDataMenuItem + " again.",
+      "Please select " + criteria.message + " and then click menu item " + getApplicationDataMenuItem + " again.",
       ui.ButtonSet.OK);
   }
 }
 
 function onSetDirectorFileName() {
-  let sheet = getMainSheet_();
-  let ui    = SpreadsheetApp.getUi();
-  let alert = validateDataFilterCriteria_();
+  let sheet    = getMainSheet_();
+  let ui       = SpreadsheetApp.getUi();
+  let criteria = validateDataFilterCriteria_();
 
-  if (alert.length == 0) {
+  if (criteria.isComplete) {
     let response = ui.prompt(setDirectorFileNameTitle,
       "Enter the first name of the director assigned to this planting group. If multiple directors are assigned, separate their first names with \"and\":",
       ui.ButtonSet.OK_CANCEL);
@@ -276,7 +276,7 @@ function onSetDirectorFileName() {
   }
   else {
     ui.alert(setDirectorFileNameTitle, 
-      "Please select " + alert + " and then click menu item " + setDirectorFileNameMenuItem + " again.",
+      "Please select " + criteria.message + " and then click menu item " + setDirectorFileNameMenuItem + " again.",
       ui.ButtonSet.OK);
   }
 }
@@ -402,9 +402,9 @@ function onApplyUpdates() {
 }
 
 function setSpreadsheetFileName_() {
-  let alert = validateDataFilterCriteria_();
+  let criteria = validateDataFilterCriteria_();
 
-  if (alert.length == 0) {
+  if (criteria.isComplete) {
     let sheet          = getMainSheet_();
     let plantingDate   = sheet.getRange(plantingDateRange).getValue();
     let groupName      = sheet.getRange(groupNameRange).getValue();
@@ -420,7 +420,8 @@ function setSpreadsheetFileName_() {
 }
 
 function validateDataFilterCriteria_() {
-  let alert = "";
+  let isComplete = true;
+  let message    = "";
 
   if (hasDataFilterValidators_()) {
     let sheet                  = getMainSheet_();
@@ -432,19 +433,23 @@ function validateDataFilterCriteria_() {
     let groupNameFirstItem     = groupNameValidation.getCriteriaValues()[0].getValue();
 
     if (plantingDate == plantingDateFirstItem) {
-      alert += plantingDateFilterLabel;
+      isComplete = false;
+      
+      message += plantingDateFilterLabel;
     }
 
     if (groupName == groupNameFirstItem) {
-      if (alert.length > 0) {
-        alert += " and ";
+      isComplete = false;
+
+      if (message.length > 0) {
+        message += " and ";
       }
 
-      alert += groupNameFilterLabel;
+      message += groupNameFilterLabel;
     }
   }
 
-  return alert;
+  return {isComplete: isComplete, message: message};
 }
 
 function insertApplicationData_(sheet, rows = listApplicationData_(sheet)) {
