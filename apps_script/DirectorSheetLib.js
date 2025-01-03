@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const deploymentVersion                = "29";
+const deploymentVersion                = "30";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -536,7 +536,7 @@ function listApplicationData_(sheet) {
     newData = queryResults.getSheet().getDataRange().getValues();
   }
   finally {
-    queryResults.clear();
+    queryResults.clearContent();
   }
 
   if (!isApplicationDataEmpty_(newData)) {
