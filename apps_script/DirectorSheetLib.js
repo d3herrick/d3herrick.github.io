@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const deploymentVersion                = "30";
+const deploymentVersion                = "31";
 const formDataSheetIdRange             = "form_data_spreadsheet_id";
 const formDataSheetRange               = "form_data";
 const plantingDateRange                = "planting_date";
@@ -527,16 +527,16 @@ function listApplicationData_(sheet) {
   // remove that slice of the array (and others, as necessary) before returning results from this function.
   let query = "=query(importrange(\"" + formDataSheetId + "\", \"" + formDataSheetRange + "\"), \"SELECT Col1, Col6, Col7, Col4, Col5, Col8, Col9, Col10, Col14, Col15, Col16, Col17, Col18, Col19, Col20, Col21, '$' WHERE Col1 IS NOT NULL AND lower(Col2) = lower(\'" + plantingDate + "\') AND lower(Col3) = lower(\'" + groupName + "\') label '$' ''\", 0)";
 
-  let queryResults = sheet.getRange(queryResultsRange);
+  let queryResults = file.insertSheet().hideSheet();
   let newData      = null;
 
   try {
-    queryResults.setFormula(query);
+    queryResults.getRange(1,1).setFormula(query);
 
-    newData = queryResults.getSheet().getDataRange().getValues();
+    newData = queryResults.getDataRange().getValues();
   }
   finally {
-    queryResults.clearContent();
+    file.deleteSheet(queryResults);
   }
 
   if (!isApplicationDataEmpty_(newData)) {
