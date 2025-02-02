@@ -13,30 +13,30 @@
 //
 // @OnlyCurrentDoc
 //
-const deploymentId                       = "1eNq3Z-0DFAqclht8OvXxPIM2IvR3J_Q1s4dzaZVERPYyVVB707MVdFPw";
-const deploymentVersion                  = "13";
-const headerRow                          = 2;
-const plantingDateRange                  = "planting_date";
-const groupNameRange                     = "group_name";
-const firstNameRange                     = "first_name";
-const lastNameRange                      = "last_name";
-const applicationAckEmailSenderNameRange = "application_ack_email_sender_name"
-const applicationAckEmailReplyToRange    = "application_ack_email_reply_to";
-const applicationAckEmailSubjectRange    = "application_ack_email_subject";
-const applicationAckEmailBodyRange       = "application_ack_email_body";
-const emailAddressRange                  = "email_address";
-const planterFirstNameRange              = "planter_first_name";
-const planterLastNameRange               = "planter_last_name";
-const planterEmailAddressRange           = "planter_email_address";
-const numberOfTreeRequestedRange         = "number_of_trees_requested";
-const newtonTreeConservancyMenu          = "Newton Tree Conservancy";
-const aboutThisMenuItem                  = "About...";
-const archiveDataForPlantingDateMenuItem = "Archive data for planting date";
-const archiveDataForPlantingDateTitle    = "Archive Data for Planting Date";
-const countOfRowsArchivedTitle           = "Count of Rows Archived";
-const aboutTitle                         = "About Community Tree Planting Spreadsheet";
+const DEPLOYMENT_ID                            = "1eNq3Z-0DFAqclht8OvXxPIM2IvR3J_Q1s4dzaZVERPYyVVB707MVdFPw";
+const DEPLOYMENT_VERSION                       = "14";
+const HEADER_ROW                               = 2;
+const PLANTING_DATE_RANGE                      = "planting_date";
+const GROUP_NAME_RANGE                         = "group_name";
+const FIRST_NAME_RANGE                         = "first_name";
+const LAST_NAME_RANGE                          = "last_name";
+const APPL_ACK_EMAIL_SENDER_NAME_RANGE         = "application_ack_email_sender_name"
+const APPL_ACK_EMAIL_REPLY_TO_RANGE            = "application_ack_email_reply_to";
+const APPL_ACK_EMAIL_SUBJECT_RANGE             = "application_ack_email_subject";
+const APPL_ACK_EMAIL_BODY_RANGE                = "application_ack_email_body";
+const EMAIL_ADDRESS_RANGE                      = "email_address";
+const PLANTER_FIRST_NAME_RANGE                 = "planter_first_name";
+const PLANTER_LAST_NAME_RANGE                  = "planter_last_name";
+const PLANTER_EMAIL_ADDRESS_RANGE              = "planter_email_address";
+const NUMBER_OF_TREES_REQUESTED_RANGE          = "number_of_trees_requested";
+const NEWTON_TREE_CONSERVANCY_MENU             = "Newton Tree Conservancy";
+const ABOUT_MENU_ITEM                          = "About...";
+const ARCHIVE_DATA_FOR_PLANTING_DATE_MENU_ITEM = "Archive data for planting date";
+const ARCHIVE_DATA_FOR_PLANTING_DATE_TITLE     = "Archive Data for Planting Date";
+const COUNT_OF_ROW_ARCHIVED_TITLE              = "Count of Rows Archived";
+const ABOUT_TITLE                              = "About Community Tree Planting Spreadsheet";
 
-const streetSuffixes = [ 
+const STREET_SUFFIXES = [ 
   ["Ave",   "Avenue"], 
   ["Cir",   "Circle"], 
   ["Ln",    "Lane"], 
@@ -55,16 +55,16 @@ function onOpen(e) {
   let ui = SpreadsheetApp.getUi();
 
   ui
-    .createMenu(newtonTreeConservancyMenu)
-      .addItem(archiveDataForPlantingDateMenuItem, "onArchiveDataForPlantingDate")
+    .createMenu(NEWTON_TREE_CONSERVANCY_MENU)
+      .addItem(ARCHIVE_DATA_FOR_PLANTING_DATE_MENU_ITEM, "onArchiveDataForPlantingDate")
       .addSeparator()
-      .addItem(aboutThisMenuItem, "onAboutThis")
+      .addItem(ABOUT_MENU_ITEM, "onAboutThis")
       .addToUi();
 }
 
 function onEdit(e) {
   let sheet = e.source.getActiveSheet();
-  let range = sheet.getRange(plantingDateRange);
+  let range = sheet.getRange(PLANTING_DATE_RANGE);
 
   if (sheet.getSheetId() == range.getSheet().getSheetId()) {
     let isLegalValue = true;
@@ -114,7 +114,7 @@ function onEdit(e) {
 function onSubmit(e) {
   let sheet     = e.range.getSheet();
   let rowIndex  = e.range.getRow();
-  let cellRange = sheet.getRange(rowIndex, sheet.getRange(groupNameRange).getColumn());
+  let cellRange = sheet.getRange(rowIndex, sheet.getRange(GROUP_NAME_RANGE).getColumn());
   let cellValue = cellRange.getValue();
 
   cellValue = cellValue.toLowerCase().
@@ -139,7 +139,7 @@ function onSubmit(e) {
     if (cellIndex == cellParts.length) {
       cellToken = cellToken.replaceAll(".", "");
 
-      let cellSuffix = streetSuffixes.find((s) => (s[0] == cellToken));
+      let cellSuffix = STREET_SUFFIXES.find((s) => (s[0] == cellToken));
 
       if (cellSuffix != undefined) {
         cellToken = cellSuffix[1];
@@ -151,7 +151,7 @@ function onSubmit(e) {
 
   cellRange.setValue(cellValue);
 
-  cellRange = sheet.getRange(rowIndex, sheet.getRange(numberOfTreeRequestedRange).getColumn());
+  cellRange = sheet.getRange(rowIndex, sheet.getRange(NUMBER_OF_TREES_REQUESTED_RANGE).getColumn());
   cellValue = cellRange.getValue();
 
   if (cellValue == "") {
@@ -159,14 +159,14 @@ function onSubmit(e) {
   }
 
   let applicantContactDataRanges = [
-    sheet.getRange(rowIndex, sheet.getRange(firstNameRange).getColumn()),
-    sheet.getRange(rowIndex, sheet.getRange(lastNameRange).getColumn()),
-    sheet.getRange(rowIndex, sheet.getRange(emailAddressRange).getColumn())
+    sheet.getRange(rowIndex, sheet.getRange(FIRST_NAME_RANGE).getColumn()),
+    sheet.getRange(rowIndex, sheet.getRange(LAST_NAME_RANGE).getColumn()),
+    sheet.getRange(rowIndex, sheet.getRange(EMAIL_ADDRESS_RANGE).getColumn())
   ];
   let planterContactDataRanges = [
-    sheet.getRange(rowIndex, sheet.getRange(planterFirstNameRange).getColumn()),
-    sheet.getRange(rowIndex, sheet.getRange(planterLastNameRange).getColumn()),
-    sheet.getRange(rowIndex, sheet.getRange(planterEmailAddressRange).getColumn())
+    sheet.getRange(rowIndex, sheet.getRange(PLANTER_FIRST_NAME_RANGE).getColumn()),
+    sheet.getRange(rowIndex, sheet.getRange(PLANTER_LAST_NAME_RANGE).getColumn()),
+    sheet.getRange(rowIndex, sheet.getRange(PLANTER_EMAIL_ADDRESS_RANGE).getColumn())
   ];
 
   if (applicantContactDataRanges.every((e, i) => e.getValue().toLowerCase().trim() == planterContactDataRanges[i].getValue().toLowerCase().trim())) {
@@ -175,7 +175,7 @@ function onSubmit(e) {
 
   sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn()).setVerticalAlignment("top");
 
-  let emailAddress = sheet.getRange(rowIndex, sheet.getRange(emailAddressRange).getColumn()).getValue();
+  let emailAddress = sheet.getRange(rowIndex, sheet.getRange(EMAIL_ADDRESS_RANGE).getColumn()).getValue();
 
   if (emailAddress != undefined) {
     let hits = sheet.getDataRange().createTextFinder(emailAddress).matchEntireCell(true).findAll();
@@ -186,10 +186,10 @@ function onSubmit(e) {
       });
     }
 
-    let senderName = sheet.getRange(applicationAckEmailSenderNameRange).getValue();
-    let replyTo    = sheet.getRange(applicationAckEmailReplyToRange).getValue();
-    let subject    = sheet.getRange(applicationAckEmailSubjectRange).getValue();
-    let body       = sheet.getRange(applicationAckEmailBodyRange).getValue();
+    let senderName = sheet.getRange(APPL_ACK_EMAIL_SENDER_NAME_RANGE).getValue();
+    let replyTo    = sheet.getRange(APPL_ACK_EMAIL_REPLY_TO_RANGE).getValue();
+    let subject    = sheet.getRange(APPL_ACK_EMAIL_SUBJECT_RANGE).getValue();
+    let body       = sheet.getRange(APPL_ACK_EMAIL_BODY_RANGE).getValue();
 
     MailApp.sendEmail(
       emailAddress,
@@ -207,7 +207,7 @@ function onSubmit(e) {
 function onArchiveDataForPlantingDate() {
   let ui = SpreadsheetApp.getUi();
 
-  let response = ui.prompt(archiveDataForPlantingDateTitle,
+  let response = ui.prompt(ARCHIVE_DATA_FOR_PLANTING_DATE_TITLE,
     "Enter the planting date you want to archive. Please specify \"YYYY\" followed by \"Spring\" or \"Fall\" with one space between the year and season, and the first letter of the season capitalized.\n\nExample: 2024 Spring",
     ui.ButtonSet.OK_CANCEL);
 
@@ -215,7 +215,7 @@ function onArchiveDataForPlantingDate() {
     let plantingDate = response.getResponseText();
 
     let file  = SpreadsheetApp.getActiveSpreadsheet();
-    let range = file.getRange(plantingDateRange);
+    let range = file.getRange(PLANTING_DATE_RANGE);
     let sheet = range.getSheet();
     let hits  = range.createTextFinder(plantingDate).matchEntireCell(true).findAll();
 
@@ -223,7 +223,7 @@ function onArchiveDataForPlantingDate() {
       let deletions = [];
       let archive   = file.insertSheet(plantingDate + " " + "Archive", file.getSheets().length);
 
-      sheet.getRange(headerRow, 1, 1, sheet.getLastColumn()).copyTo(archive.getRange("A1"));
+      sheet.getRange(HEADER_ROW, 1, 1, sheet.getLastColumn()).copyTo(archive.getRange("A1"));
 
       let dstRow = 2;
 
@@ -238,7 +238,7 @@ function onArchiveDataForPlantingDate() {
       deletions.reverse().forEach(d => sheet.deleteRow(d));
     }
 
-    ui.alert(countOfRowsArchivedTitle,
+    ui.alert(COUNT_OF_ROW_ARCHIVED_TITLE,
       "Number of rows archived is " + hits.length + ".",
       ui.ButtonSet.OK);
   }
@@ -247,9 +247,9 @@ function onArchiveDataForPlantingDate() {
 function onAboutThis() {
   let ui = SpreadsheetApp.getUi();
 
-  ui.alert(aboutTitle,
-    "Deployment ID\n" + deploymentId + "\n\n" +
-    "Version\n" + deploymentVersion + "\n\n\n" +
+  ui.alert(ABOUT_TITLE,
+    "Deployment ID\n" + DEPLOYMENT_ID + "\n\n" +
+    "Version\n" + DEPLOYMENT_VERSION + "\n\n\n" +
     "Newton Tree Conservancy\n" +
     "www.newtontreeconservancy.org",
     ui.ButtonSet.OK);

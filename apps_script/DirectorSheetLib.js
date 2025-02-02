@@ -13,72 +13,72 @@
 //
 // @OnlyCurrentDoc
 //
-const deploymentId                     = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const deploymentVersion                = "31";
-const formDataSheetIdRange             = "form_data_spreadsheet_id";
-const formDataSheetRange               = "form_data";
-const plantingDateRange                = "planting_date";
-const groupNameRange                   = "group_name";
-const queryResultsRange                = "query_results"
-const groupLeaderDataFilter            = "group_leader_data_filter";
-const phoneDataFilter                  = "phone_data_filter";
-const numberOfTreeRequestedFilter      = "number_of_trees_requested";
-const residentNotesRange               = "resident_notes"
-const groupDataRange                   = "group_data";
-const recommendedTreeCountDataRange    = "recommended_tree_count_data"
-const wiresDataFilter                  = "wires_data_filter";
-const curbDataFilter                   = "curb_data_filter";
-const largeTreeCountFilter             = "large_tree_count_filter";
-const mediumTreeCountFilter            = "medium_tree_count_filter";
-const smallTreeCountFilter             = "small_tree_count_filter";
-const tbdTreeCountFilter               = "tbd_tree_count_filter";
-const bermDataFilter                   = "berm_data_filter";
-const ntcNotesRange                    = "ntc_notes"
-const plantingDataFilter               = "planting_data_filter";
-const timestampDataFilter              = "timestamp_data_filter";
-const lastDataRetrievalRange           = "last_data_retrieval";
-const totalRequestedTreeCountRange     = "total_requested_tree_count";
-const totalRecommendedTreeCountRange   = "total_recommended_tree_count";
-const plantingDataFilterVisibility     = "is_planting_data_filter_visible";
-const insertEmptyRowsMax               = 30;
-const directorNameProp                 = "director_name_prop";
-const directorNameNotSpecified         = "Not specified";
-const duplicateRowColor                = "darkgray";
-const duplicateRowRequestedValue       = "X";
-const duplicateRowRequestedFontSize    = 45;
-const retrievingDataStatus             = "Retrieving data..."
-const newtonTreeConservancyMenu        = "Newton Tree Conservancy";
-const getApplicationDataMenuItem       = "Get application data";
-const toggleDataFilterMenuItem         = "Toggle data filter visibility";
-const setDirectorFileNameMenuItem      = "Set director for spreadsheet file name";
-const duplicateRowForCornerLotMenuItem = "Duplicate application row for corner lot"
-const insertEmptyRowsMenuItem          = "Insert empty rows";
-const aboutThisMenuItem                = "About...";
-const additionalDataAvailableTitle     = "Additional Application Data Available";
-const setDirectorFileNameTitle         = "Set Director for Spreadsheet File Name";
-const duplicateRowForCornerLotTitle    = "Duplicate Application Row for Corner Lot"
-const insertEmptyRowsTitle             = "Insert Empty Rows";
-const specifyDataFilterTitle           = "Specify Application Data Filter Criteria";
-const specifiedInvalidColumnValueTitle = "Invalid Value Specified for ";
-const aboutThisTitle                   = "About Community Tree Planting Spreadsheet";
-const plantingDateFilterLabel          = "Planting date";
-const groupNameFilterLabel             = "Group name";
-const archivedDataNote                 = "Because it has concluded, data associated with the planting date has been archived.";
-const cornerLotStreetTag               = "replace-with-street-name: "
-const cornerLotResidentNoteTag         = "Application row above was duplicated to accommodate planting on multiple streets that border the corner lot.";
+const DEPLOYMENT_ID                          = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
+const DEPLOYMENT_VERSION                     = "32";
+const FORM_DATA_SHEET_ID_RANGE               = "form_data_spreadsheet_id";
+const FORM_DATA_SHEET_RANGE                  = "form_data";
+const PLANTING_DATE_RANGE                    = "planting_date";
+const GROUP_NAME_RANGE                       = "group_name";
+const QUERY_RESULTS_RANGE                    = "query_results"
+const GROUP_LEADER_DATA_FILTER               = "group_leader_data_filter";
+const PHONE_DATA_FILTER                      = "phone_data_filter";
+const NUMBER_OF_TREES_REQUESTED_FILTER       = "number_of_trees_requested";
+const RESIDENT_NOTES_RANGE                   = "resident_notes"
+const GROUP_DATA_RANGE                       = "group_data";
+const RECOMMENDED_TREE_COUNT_DATA_RANGE      = "recommended_tree_count_data"
+const WIRES_DATA_FILTER                      = "wires_data_filter";
+const CURB_DATA_FILTER                       = "curb_data_filter";
+const LARGE_TREE_COUNT_FILTER                = "large_tree_count_filter";
+const MEDIUM_TREE_COUNT_FILTER               = "medium_tree_count_filter";
+const SMALL_TREE_COUNT_FILTER                = "small_tree_count_filter";
+const TBD_TREE_COUNT_FILTER                  = "tbd_tree_count_filter";
+const BERM_DATA_FILTER                       = "berm_data_filter";
+const NTC_NOTES_RANGE                        = "ntc_notes"
+const PLANTING_DATA_FILTER                   = "planting_data_filter";
+const TIMESTAMP_DATA_FILTER                  = "timestamp_data_filter";
+const LAST_DATA_RETRIEVAL_RANGE              = "last_data_retrieval";
+const TOTAL_REQUESTED_TREE_COUNT_RANGE       = "total_requested_tree_count";
+const TOTAL_RECOMMENDED_TREE_COUNT_RANGE     = "total_recommended_tree_count";
+const PLANTING_DATA_FILTER_VISIBILITY        = "is_planting_data_filter_visible";
+const INSERT_EMPTRY_ROWS_MAX                 = 30;
+const DIRECTOR_NAME_PROP                     = "director_name_prop";
+const DIRECTOR_NAME_NOT_SPECIFIED            = "Not specified";
+const DUPLICATE_ROW_COLOR                    = "darkgray";
+const DUPLICATE_ROW_REQUESTED_VALUE          = "X";
+const DUPLICATE_ROW_REQUESTED_FONT_SIZE      = 45;
+const RETRIEVING_DATA_STATUS                 = "Retrieving data..."
+const NEWTON_TREE_CONSERVANCY_MENU           = "Newton Tree Conservancy";
+const GET_APPLICATION_DATA_MENU_ITEM         = "Get application data";
+const TOGGLE_DATA_FILTER_MENU_ITEM           = "Toggle data filter visibility";
+const SET_DIRECTOR_FILE_NAME_MENU_ITEM       = "Set director for spreadsheet file name";
+const DUPLICATE_ROW_FOR_CORNER_LOT_MENU_ITEM = "Duplicate application row for corner lot"
+const INSERT_EMPTY_ROWS_MENU_ITEM            = "Insert empty rows";
+const ABOUT_MENU_ITEM                        = "About...";
+const ADDITIONAL_DATA_AVAILABLE_TITLE        = "Additional Application Data Available";
+const SET_DIRECTOR_FILE_NAME_TITLE           = "Set Director for Spreadsheet File Name";
+const DUPLICATE_ROW_FOR_CORNER_LOT_TITLE     = "Duplicate Application Row for Corner Lot"
+const INSERT_EMPTY_ROWS_TITLE                = "Insert Empty Rows";
+const SPECIFY_DATA_FILTER_TITLE              = "Specify Application Data Filter Criteria";
+const SPECIFIED_INVALID_COLUMN_VALUE_TITLE   = "Invalid Value Specified for ";
+const ABOUT_TITLE                            = "About Community Tree Planting Spreadsheet";
+const PLANTING_DATA_FILTER_LABEL             = "Planting date";
+const GROUP_NAME_FILTER_LABEL                = "Group name";
+const ARCHIVED_DATA_NOTE                     = "Because it has concluded, data associated with the planting date has been archived.";
+const CORNER_LOT_STREET_TAG                  = "replace-with-street-name: "
+const CORNER_LOT_RESIDENT_NOTE_TAG           = "Application row above was duplicated to accommodate planting on multiple streets that border the corner lot.";
 
-const booleanValidationFilters = [
-  [groupLeaderDataFilter, ""],
-  [wiresDataFilter, ""],
-  [curbDataFilter, ""]
+const BOOLEAN_VALIDATION_FILTERS = [
+  [GROUP_LEADER_DATA_FILTER, ""],
+  [WIRES_DATA_FILTER, ""],
+  [CURB_DATA_FILTER, ""]
 ];
 
-const integerValidationFilters = [
-  [largeTreeCountFilter,  ""],
-  [mediumTreeCountFilter, ""],
-  [smallTreeCountFilter,  ""],
-  [tbdTreeCountFilter,    ""],
-  [bermDataFilter,        "If there is no berm, specify a width of zero."]
+const INTEGRER_VALIDATION_FILTERS = [
+  [LARGE_TREE_COUNT_FILTER,  ""],
+  [MEDIUM_TREE_COUNT_FILTER, ""],
+  [SMALL_TREE_COUNT_FILTER,  ""],
+  [TBD_TREE_COUNT_FILTER,    ""],
+  [BERM_DATA_FILTER,        "If there is no berm, specify a width of zero."]
 ];
 
 function onOpen(e) {
@@ -86,19 +86,19 @@ function onOpen(e) {
   let ui    = SpreadsheetApp.getUi();
 
   ui
-    .createMenu(newtonTreeConservancyMenu)
-      .addItem(getApplicationDataMenuItem, "onGetApplicationData")
-      .addItem(setDirectorFileNameMenuItem, "onSetDirectorFileName")
+    .createMenu(NEWTON_TREE_CONSERVANCY_MENU)
+      .addItem(GET_APPLICATION_DATA_MENU_ITEM, "onGetApplicationData")
+      .addItem(SET_DIRECTOR_FILE_NAME_MENU_ITEM, "onSetDirectorFileName")
       .addSeparator()
-      .addItem(duplicateRowForCornerLotMenuItem, "onDuplicateRowForCornerLot")
-      .addItem(insertEmptyRowsMenuItem, "onInsertEmptyRows")
-      .addItem(toggleDataFilterMenuItem, "onToggleDataFilterVisibility")
+      .addItem(DUPLICATE_ROW_FOR_CORNER_LOT_MENU_ITEM, "onDuplicateRowForCornerLot")
+      .addItem(INSERT_EMPTY_ROWS_MENU_ITEM, "onInsertEmptyRows")
+      .addItem(TOGGLE_DATA_FILTER_MENU_ITEM, "onToggleDataFilterVisibility")
       .addSeparator()
-      .addItem(aboutThisMenuItem, "onAboutThis")
+      .addItem(ABOUT_MENU_ITEM, "onAboutThis")
       .addToUi();
 
-  let plantingDate   = sheet.getRange(plantingDateRange);
-  let groupName      = sheet.getRange(groupNameRange);
+  let plantingDate   = sheet.getRange(PLANTING_DATE_RANGE);
+  let groupName      = sheet.getRange(GROUP_NAME_RANGE);
   let isDataArchived = true;
 
   if (hasDataFilterValidators_()) { 
@@ -108,8 +108,8 @@ function onOpen(e) {
       let rows = listApplicationData_(sheet);
 
       if (!isApplicationDataEmpty_(rows)) {
-        let response = ui.alert(additionalDataAvailableTitle, 
-          "There " + ((rows.length > 1) ? "are" : "is") + " " + rows.length + " additional " + ((rows.length > 1) ? "applications" : "application") + " available for the " + plantingDateFilterLabel + " and " + groupNameFilterLabel + " you selected. Do you want to refresh your applicaton data now? If not, you may do so later by clicking menu item " + getApplicationDataMenuItem + ".",
+        let response = ui.alert(ADDITIONAL_DATA_AVAILABLE_TITLE, 
+          "There " + ((rows.length > 1) ? "are" : "is") + " " + rows.length + " additional " + ((rows.length > 1) ? "applications" : "application") + " available for the " + PLANTING_DATA_FILTER_LABEL + " and " + GROUP_NAME_FILTER_LABEL + " you selected. Do you want to refresh your applicaton data now? If not, you may do so later by clicking menu item " + GET_APPLICATION_DATA_MENU_ITEM + ".",
           ui.ButtonSet.YES_NO);
 
         if (response == ui.Button.YES) {
@@ -128,8 +128,8 @@ function onOpen(e) {
   }
 
   if (isDataArchived) {
-    plantingDate.setNote(archivedDataNote);
-    groupName.setNote(archivedDataNote);
+    plantingDate.setNote(ARCHIVED_DATA_NOTE);
+    groupName.setNote(ARCHIVED_DATA_NOTE);
   }
   else {
     setSpreadsheetFileName_();
@@ -139,8 +139,8 @@ function onOpen(e) {
 function onEdit(e) {
   let sheet = getMainSheet_();
 
-  if (sheet.getRange(plantingDateRange).getA1Notation() != e.range.getA1Notation()) {
-    let dataRange = sheet.getRange(groupDataRange);
+  if (sheet.getRange(PLANTING_DATE_RANGE).getA1Notation() != e.range.getA1Notation()) {
+    let dataRange = sheet.getRange(GROUP_DATA_RANGE);
 
     if ((dataRange.getRow() < e.range.rowStart) && (dataRange.getLastRow() > e.range.rowEnd)) {
       let isValidValue = true;
@@ -151,7 +151,7 @@ function onEdit(e) {
         if (needle.length > 0) {
           needle = needle.toLowerCase();
 
-          for (r of booleanValidationFilters) {
+          for (r of BOOLEAN_VALIDATION_FILTERS) {
             let range = sheet.getRange(r[0]);
         
             if (range.getLastColumn() == e.range.columnEnd) {
@@ -165,7 +165,7 @@ function onEdit(e) {
                 let ui         = SpreadsheetApp.getUi();
                 let columnName = sheet.getRange(dataRange.getRow(), range.getLastColumn()).getValue();
 
-                ui.alert(specifiedInvalidColumnValueTitle + columnName,
+                ui.alert(SPECIFIED_INVALID_COLUMN_VALUE_TITLE + columnName,
                   "Value \"" + e.value + "\" is invalid. Please specify either \"Yes\", or the letter \"Y\", or \"No\", or the letter \"N\". " + r[1],
                   ui.ButtonSet.OK);
 
@@ -178,7 +178,7 @@ function onEdit(e) {
           }
 
           if (isValidValue) {
-            for (r of integerValidationFilters) {
+            for (r of INTEGRER_VALIDATION_FILTERS) {
               let range = sheet.getRange(r[0]);
               
               if (range.getLastColumn() == e.range.columnEnd) {
@@ -186,7 +186,7 @@ function onEdit(e) {
                   let ui         = SpreadsheetApp.getUi();
                   let columnName = sheet.getRange(dataRange.getRow(), range.getLastColumn()).getValue();
 
-                  ui.alert(specifiedInvalidColumnValueTitle + columnName,
+                  ui.alert(SPECIFIED_INVALID_COLUMN_VALUE_TITLE + columnName,
                     "Value \"" + e.value + "\" is invalid. Please specify an integer greater than or equal to zero. " + r[1],
                     ui.ButtonSet.OK);
 
@@ -205,7 +205,7 @@ function onEdit(e) {
       }
 
       if (isValidValue) {
-        dataRange = sheet.getRange(recommendedTreeCountDataRange);
+        dataRange = sheet.getRange(RECOMMENDED_TREE_COUNT_DATA_RANGE);
 
         if ((dataRange.getRow() < e.range.rowStart) && (dataRange.getLastRow() > e.range.rowEnd)) {
           setSpreadsheetFileName_();
@@ -215,7 +215,7 @@ function onEdit(e) {
   }
   else {
     if (hasDataFilterValidators_()) { 
-      let range          = sheet.getRange(groupNameRange);
+      let range          = sheet.getRange(GROUP_NAME_RANGE);
       let dataValidation = range.getDataValidation();
 
       range.setValue(dataValidation.getCriteriaValues()[0].getValues()[0]);
@@ -229,11 +229,11 @@ function onGetApplicationData(rows) {
   let criteria = validateDataFilterCriteria_();
 
   if (criteria.isComplete) {
-    let range  = sheet.getRange(lastDataRetrievalRange);
+    let range  = sheet.getRange(LAST_DATA_RETRIEVAL_RANGE);
     let format = range.getNumberFormat(); 
  
     try {
-      range.setValue(retrievingDataStatus);
+      range.setValue(RETRIEVING_DATA_STATUS);
       insertApplicationData_(sheet, rows);
     }
     finally {
@@ -241,8 +241,8 @@ function onGetApplicationData(rows) {
     }
   }
   else {
-    ui.alert(specifyDataFilterTitle, 
-      "Please select " + criteria.message + " and then click menu item " + getApplicationDataMenuItem + " again.",
+    ui.alert(SPECIFY_DATA_FILTER_TITLE, 
+      "Please select " + criteria.message + " and then click menu item " + GET_APPLICATION_DATA_MENU_ITEM + " again.",
       ui.ButtonSet.OK);
   }
 }
@@ -253,7 +253,7 @@ function onSetDirectorFileName() {
   let criteria = validateDataFilterCriteria_();
 
   if (criteria.isComplete) {
-    let response = ui.prompt(setDirectorFileNameTitle,
+    let response = ui.prompt(SET_DIRECTOR_FILE_NAME_TITLE,
       "Enter the first name of the director assigned to this planting group. If multiple directors are assigned, separate their first names with \"and\":",
       ui.ButtonSet.OK_CANCEL);
 
@@ -261,22 +261,22 @@ function onSetDirectorFileName() {
 
     if (response.getSelectedButton() == ui.Button.OK) {
       if (directorName.length > 0) {
-        PropertiesService.getDocumentProperties().setProperty(directorNameProp, directorName);
+        PropertiesService.getDocumentProperties().setProperty(DIRECTOR_NAME_PROP, directorName);
 
         setSpreadsheetFileName_();
       }
       else {
-        PropertiesService.getDocumentProperties().deleteProperty(directorNameProp);
+        PropertiesService.getDocumentProperties().deleteProperty(DIRECTOR_NAME_PROP);
 
-        ui.alert(setDirectorFileNameTitle,
+        ui.alert(SET_DIRECTOR_FILE_NAME_TITLE,
           "You did not specify the name of a director. Consequently, automatic update of the spreadsheet file name will be disabled.",
           ui.ButtonSet.OK);
       }
     }
   }
   else {
-    ui.alert(setDirectorFileNameTitle, 
-      "Please select " + criteria.message + " and then click menu item " + setDirectorFileNameMenuItem + " again.",
+    ui.alert(SET_DIRECTOR_FILE_NAME_TITLE, 
+      "Please select " + criteria.message + " and then click menu item " + SET_DIRECTOR_FILE_NAME_MENU_ITEM + " again.",
       ui.ButtonSet.OK);
   }
 }
@@ -285,31 +285,31 @@ function onDuplicateRowForCornerLot() {
   let sheet     = getMainSheet_();
   let ui        = SpreadsheetApp.getUi();
   let row       = sheet.getActiveCell().getRow();
-  let dataRange = sheet.getRange(groupDataRange);
+  let dataRange = sheet.getRange(GROUP_DATA_RANGE);
 
   if ((dataRange.getRow() < row) && (dataRange.getLastRow() > row)) {
-    let column = sheet.getRange(groupLeaderDataFilter).getLastColumn();
+    let column = sheet.getRange(GROUP_LEADER_DATA_FILTER).getLastColumn();
     let newRow = row + 1;
     let range  = sheet.getRange(row, 1, 1, column);
 
     sheet.insertRowsAfter(row, 1);
     range.copyTo(sheet.getRange(newRow, 1, 1, column));
-    sheet.getRange(newRow, 1, 1, column).setFontColor(duplicateRowColor);
+    sheet.getRange(newRow, 1, 1, column).setFontColor(DUPLICATE_ROW_COLOR);
         
-    range = sheet.getRange(newRow, sheet.getRange(numberOfTreeRequestedFilter).getLastColumn());
-    range.setValue(duplicateRowRequestedValue).setFontSize(duplicateRowRequestedFontSize).setFontColor(duplicateRowColor);
+    range = sheet.getRange(newRow, sheet.getRange(NUMBER_OF_TREES_REQUESTED_FILTER).getLastColumn());
+    range.setValue(DUPLICATE_ROW_REQUESTED_VALUE).setFontSize(DUPLICATE_ROW_REQUESTED_FONT_SIZE).setFontColor(DUPLICATE_ROW_COLOR);
 
-    range = sheet.getRange(row, sheet.getRange(ntcNotesRange).getLastColumn());
-    range.setValue(cornerLotStreetTag + range.getValue());
+    range = sheet.getRange(row, sheet.getRange(NTC_NOTES_RANGE).getLastColumn());
+    range.setValue(CORNER_LOT_STREET_TAG + range.getValue());
 
-    range = sheet.getRange(newRow, sheet.getRange(residentNotesRange).getLastColumn());
-    range.setValue(cornerLotResidentNoteTag).setFontStyle("italic").setFontColor(duplicateRowColor);
+    range = sheet.getRange(newRow, sheet.getRange(RESIDENT_NOTES_RANGE).getLastColumn());
+    range.setValue(CORNER_LOT_RESIDENT_NOTE_TAG).setFontStyle("italic").setFontColor(DUPLICATE_ROW_COLOR);
 
-    range = sheet.getRange(newRow, sheet.getRange(ntcNotesRange).getLastColumn());
-    range.setValue(cornerLotStreetTag);
+    range = sheet.getRange(newRow, sheet.getRange(NTC_NOTES_RANGE).getLastColumn());
+    range.setValue(CORNER_LOT_STREET_TAG);
   }
   else {
-    ui.alert(duplicateRowForCornerLotTitle, 
+    ui.alert(DUPLICATE_ROW_FOR_CORNER_LOT_TITLE, 
       "Please select one of the applications located in rows " + (dataRange.getRow() + 1) + " through " + (dataRange.getLastRow() - 1) + ".",
       ui.ButtonSet.OK);
   }
@@ -318,17 +318,17 @@ function onDuplicateRowForCornerLot() {
 function onInsertEmptyRows() {
   let sheet    = getMainSheet_();
   let ui       = SpreadsheetApp.getUi();
-  let rowIndex = sheet.getRange(groupDataRange).getLastRow();
+  let rowIndex = sheet.getRange(GROUP_DATA_RANGE).getLastRow();
 
-  let response = ui.prompt(insertEmptyRowsTitle,
-    "Enter the number of empty rows to insert. You may specify up to " + insertEmptyRowsMax + " rows. The empty rows will be inserted starting at row " + rowIndex + ":",
+  let response = ui.prompt(INSERT_EMPTY_ROWS_TITLE,
+    "Enter the number of empty rows to insert. You may specify up to " + INSERT_EMPTRY_ROWS_MAX + " rows. The empty rows will be inserted starting at row " + rowIndex + ":",
     ui.ButtonSet.OK_CANCEL);
 
   if (response.getSelectedButton() == ui.Button.OK) {
     let rowCount = Number.parseInt(response.getResponseText());
 
     if (Number.isInteger(rowCount) && (rowCount > 0)) {
-      if (rowCount <= insertEmptyRowsMax) {
+      if (rowCount <= INSERT_EMPTRY_ROWS_MAX) {
         let rowTimestamp = new Date();
 
         while (true) {
@@ -345,13 +345,13 @@ function onInsertEmptyRows() {
         }
       }
       else {
-        ui.alert(insertEmptyRowsTitle,
-          "You may not specify more than " + insertEmptyRowsMax + " rows.",
+        ui.alert(INSERT_EMPTY_ROWS_TITLE,
+          "You may not specify more than " + INSERT_EMPTRY_ROWS_MAX + " rows.",
           ui.ButtonSet.OK);
       }
     }
     else {
-      ui.alert(insertEmptyRowsTitle,
+      ui.alert(INSERT_EMPTY_ROWS_TITLE,
         response.getResponseText() + " is not a valid number.",
         ui.ButtonSet.OK);
     }
@@ -362,23 +362,23 @@ function onToggleDataFilterVisibility() {
   let sheet      = getMainSheet_();
   let properties = PropertiesService.getDocumentProperties();
 
-  let isPlantingDataFilterVisible = properties.getProperty(plantingDataFilterVisibility);
+  let isPlantingDataFilterVisible = properties.getProperty(PLANTING_DATA_FILTER_VISIBILITY);
 
   if ((isPlantingDataFilterVisible == null) || (isPlantingDataFilterVisible == "true")) {
-    sheet.hideRow(sheet.getRange(plantingDataFilter));
-    sheet.hideColumn(sheet.getRange(timestampDataFilter));
-    sheet.hideColumn(sheet.getRange(groupLeaderDataFilter));
-    sheet.hideColumn(sheet.getRange(phoneDataFilter));
+    sheet.hideRow(sheet.getRange(PLANTING_DATA_FILTER));
+    sheet.hideColumn(sheet.getRange(TIMESTAMP_DATA_FILTER));
+    sheet.hideColumn(sheet.getRange(GROUP_LEADER_DATA_FILTER));
+    sheet.hideColumn(sheet.getRange(PHONE_DATA_FILTER));
 
-    properties.setProperty(plantingDataFilterVisibility, "false");
+    properties.setProperty(PLANTING_DATA_FILTER_VISIBILITY, "false");
   }
   else {
-    sheet.unhideRow(sheet.getRange(plantingDataFilter));
-    sheet.unhideColumn(sheet.getRange(timestampDataFilter));
-    sheet.unhideColumn(sheet.getRange(groupLeaderDataFilter));
-    sheet.unhideColumn(sheet.getRange(phoneDataFilter));
+    sheet.unhideRow(sheet.getRange(PLANTING_DATA_FILTER));
+    sheet.unhideColumn(sheet.getRange(TIMESTAMP_DATA_FILTER));
+    sheet.unhideColumn(sheet.getRange(GROUP_LEADER_DATA_FILTER));
+    sheet.unhideColumn(sheet.getRange(PHONE_DATA_FILTER));
 
-    properties.setProperty(plantingDataFilterVisibility, "true");
+    properties.setProperty(PLANTING_DATA_FILTER_VISIBILITY, "true");
   }
 
   sheet.setActiveSelection(sheet.getRange("A1"));
@@ -386,11 +386,11 @@ function onToggleDataFilterVisibility() {
 
 function onAboutThis() {
   let ui           = SpreadsheetApp.getUi();
-  let directorName = PropertiesService.getDocumentProperties().getProperty(directorNameProp) ?? directorNameNotSpecified;
+  let directorName = PropertiesService.getDocumentProperties().getProperty(DIRECTOR_NAME_PROP) ?? DIRECTOR_NAME_NOT_SPECIFIED;
 
-  ui.alert(aboutThisTitle,
-    "Deployment ID\n " + deploymentId + "\n\n" +
-    "Version\n" + deploymentVersion + "\n\n" +
+  ui.alert(ABOUT_TITLE,
+    "Deployment ID\n " + DEPLOYMENT_ID + "\n\n" +
+    "Version\n" + DEPLOYMENT_VERSION + "\n\n" +
     "Director name\n" + directorName + "\n\n\n" +
     "Newton Tree Conservancy\n" +
     "www.newtontreeconservancy.org",
@@ -406,10 +406,10 @@ function setSpreadsheetFileName_() {
 
   if (criteria.isComplete) {
     let sheet          = getMainSheet_();
-    let plantingDate   = sheet.getRange(plantingDateRange).getValue();
-    let groupName      = sheet.getRange(groupNameRange).getValue();
-    let totalTreeCount = sheet.getRange(totalRecommendedTreeCountRange).getValue() ?? 0;
-    let directorName   = PropertiesService.getDocumentProperties().getProperty(directorNameProp);
+    let plantingDate   = sheet.getRange(PLANTING_DATE_RANGE).getValue();
+    let groupName      = sheet.getRange(GROUP_NAME_RANGE).getValue();
+    let totalTreeCount = sheet.getRange(TOTAL_RECOMMENDED_TREE_COUNT_RANGE).getValue() ?? 0;
+    let directorName   = PropertiesService.getDocumentProperties().getProperty(DIRECTOR_NAME_PROP);
 
     if (!isEmpty_(plantingDate) && !isEmpty_(groupName) && !isEmpty_(directorName)) {
       let spreadSheetName = plantingDate + "-" + groupName + " (" + directorName + ") (" + totalTreeCount + ")";
@@ -425,17 +425,17 @@ function validateDataFilterCriteria_() {
 
   if (hasDataFilterValidators_()) {
     let sheet                  = getMainSheet_();
-    let plantingDateValidation = sheet.getRange(plantingDateRange).getDataValidation();
-    let groupNameValidation    = sheet.getRange(groupNameRange).getDataValidation();
-    let plantingDate           = sheet.getRange(plantingDateRange).getValue();
+    let plantingDateValidation = sheet.getRange(PLANTING_DATE_RANGE).getDataValidation();
+    let groupNameValidation    = sheet.getRange(GROUP_NAME_RANGE).getDataValidation();
+    let plantingDate           = sheet.getRange(PLANTING_DATE_RANGE).getValue();
     let plantingDateFirstItem  = plantingDateValidation.getCriteriaValues()[0].getValue();
-    let groupName              = sheet.getRange(groupNameRange).getValue();
+    let groupName              = sheet.getRange(GROUP_NAME_RANGE).getValue();
     let groupNameFirstItem     = groupNameValidation.getCriteriaValues()[0].getValue();
 
     if (plantingDate == plantingDateFirstItem) {
       isComplete = false;
       
-      message += plantingDateFilterLabel;
+      message += PLANTING_DATA_FILTER_LABEL;
     }
 
     if (groupName == groupNameFirstItem) {
@@ -445,7 +445,7 @@ function validateDataFilterCriteria_() {
         message += " and ";
       }
 
-      message += groupNameFilterLabel;
+      message += GROUP_NAME_FILTER_LABEL;
     }
   }
 
@@ -454,7 +454,7 @@ function validateDataFilterCriteria_() {
 
 function insertApplicationData_(sheet, rows = listApplicationData_(sheet)) {
   if (!isApplicationDataEmpty_(rows)) {
-    let dataRange = sheet.getRange(groupDataRange);
+    let dataRange = sheet.getRange(GROUP_DATA_RANGE);
     let firstRow  = dataRange.getRow();
     let lastRow   = dataRange.getLastRow();
 
@@ -480,7 +480,7 @@ function insertApplicationData_(sheet, rows = listApplicationData_(sheet)) {
         range.setValues([e]);
         range.setVerticalAlignment("top");
 
-        dataRange = sheet.getRange(groupDataRange);
+        dataRange = sheet.getRange(GROUP_DATA_RANGE);
         firstRow  = dataRange.getRow();
         lastRow   = dataRange.getLastRow();
       });
@@ -500,10 +500,10 @@ function insertApplicationData_(sheet, rows = listApplicationData_(sheet)) {
 
 function listApplicationData_(sheet) {
   let file            = sheet.getParent();
-  let plantingDate    = sheet.getRange(plantingDateRange).getValue();
-  let groupName       = sheet.getRange(groupNameRange).getValue();
-  let dataRange       = sheet.getRange(groupDataRange);
-  let formDataSheetId = file.getRange(formDataSheetIdRange).getValue();
+  let plantingDate    = sheet.getRange(PLANTING_DATE_RANGE).getValue();
+  let groupName       = sheet.getRange(GROUP_NAME_RANGE).getValue();
+  let dataRange       = sheet.getRange(GROUP_DATA_RANGE);
+  let formDataSheetId = file.getRange(FORM_DATA_SHEET_ID_RANGE).getValue();
   let firstRow        = dataRange.getRow();
   let lastRow         = dataRange.getLastRow();
   let currentRowKeys  = new Set();
@@ -525,7 +525,7 @@ function listApplicationData_(sheet) {
   // a zero-length string, for any number of consecutive columns that have no value on the end of a row's
   // array of values. To circumvent this, we include a constant ('$') as the last column in the query. We then
   // remove that slice of the array (and others, as necessary) before returning results from this function.
-  let query = "=query(importrange(\"" + formDataSheetId + "\", \"" + formDataSheetRange + "\"), \"SELECT Col1, Col6, Col7, Col4, Col5, Col8, Col9, Col10, Col14, Col15, Col16, Col17, Col18, Col19, Col20, Col21, '$' WHERE Col1 IS NOT NULL AND lower(Col2) = lower(\'" + plantingDate + "\') AND lower(Col3) = lower(\'" + groupName + "\') label '$' ''\", 0)";
+  let query = "=query(importrange(\"" + formDataSheetId + "\", \"" + FORM_DATA_SHEET_RANGE + "\"), \"SELECT Col1, Col6, Col7, Col4, Col5, Col8, Col9, Col10, Col14, Col15, Col16, Col17, Col18, Col19, Col20, Col21, '$' WHERE Col1 IS NOT NULL AND lower(Col2) = lower(\'" + plantingDate + "\') AND lower(Col3) = lower(\'" + groupName + "\') label '$' ''\", 0)";
 
   let queryResults = file.insertSheet().hideSheet();
   let newData      = null;
@@ -870,10 +870,10 @@ function normalizeStreetAddress_(streetAddress) {
 
 function hasDataFilterValidators_() {
   let sheet         = getMainSheet_();
-  let hasValidators = (sheet.getRange(plantingDateRange).getDataValidation() != null);
+  let hasValidators = (sheet.getRange(PLANTING_DATE_RANGE).getDataValidation() != null);
 
   if (hasValidators) {
-    hasValidators = (sheet.getRange(groupNameRange).getDataValidation() != null);
+    hasValidators = (sheet.getRange(GROUP_NAME_RANGE).getDataValidation() != null);
   }
 
   return hasValidators;
@@ -881,7 +881,7 @@ function hasDataFilterValidators_() {
 
 function getMainSheet_() {
   let sheet = undefined;
-  let range = SpreadsheetApp.getActiveSpreadsheet().getRangeByName(groupDataRange);
+  let range = SpreadsheetApp.getActiveSpreadsheet().getRangeByName(GROUP_DATA_RANGE);
 
   if (range != null) {
     sheet = range.getSheet();
