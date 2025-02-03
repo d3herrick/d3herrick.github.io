@@ -8,13 +8,12 @@
 //
 // This file includes functions to help manage and normalize data in the spreadsheet that is synchronized
 // by a Google Form that residents of Newton use to submit applications for trees to be planted on their
-// property. That sheet provides data to the sheets that Newton Tree Conservancy directors use to manage
-// planting groups.
+// property. That sheet provides application data to the sheets that Newton Tree Conservancy directors use
+// to manage planting groups.
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_ID                            = "1eNq3Z-0DFAqclht8OvXxPIM2IvR3J_Q1s4dzaZVERPYyVVB707MVdFPw";
-const DEPLOYMENT_VERSION                       = "14";
+const DEPLOYMENT_VERSION                       = "15";
 const HEADER_ROW                               = 2;
 const PLANTING_DATE_RANGE                      = "planting_date";
 const GROUP_NAME_RANGE                         = "group_name";
@@ -34,7 +33,7 @@ const ABOUT_MENU_ITEM                          = "About...";
 const ARCHIVE_DATA_FOR_PLANTING_DATE_MENU_ITEM = "Archive data for planting date";
 const ARCHIVE_DATA_FOR_PLANTING_DATE_TITLE     = "Archive Data for Planting Date";
 const COUNT_OF_ROW_ARCHIVED_TITLE              = "Count of Rows Archived";
-const ABOUT_TITLE                              = "About Community Tree Planting Spreadsheet";
+const ABOUT_TITLE                              = "About Tree Application Spreadsheet";
 
 const STREET_SUFFIXES = [ 
   ["Ave",   "Avenue"], 
@@ -248,7 +247,6 @@ function onAboutThis() {
   let ui = SpreadsheetApp.getUi();
 
   ui.alert(ABOUT_TITLE,
-    "Deployment ID\n" + DEPLOYMENT_ID + "\n\n" +
     "Version\n" + DEPLOYMENT_VERSION + "\n\n\n" +
     "Newton Tree Conservancy\n" +
     "www.newtontreeconservancy.org",
