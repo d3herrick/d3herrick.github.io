@@ -12,10 +12,11 @@
 //
 // @OnlyCurrentDoc
 //
+const DEPLOYMENT_ID                           = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
 const DEPLOYMENT_VERSION                      = "1";
 const NEWTON_TREE_CONSERVANCY_MENU            = "Newton Tree Conservancy";
 const ABOUT_MENU_ITEM                         = "About...";
-const PROCESS_PENDING_DONATION_DATA_MENU_ITEM = "onProcessPendingDonationData";
+const PROCESS_PENDING_DONATION_DATA_MENU_ITEM = "Process pending donation data";
 const PROCESS_PENDING_DONATION_DATA_TITLE     = "Archive Data for Planting Date";
 const ABOUT_TITLE                             = "About Donation Processing Spreadsheet";
 
@@ -43,6 +44,7 @@ function onAboutThis() {
   let ui = SpreadsheetApp.getUi();
 
   ui.alert(ABOUT_TITLE,
+    "Deployment ID\n " + DEPLOYMENT_ID + "\n\n" +
     "Version\n" + DEPLOYMENT_VERSION + "\n\n\n" +
     "Newton Tree Conservancy\n" +
     "www.newtontreeconservancy.org",

@@ -13,7 +13,8 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                       = "15";
+const DEPLOYMENT_ID                            = "1DeKSwHUU3ECgFmC-odP_rpwQ6_Ba_Y_Oq5Ly4kNt-IUpHOctGIG1wRAS";
+const DEPLOYMENT_VERSION                       = "16";
 const HEADER_ROW                               = 2;
 const PLANTING_DATE_RANGE                      = "planting_date";
 const GROUP_NAME_RANGE                         = "group_name";
@@ -247,6 +248,7 @@ function onAboutThis() {
   let ui = SpreadsheetApp.getUi();
 
   ui.alert(ABOUT_TITLE,
+    "Deployment ID\n " + DEPLOYMENT_ID + "\n\n" +
     "Version\n" + DEPLOYMENT_VERSION + "\n\n\n" +
     "Newton Tree Conservancy\n" +
     "www.newtontreeconservancy.org",
