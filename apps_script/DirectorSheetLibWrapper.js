@@ -39,8 +39,8 @@ function onToggleDataFilterVisibility() {
   DirectorSheetLib.onToggleDataFilterVisibility();
 }
 
-function onAboutThis() {
-  DirectorSheetLib.onAboutThis();
+function onAbout() {
+  DirectorSheetLib.onAbout();
 }
 
 function onApplyUpdates() {

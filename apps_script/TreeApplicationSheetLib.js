@@ -14,12 +14,13 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                            = "1DeKSwHUU3ECgFmC-odP_rpwQ6_Ba_Y_Oq5Ly4kNt-IUpHOctGIG1wRAS";
-const DEPLOYMENT_VERSION                       = "16";
+const DEPLOYMENT_VERSION                       = "18";
 const HEADER_ROW                               = 2;
 const PLANTING_DATE_RANGE                      = "planting_date";
 const GROUP_NAME_RANGE                         = "group_name";
 const FIRST_NAME_RANGE                         = "first_name";
 const LAST_NAME_RANGE                          = "last_name";
+const FORM_DATA_RANGE                          = "form_data";
 const APPL_ACK_EMAIL_SENDER_NAME_RANGE         = "application_ack_email_sender_name"
 const APPL_ACK_EMAIL_REPLY_TO_RANGE            = "application_ack_email_reply_to";
 const APPL_ACK_EMAIL_SUBJECT_RANGE             = "application_ack_email_subject";
@@ -58,7 +59,7 @@ function onOpen(e) {
     .createMenu(NEWTON_TREE_CONSERVANCY_MENU)
       .addItem(ARCHIVE_DATA_FOR_PLANTING_DATE_MENU_ITEM, "onArchiveDataForPlantingDate")
       .addSeparator()
-      .addItem(ABOUT_MENU_ITEM, "onAboutThis")
+      .addItem(ABOUT_MENU_ITEM, "onAbout")
       .addToUi();
 }
 
@@ -244,7 +245,7 @@ function onArchiveDataForPlantingDate() {
   }
 }
 
-function onAboutThis() {
+function onAbout() {
   let ui = SpreadsheetApp.getUi();
 
   ui.alert(ABOUT_TITLE,

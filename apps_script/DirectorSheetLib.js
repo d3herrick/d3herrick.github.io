@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                          = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const DEPLOYMENT_VERSION                     = "32";
+const DEPLOYMENT_VERSION                     = "33";
 const FORM_DATA_SHEET_ID_RANGE               = "form_data_spreadsheet_id";
 const FORM_DATA_SHEET_RANGE                  = "form_data";
 const PLANTING_DATE_RANGE                    = "planting_date";
@@ -82,7 +82,7 @@ const INTEGRER_VALIDATION_FILTERS = [
 ];
 
 function onOpen(e) {
-  let sheet = getMainSheet_();
+  let sheet = getGroupDataSheet_();
   let ui    = SpreadsheetApp.getUi();
 
   ui
@@ -94,7 +94,7 @@ function onOpen(e) {
       .addItem(INSERT_EMPTY_ROWS_MENU_ITEM, "onInsertEmptyRows")
       .addItem(TOGGLE_DATA_FILTER_MENU_ITEM, "onToggleDataFilterVisibility")
       .addSeparator()
-      .addItem(ABOUT_MENU_ITEM, "onAboutThis")
+      .addItem(ABOUT_MENU_ITEM, "onAbout")
       .addToUi();
 
   let plantingDate   = sheet.getRange(PLANTING_DATE_RANGE);
@@ -137,7 +137,7 @@ function onOpen(e) {
 }
 
 function onEdit(e) {
-  let sheet = getMainSheet_();
+  let sheet = getGroupDataSheet_();
 
   if (sheet.getRange(PLANTING_DATE_RANGE).getA1Notation() != e.range.getA1Notation()) {
     let dataRange = sheet.getRange(GROUP_DATA_RANGE);
@@ -224,7 +224,7 @@ function onEdit(e) {
 }
 
 function onGetApplicationData(rows) {
-  let sheet    = getMainSheet_();
+  let sheet    = getGroupDataSheet_();
   let ui       = SpreadsheetApp.getUi();
   let criteria = validateDataFilterCriteria_();
 
@@ -248,7 +248,7 @@ function onGetApplicationData(rows) {
 }
 
 function onSetDirectorFileName() {
-  let sheet    = getMainSheet_();
+  let sheet    = getGroupDataSheet_();
   let ui       = SpreadsheetApp.getUi();
   let criteria = validateDataFilterCriteria_();
 
@@ -282,7 +282,7 @@ function onSetDirectorFileName() {
 }
 
 function onDuplicateRowForCornerLot() {
-  let sheet     = getMainSheet_();
+  let sheet     = getGroupDataSheet_();
   let ui        = SpreadsheetApp.getUi();
   let row       = sheet.getActiveCell().getRow();
   let dataRange = sheet.getRange(GROUP_DATA_RANGE);
@@ -316,7 +316,7 @@ function onDuplicateRowForCornerLot() {
 }
 
 function onInsertEmptyRows() {
-  let sheet    = getMainSheet_();
+  let sheet    = getGroupDataSheet_();
   let ui       = SpreadsheetApp.getUi();
   let rowIndex = sheet.getRange(GROUP_DATA_RANGE).getLastRow();
 
@@ -359,7 +359,7 @@ function onInsertEmptyRows() {
 }
 
 function onToggleDataFilterVisibility() {
-  let sheet      = getMainSheet_();
+  let sheet      = getGroupDataSheet_();
   let properties = PropertiesService.getDocumentProperties();
 
   let isPlantingDataFilterVisible = properties.getProperty(PLANTING_DATA_FILTER_VISIBILITY);
@@ -384,7 +384,7 @@ function onToggleDataFilterVisibility() {
   sheet.setActiveSelection(sheet.getRange("A1"));
 }
 
-function onAboutThis() {
+function onAbout() {
   let ui           = SpreadsheetApp.getUi();
   let directorName = PropertiesService.getDocumentProperties().getProperty(DIRECTOR_NAME_PROP) ?? DIRECTOR_NAME_NOT_SPECIFIED;
 
@@ -405,7 +405,7 @@ function setSpreadsheetFileName_() {
   let criteria = validateDataFilterCriteria_();
 
   if (criteria.isComplete) {
-    let sheet          = getMainSheet_();
+    let sheet          = getGroupDataSheet_();
     let plantingDate   = sheet.getRange(PLANTING_DATE_RANGE).getValue();
     let groupName      = sheet.getRange(GROUP_NAME_RANGE).getValue();
     let totalTreeCount = sheet.getRange(TOTAL_RECOMMENDED_TREE_COUNT_RANGE).getValue() ?? 0;
@@ -424,7 +424,7 @@ function validateDataFilterCriteria_() {
   let message    = "";
 
   if (hasDataFilterValidators_()) {
-    let sheet                  = getMainSheet_();
+    let sheet                  = getGroupDataSheet_();
     let plantingDateValidation = sheet.getRange(PLANTING_DATE_RANGE).getDataValidation();
     let groupNameValidation    = sheet.getRange(GROUP_NAME_RANGE).getDataValidation();
     let plantingDate           = sheet.getRange(PLANTING_DATE_RANGE).getValue();
@@ -869,7 +869,7 @@ function normalizeStreetAddress_(streetAddress) {
 }
 
 function hasDataFilterValidators_() {
-  let sheet         = getMainSheet_();
+  let sheet         = getGroupDataSheet_();
   let hasValidators = (sheet.getRange(PLANTING_DATE_RANGE).getDataValidation() != null);
 
   if (hasValidators) {
@@ -879,7 +879,15 @@ function hasDataFilterValidators_() {
   return hasValidators;
 }
 
-function getMainSheet_() {
+function isEmpty_(object) {
+  return ((object == null) || (object.length == 0));
+}
+
+function isApplicationDataEmpty_(rows) {
+  return !((rows != null) && (rows.length > 0) && (rows[0] != "#N/A") && (rows[0] != "#VALUE!") && (rows[0] != "#ERROR!"));
+}
+
+function getGroupDataSheet_() {
   let sheet = undefined;
   let range = SpreadsheetApp.getActiveSpreadsheet().getRangeByName(GROUP_DATA_RANGE);
 
@@ -887,16 +895,8 @@ function getMainSheet_() {
     sheet = range.getSheet();
   }
   else {
-    throw new Error("Main sheet could not be resolved");
+    throw new Error("Group data sheet could not be resolved");
   }
 
   return sheet;
-}
-
-function isEmpty_(object) {
-  return ((object == null) || (object.length == 0));
-}
-
-function isApplicationDataEmpty_(rows) {
-  return !((rows != null) && (rows.length > 0) && (rows[0] != "#N/A") && (rows[0] != "#VALUE!") && (rows[0] != "#ERROR!"));
 }
