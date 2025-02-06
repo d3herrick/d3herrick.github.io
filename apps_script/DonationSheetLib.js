@@ -69,11 +69,11 @@ function onImportPendingDonationData(displayResult = true) {
       pendingFolder = DriveApp.getFolderById(pendingFolderRange.getValue());
     }
     catch (e) {
-      console.log(`Pending folder is not accessible`);
+      console.log("Pending folder is not accessible");
     }
   }
   else {
-    console.log(`Pending folder range is not defined`);
+    console.log("Pending folder range is not defined");
   }
 
   let importedFolderRange = sheet.getRange(IMPORTED_FOLDER_RANGE);
@@ -83,11 +83,11 @@ function onImportPendingDonationData(displayResult = true) {
       importedFolder = DriveApp.getFolderById(importedFolderRange.getValue());
     }
     catch (e) {
-      console.log(`Imported folder is not accessible`);
+      console.log("Imported folder is not accessible");
     }
   }
   else {
-    console.log(`Imported folder range is not defined`);
+    console.log("Imported folder range is not defined");
   }
 
   let firstDataRowRange = sheet.getRange(FIRST_DATA_ROW_RANGE);
@@ -96,24 +96,24 @@ function onImportPendingDonationData(displayResult = true) {
     firstDataRow = firstDataRowRange.getValue();
   }
   else {
-    console.log(`First data row range is not defined`);
+    console.log("First data row range is not defined");
   }  
 
   if ((pendingFolder != null) && (importedFolder != null) && (firstDataRow != -1)) {
-    let stats = importPayPalCsv_(sheet, pendingFolder, importedFolder, firstDataRow, 1);
+    let stats = importPendingFiles_(sheet, pendingFolder, importedFolder, firstDataRow, 1);
 
     let result = "";
 
     if (stats.length > 0) {
       result = "The following files (record counts) were imported:";
 
-      result += '<ul>'
+      result += "<ul>"
 
       stats.forEach(function(s) {
-        result += `<li><p style="font-family:arial">${s[0]} (${s[1]})</p>`;
+        result += `<li><p style="font-family:arial">${s[1]} (${s[2]})</p>`;
       });
 
-      result += '</ul>'
+      result += "</ul>"
     }
     else {
       result = "No files were pending import";
@@ -139,39 +139,55 @@ function onAbout() {
     ui.ButtonSet.OK);
 }
 
-function importPayPalCsv_(sheet, pendingFolder, importedFolder, firstDataRow, firstDataColumn) {
+function importPendingFiles_(sheet, pendingFolder, importedFolder, firstDataRow, firstDataColumn) {
   let stats = [];
 
   let pendingFiles = pendingFolder.getFiles();
 
   while (pendingFiles.hasNext()) {
-    let file = pendingFiles.next();
+    let file     = pendingFiles.next();
+    let fileName = file.getName().toLowerCase();
 
-    if (file.getName().toLowerCase().startsWith(PAYPAL_FILE_PREFIX)) {
-      let data = Utilities.parseCsv(file.getBlob().getDataAsString());
+    if (fileName.startsWith(PAYPAL_FILE_PREFIX)) {
+      let stat = importPayPalCsv_(sheet, file, firstDataRow, firstDataColumn);
 
-      if (data[0].length == PAYPAL_FILE_FIELD_COUNT) {
-        data.splice(0, 1);
-
-        let rows = normalizePaypalData_(data);
-
-        let numRows    = rows.length;
-        let numColumns = rows[0].length;
-
-        sheet.insertRows(firstDataRow, numRows);
-        sheet.getRange(firstDataRow, firstDataColumn, numRows, numColumns).setValues(rows);
-
-        stats.push([file.getName(), numRows]);
-
+      if (stat[0] == true) {
         file.moveTo(importedFolder);
       }
-      else {
-        console.log(`File ${file.getName()} contains insufficient number of fields: expected ${PAYPAL_FILE_FIELD_COUNT} found ${data[0].length}.`);
-      }
+
+      stats.push(stat);
     }
   }
 
   return stats;
+}
+
+function importPayPalCsv_(sheet, file, firstDataRow, firstDataColumn) {
+  let aOkay = true;
+
+  let numRows    = 0;
+  let numColumns = 0;
+
+  let data = Utilities.parseCsv(file.getBlob().getDataAsString());
+
+  if (data[0].length == PAYPAL_FILE_FIELD_COUNT) {
+    data.splice(0, 1);
+
+    let rows = normalizePaypalData_(data);
+
+    numRows    = rows.length;
+    numColumns = rows[0].length;
+
+    sheet.insertRows(firstDataRow, numRows);
+    sheet.getRange(firstDataRow, firstDataColumn, numRows, numColumns).setValues(rows);
+  }
+  else {
+    aOkay = false;
+
+    console.log(`File ${file.getName()} contains insufficient number of fields: expected ${PAYPAL_FILE_FIELD_COUNT} found ${data[0].length}.`);
+  }
+
+  return [aOkay, file.getName(), numRows];
 }
 
 function normalizePaypalData_(data) {
@@ -191,7 +207,7 @@ function normalizePaypalData_(data) {
       // Donation date
       row.push(r[0]);
 
-      // Shipping address tokenizes the specified first and last "name" fields, so it's the preferred source for their values
+      // Shipping address tokenizes the first and last "name" fields, so it's the preferred source for their values
       let shippingAddress = r[13].trim();
 
       if (shippingAddress.length > 0) {
@@ -288,7 +304,7 @@ function getDonationDataSheet_() {
     sheet = range.getSheet();
   }
   else {
-    throw new Error(`Donation data sheet could not be resolved`);
+    throw new Error("Donation data sheet could not be resolved");
   }
 
   return sheet;
