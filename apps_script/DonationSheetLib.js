@@ -142,22 +142,21 @@ function onAbout() {
 function importPendingFiles_(sheet, pendingFolder, importedFolder, firstDataRow, firstDataColumn) {
   let stats = [];
 
-  let pendingFiles = pendingFolder.getFiles();
+  let pendingFiles = sortPendingFiles_(pendingFolder.getFiles());
 
-  while (pendingFiles.hasNext()) {
-    let file     = pendingFiles.next();
-    let fileName = file.getName().toLowerCase();
+  pendingFiles.forEach(function(f) {
+    let fileName = f.getName().toLowerCase();
 
     if (fileName.startsWith(PAYPAL_FILE_PREFIX)) {
-      let stat = importPayPalCsv_(sheet, file, firstDataRow, firstDataColumn);
+      let stat = importPayPalCsv_(sheet, f, firstDataRow, firstDataColumn);
 
       if (stat[0] == true) {
-        file.moveTo(importedFolder);
+        f.moveTo(importedFolder);
       }
 
       stats.push(stat);
     }
-  }
+  });
 
   return stats;
 }
@@ -294,6 +293,20 @@ function normalizePaypalData_(data) {
   }
 
   return rows;
+}
+
+function sortPendingFiles_(unsortedFiles) {
+  let sortedFiles = [];
+
+  while (unsortedFiles.hasNext()) {
+    sortedFiles.push(unsortedFiles.next());
+  }
+
+  if (sortedFiles.length > 1) {
+    sortedFiles.sort((a, b) => a.getName().toLowerCase().localeCompare(b.getName().toLowerCase()));
+  }
+
+  return sortedFiles;
 }
 
 function getDonationDataSheet_() {
