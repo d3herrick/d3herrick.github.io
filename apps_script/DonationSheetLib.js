@@ -7,8 +7,8 @@
 // https://opensource.org/licenses/MIT.
 //
 // This library includes functions to handle import of files containing donations made to the Newton Tree
-// Conservancy. These functions exist primarily to normalize incoming data to the layout captured in the
-// spreadsheets used to manage donations and membership.
+// Conservancy. These functions exist primarily to normalize and store incoming data to the layout captured
+// in the spreadsheets used to manage donations and memberships.
 //
 // @OnlyCurrentDoc
 //
@@ -139,8 +139,8 @@ function onAbout() {
     
     Version
     ${DEPLOYMENT_VERSION}
-    
-        
+
+
     Newton Tree Conservancy
     www.newtontreeconservancy.org`,
     ui.ButtonSet.OK);
