@@ -22,6 +22,8 @@ const PAYPAL_FILE_PREFIX                      = "paypal";
 const PAYPAL_FILE_FIELD_COUNT                 = 41;
 const PAYPAL_DONATION_PAYMENT                 = "Donation Payment"
 const PAYPAL_SUBSCRIPTION_PAYMENT             = "Subscription Payment";
+const PAYPAL_MOBILE_PAYMENT                   = "Mobile Payment";
+const PAYPAL_MASS_PAYMENT                     = "Mass Pay Payment";
 const NEWTON_TREE_CONSERVANCY_MENU            = "Newton Tree Conservancy";
 const ABOUT_MENU_ITEM                         = "About...";
 const IMPORT_PENDING_DONATION_DATA_MENU_ITEM  = "Import pending donation data";
@@ -29,9 +31,9 @@ const IMPORT_PENDING_DONATION_DATA_TITLE      = "Import Pending Donation Data";
 const ABOUT_TITLE                             = "About Donation Ledger Spreadsheet";
 
 // Payment types
-// P1 Regular tax deductible one time gift from Paypal
-// P2 Monthly regular tax deductible from Paypal
-// P3 Tax deductible but with Comment in Paypal
+// P1 Regular tax deductible one time gift from PayPal
+// P2 Monthly regular tax deductible from PayPal
+// P3 Tax deductible with Comment from PayPal
 // C1 regular check tax deductible
 // D1 Donor Advised Fund check or EFT
 // I1 IRA Distribution check
@@ -132,10 +134,15 @@ function onAbout() {
   let ui = SpreadsheetApp.getUi();
 
   ui.alert(ABOUT_TITLE,
-    "Deployment ID\n " + DEPLOYMENT_ID + "\n\n" +
-    "Version\n" + DEPLOYMENT_VERSION + "\n\n\n" +
-    "Newton Tree Conservancy\n" +
-    "www.newtontreeconservancy.org",
+    `Deployment ID
+    ${DEPLOYMENT_ID}
+    
+    Version
+    ${DEPLOYMENT_VERSION}
+    
+        
+    Newton Tree Conservancy
+    www.newtontreeconservancy.org`,
     ui.ButtonSet.OK);
 }
 
@@ -197,7 +204,7 @@ function normalizePaypalData_(data) {
   data.forEach(function(r) {
     let donationType = r[4];
 
-    if ((donationType == PAYPAL_DONATION_PAYMENT) || (donationType == PAYPAL_SUBSCRIPTION_PAYMENT)) {
+    if (isPayPalDonation(donationType)) {
       let row = [];
 
       // Admin
@@ -217,6 +224,13 @@ function normalizePaypalData_(data) {
 
         // First name
         row.push(tokens[0]);
+      }
+      else if (donationType == PAYPAL_MASS_PAYMENT) {
+        // Last name
+        row.push(r[3].trim());
+
+        // First name
+        row.push("");
       }
       else {
         let tokens = r[3].trim().split(/\s+/);
@@ -260,6 +274,9 @@ function normalizePaypalData_(data) {
       else if (donationType == PAYPAL_SUBSCRIPTION_PAYMENT) {
         paymentType = PAYMENT_TYPE_P2;
       }
+      else if (donationType == PAYPAL_MASS_PAYMENT) {
+        paymentType = PAYMENT_TYPE_D1;
+      }
 
       row.push(paymentType);
       
@@ -293,6 +310,13 @@ function normalizePaypalData_(data) {
   }
 
   return rows;
+}
+
+function isPayPalDonation(donationType) {
+  return ((donationType == PAYPAL_DONATION_PAYMENT) || 
+          (donationType == PAYPAL_SUBSCRIPTION_PAYMENT) ||
+          (donationType == PAYPAL_MOBILE_PAYMENT) ||
+          (donationType == PAYPAL_MASS_PAYMENT))
 }
 
 function sortPendingFiles_(unsortedFiles) {
