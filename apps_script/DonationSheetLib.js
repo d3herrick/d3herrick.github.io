@@ -26,6 +26,7 @@ const PAYPAL_DONATION_PAYMENT                 = "Donation Payment"
 const PAYPAL_SUBSCRIPTION_PAYMENT             = "Subscription Payment";
 const PAYPAL_MOBILE_PAYMENT                   = "Mobile Payment";
 const PAYPAL_MASS_PAYMENT                     = "Mass Pay Payment";
+const CHECK_FILE_PREFIX                       = "check";
 const NEWTON_TREE_CONSERVANCY_MENU            = "Newton Tree Conservancy";
 const ABOUT_MENU_ITEM                         = "About...";
 const IMPORT_PENDING_DONATION_DATA_MENU_ITEM  = "Import pending donation data";
@@ -159,10 +160,19 @@ function importPendingFiles_(sheet, pendingFolder, importedFolder, firstDataRow,
 
   pendingFiles.forEach(function(f) {
     let fileName = f.getName().toLowerCase();
+    let stat     = null;
 
     if (fileName.startsWith(PAYPAL_FILE_PREFIX)) {
-      let stat = importPayPalCsv_(sheet, f, firstDataRow, firstDataColumn);
+      stat = importPayPalCsv_(sheet, f, firstDataRow, firstDataColumn);
+    }
+    else if (fileName.startsWith(CHECK_FILE_PREFIX)) {
+      stat = importSpreadsheet_(sheet, f, firstDataRow, firstDataColumn);
+    }
+    else {
+      console.log(`Unsupported file ${fileName} was not processed`);
+    }
 
+    if (stat != null) {
       if (stat[0] == true) {
         f.moveTo(importedFolder);
       }
@@ -190,10 +200,7 @@ function importPayPalCsv_(sheet, file, firstDataRow, firstDataColumn) {
     numRows    = rows.length;
     numColumns = rows[0].length;
 
-    sheet.insertRows(firstDataRow, numRows);
-    sheet.getRange(firstDataRow, firstDataColumn, numRows, numColumns).
-      setValues(rows).
-      setBackground(DONATION_NEW_ROW_BACKGROUND_COLOR);
+    insertDonationData_(sheet, rows, firstDataRow, firstDataColumn, numRows, numColumns);
   }
   else {
     aOkay = false;
@@ -324,11 +331,37 @@ function normalizePaypalData_(data) {
     }
   });
 
-  if (rows.length > 1) {
-    rows.sort((a, b) => new Date(b[1]) - new Date(a[1]));
+  return rows;
+}
+
+function importSpreadsheet_(sheet, file, firstDataRow, firstDataColumn) {
+  let aOkay = true;
+
+  let numRows    = 0;
+  let numColumns = 0;
+
+  let range = SpreadsheetApp.openById(file.getId()).getRangeByName(DONATION_DATA_RANGE);
+
+  if (range != null) {
+    let donationSheet = range.getSheet();
+    let donationRange = donationSheet.getDataRange();
+
+    let rows = donationRange.getValues();
+
+    rows.splice(0, (firstDataRow - 1));
+
+    numRows    = rows.length;
+    numColumns = rows[0].length;
+
+    insertDonationData_(sheet, rows, firstDataRow, firstDataColumn, numRows, numColumns);
+  }
+  else {
+    aOkay = false;
+
+    console.log(`Range ${DONATION_DATA_RANGE} not defined in ${file.getName()}`)
   }
 
-  return rows;
+  return [aOkay, file.getName(), numRows];
 }
 
 function isPayPalDonation(donationType) {
@@ -350,6 +383,17 @@ function sortPendingFiles_(unsortedFiles) {
   }
 
   return sortedFiles;
+}
+
+function insertDonationData_(sheet, rows, firstDataRow, firstDataColumn, numRows, numColumns) {
+  if (rows.length > 1) {
+    rows.sort((a, b) => new Date(b[1]) - new Date(a[1]));
+
+    sheet.insertRows(firstDataRow, numRows);
+    sheet.getRange(firstDataRow, firstDataColumn, numRows, numColumns).
+      setValues(rows).
+      setBackground(DONATION_NEW_ROW_BACKGROUND_COLOR);
+  }
 }
 
 function getDonationDataSheet_() {
