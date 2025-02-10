@@ -18,6 +18,7 @@ const DONATION_DATA_RANGE                     = "donation_data";
 const PENDING_FOLDER_RANGE                    = "pending_folder";
 const IMPORTED_FOLDER_RANGE                   = "imported_folder"
 const FIRST_DATA_ROW_RANGE                    = "first_data_row";
+const DONATION_NEW_ROW_BACKGROUND_COLOR       = "#fffcd3";
 const PAYPAL_FILE_PREFIX                      = "paypal";
 const PAYPAL_FILE_FIELD_COUNT                 = 41;
 const PAYPAL_DONATION_PAYMENT                 = "Donation Payment"
@@ -185,7 +186,9 @@ function importPayPalCsv_(sheet, file, firstDataRow, firstDataColumn) {
     numColumns = rows[0].length;
 
     sheet.insertRows(firstDataRow, numRows);
-    sheet.getRange(firstDataRow, firstDataColumn, numRows, numColumns).setValues(rows);
+    sheet.getRange(firstDataRow, firstDataColumn, numRows, numColumns).
+      setValues(rows).
+      setBackground(DONATION_NEW_ROW_BACKGROUND_COLOR);
   }
   else {
     aOkay = false;
@@ -215,43 +218,39 @@ function normalizePaypalData_(data) {
 
       // Shipping address tokenizes the first and last "name" fields, so it's the preferred source for their values
       let shippingAddress = r[13].trim();
+      let lastName        = "";
+      let firstName       = "";
 
       if (shippingAddress.length > 0) {
         let tokens = shippingAddress.split(/\s*,\s*/)
 
-        // Last name
-        row.push(tokens[1]);
-
-        // First name
-        row.push(tokens[0]);
+        lastName  = tokens[1];
+        firstName = tokens[0];
       }
       else if (donationType == PAYPAL_MASS_PAYMENT) {
-        // Last name
-        row.push(r[3].trim());
-
-        // First name
-        row.push("");
+        lastName  = r[3].trim();
+        firstName = "";
       }
       else {
         let tokens = r[3].trim().split(/\s+/);
 
         if (tokens.length > 1) {
-          // Last name
-          row.push(tokens[tokens.length - 1].trim());
-
-          // First name
-          row.push(tokens.slice(0, -1).join(" "));
+          lastName  = tokens[tokens.length - 1].trim();
+          firstName = tokens.slice(0, -1).join(" ");
         }
         else {
-          // Last name
-          row.push(tokens[0].trim());
-
-          // First name
-          row.push("");
+          lastName  = tokens[0].trim();
+          firstName = "";
         }
       }
 
-      // Salutation/Other Names
+      // Last name
+      row.push(lastName.charAt(0).toUpperCase() + lastName.slice(1));
+
+      // First name
+      row.push(firstName.charAt(0).toUpperCase() + firstName.slice(1));
+
+      // Salutation/Other names
       row.push("");
 
       // Gross
