@@ -19,6 +19,7 @@ const PENDING_FOLDER_RANGE                    = "pending_folder";
 const IMPORTED_FOLDER_RANGE                   = "imported_folder"
 const FIRST_DATA_ROW_RANGE                    = "first_data_row";
 const DONATION_NEW_ROW_BACKGROUND_COLOR       = "#fffcd3";
+const ADDRESS_JOIN_SEPARATOR                  = ", ";
 const PAYPAL_FILE_PREFIX                      = "paypal";
 const PAYPAL_FILE_FIELD_COUNT                 = 41;
 const PAYPAL_DONATION_PAYMENT                 = "Donation Payment"
@@ -57,6 +58,10 @@ function onOpen(e) {
       .addSeparator()
       .addItem(ABOUT_MENU_ITEM, "onAbout")
       .addToUi();
+}
+
+function onScheduledImport() {
+  onImportPendingDonationData(false);
 }
 
 function onImportPendingDonationData(displayResult = true) {
@@ -244,6 +249,14 @@ function normalizePaypalData_(data) {
         }
       }
 
+      if (lastName.search(/\s+/) == -1) {
+        lastName = lastName.toLocaleLowerCase();
+      }
+
+      if (firstName.search(/\s+/) == -1) {
+        firstName = firstName.toLocaleLowerCase();
+      }
+
       // Last name
       row.push(lastName.charAt(0).toUpperCase() + lastName.slice(1));
 
@@ -288,8 +301,15 @@ function normalizePaypalData_(data) {
       // Email address
       row.push(r[10].trim());
 
+      let streetAddress1 = r[30].trim();
+      let streetAddress2 = r[31].trim();
+
+      if (streetAddress2.length > 0) {
+        streetAddress1 += ADDRESS_JOIN_SEPARATOR + streetAddress2;
+      } 
+
       // Street address
-      row.push([r[30].trim(), r[31]].join(" ").trim());
+      row.push(streetAddress1);
       
       // City
       row.push(r[32].trim());
