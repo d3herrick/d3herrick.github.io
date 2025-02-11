@@ -10,28 +10,36 @@
 // Conservancy. These functions exist primarily to normalize and store incoming data to the layout captured
 // in the spreadsheets used to manage donations and memberships.
 //
-// @OnlyCurrentDoc
+// This library requires the following authScopes:
 //
-const DEPLOYMENT_ID                           = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
-const DEPLOYMENT_VERSION                      = "1";
-const DONATION_DATA_RANGE                     = "donation_data";
-const PENDING_FOLDER_RANGE                    = "pending_folder";
-const IMPORTED_FOLDER_RANGE                   = "imported_folder"
-const FIRST_DATA_ROW_RANGE                    = "first_data_row";
-const DONATION_NEW_ROW_BACKGROUND_COLOR       = "#fffcd3";
-const ADDRESS_JOIN_SEPARATOR                  = ", ";
-const PAYPAL_FILE_PREFIX                      = "paypal";
-const PAYPAL_FILE_FIELD_COUNT                 = 41;
-const PAYPAL_DONATION_PAYMENT                 = "Donation Payment"
-const PAYPAL_SUBSCRIPTION_PAYMENT             = "Subscription Payment";
-const PAYPAL_MOBILE_PAYMENT                   = "Mobile Payment";
-const PAYPAL_MASS_PAYMENT                     = "Mass Pay Payment";
-const CHECK_FILE_PREFIX                       = "check";
-const NEWTON_TREE_CONSERVANCY_MENU            = "Newton Tree Conservancy";
-const ABOUT_MENU_ITEM                         = "About...";
-const IMPORT_PENDING_DONATION_DATA_MENU_ITEM  = "Import pending donation data";
-const IMPORT_PENDING_DONATION_DATA_TITLE      = "Import Pending Donation Data";
-const ABOUT_TITLE                             = "About Donation Ledger Spreadsheet";
+// "oauthScopes": ["https://www.googleapis.com/auth/spreadsheets.currentonly",
+//                 "https://www.googleapis.com/auth/spreadsheets",
+//                 "https://www.googleapis.com/auth/drive.readonly",
+//                 "https://www.googleapis.com/auth/drive",
+//                 "https://www.googleapis.com/auth/script.container.ui"]
+//
+const DEPLOYMENT_ID                   = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
+const DEPLOYMENT_VERSION              = "1";
+const DONATION_DATA_RANGE             = "donation_data";
+const PENDING_FOLDER_RANGE            = "pending_folder";
+const IMPORTED_FOLDER_RANGE           = "imported_folder";
+const ZIPCODE_MINIMUM_LENGTH          = 5;
+const NTC_FIRST_DATA_ROW_RANGE        = "ntc_first_data_row";
+const PAYPAL_FIRST_DATA_ROW_RANGE     = "paypal_first_data_row";
+const DONATION_NEW_ROW_BACKGROUND     = "#fffcd3";
+const ADDRESS_JOIN_SEPARATOR          = ", ";
+const PAYPAL_FILE_PREFIX              = "paypal";
+const PAYPAL_FILE_FIELD_COUNT         = 41;
+const PAYPAL_DONATION_PAYMENT         = "Donation Payment";
+const PAYPAL_SUBSCRIPTION_PAYMENT     = "Subscription Payment";
+const PAYPAL_MOBILE_PAYMENT           = "Mobile Payment";
+const PAYPAL_MASS_PAYMENT             = "Mass Pay Payment";
+const CHECK_FILE_PREFIX               = "check";
+const NEWTON_TREE_CONSERVANCY_MENU    = "Newton Tree Conservancy";
+const ABOUT_MENU_ITEM                 = "About...";
+const IMPORT_DONATION_DATA_MENU_ITEM  = "Import donation data";
+const IMPORT_DONATION_DATA_TITLE      = "Import Donation Data";
+const ABOUT_TITLE                     = "About Donation Ledger Spreadsheet";
 
 // Payment types
 // P1 Regular tax deductible one time gift from PayPal
@@ -53,73 +61,53 @@ const PAYMENT_SOURCE_PAYPAL ="PayPal";
 function onOpen(e) {
   let ui = SpreadsheetApp.getUi();
 
-  ui
-    .createMenu(NEWTON_TREE_CONSERVANCY_MENU)
-      .addItem(IMPORT_PENDING_DONATION_DATA_MENU_ITEM, "onImportPendingDonationData")
-      .addSeparator()
-      .addItem(ABOUT_MENU_ITEM, "onAbout")
-      .addToUi();
+  ui.
+    createMenu(NEWTON_TREE_CONSERVANCY_MENU).
+      addItem(IMPORT_DONATION_DATA_MENU_ITEM, "onImportDonationData").
+      addSeparator().
+      addItem(ABOUT_MENU_ITEM, "onAbout").
+      addToUi();
 }
 
 function onScheduledImport() {
-  onImportPendingDonationData(false);
+  onImportDonationData(false);
 }
 
-function onImportPendingDonationData(displayResult = true) {
+function onImportDonationData(displayResult = true) {
   let sheet          = getDonationDataSheet_();
   let pendingFolder  = null;
   let importedFolder = null;
-  let firstDataRow   = -1;
 
   let pendingFolderRange = sheet.getRange(PENDING_FOLDER_RANGE);
 
   if (pendingFolderRange != undefined) {
-    try {
-      pendingFolder = DriveApp.getFolderById(pendingFolderRange.getValue());
-    }
-    catch (e) {
-      console.log("Pending folder is not accessible");
-    }
+    pendingFolder = DriveApp.getFolderById(pendingFolderRange.getValue());
   }
   else {
-    console.log("Pending folder range is not defined");
+    throw Error(`${PENDING_FOLDER_RANGE} range is not defined`);
   }
 
   let importedFolderRange = sheet.getRange(IMPORTED_FOLDER_RANGE);
 
   if (importedFolderRange != undefined) {
-    try {
-      importedFolder = DriveApp.getFolderById(importedFolderRange.getValue());
-    }
-    catch (e) {
-      console.log("Imported folder is not accessible");
-    }
+    importedFolder = DriveApp.getFolderById(importedFolderRange.getValue());
   }
   else {
-    console.log("Imported folder range is not defined");
+    throw Error(`${IMPORTED_FOLDER_RANGE} range is not defined`);
   }
 
-  let firstDataRowRange = sheet.getRange(FIRST_DATA_ROW_RANGE);
-
-  if (firstDataRowRange != undefined) {
-    firstDataRow = firstDataRowRange.getValue();
-  }
-  else {
-    console.log("First data row range is not defined");
-  }  
-
-  if ((pendingFolder != null) && (importedFolder != null) && (firstDataRow != -1)) {
-    let stats = importPendingFiles_(sheet, pendingFolder, importedFolder, firstDataRow, 1);
+  if ((pendingFolder != null) && (importedFolder != null)) {
+    let stats = importPendingFiles_(sheet, pendingFolder, importedFolder);
 
     let result = "";
 
     if (stats.length > 0) {
-      result = "The following files (record counts) were imported:";
+      result = "The following files (total/payments) were imported:";
 
       result += "<ul>"
 
       stats.forEach(function(s) {
-        result += `<li><p style="font-family:arial">${s[1]} (${s[2]})</p>`;
+        result += `<li><p style="font-family:arial">${s[1]} (${s[2]}/${s[3]})</p>`;
       });
 
       result += "</ul>"
@@ -132,7 +120,7 @@ function onImportPendingDonationData(displayResult = true) {
       let ui   = SpreadsheetApp.getUi();
       let html = HtmlService.createHtmlOutput(`<p style="font-family:arial">${result}</p>`);
       
-      ui.showModelessDialog(html, IMPORT_PENDING_DONATION_DATA_TITLE);
+      ui.showModelessDialog(html, IMPORT_DONATION_DATA_TITLE);
     }
   }
 }
@@ -153,7 +141,34 @@ function onAbout() {
     ui.ButtonSet.OK);
 }
 
-function importPendingFiles_(sheet, pendingFolder, importedFolder, firstDataRow, firstDataColumn) {
+function importPendingFiles_(sheet, pendingFolder, importedFolder) {
+  let ntcFirstDataRow    = undefined;
+  let ntcFirstDataColumn = 1;
+
+  let ntcFirstDataRowRange = sheet.getRange(NTC_FIRST_DATA_ROW_RANGE);
+
+  if (ntcFirstDataRowRange != undefined) {
+    ntcFirstDataRow = ntcFirstDataRowRange.getValue();
+  }
+  else {
+    throw Error(`${NTC_FIRST_DATA_ROW_RANGE} range is not defined`);
+  }  
+
+  let paypalFirstDataRow    = undefined;
+  let paypalFirstDataColumn = 1;
+
+  let paypalFirstDataRowRange = sheet.getRange(PAYPAL_FIRST_DATA_ROW_RANGE);
+
+  if (paypalFirstDataRowRange != undefined) {
+    paypalFirstDataRow = paypalFirstDataRowRange.getValue();
+  }
+  else {
+    throw Error(`${PAYPAL_FIRST_DATA_ROW_RANGE} range is not defined`);
+  }
+
+  let firstInsertionRow    = ntcFirstDataRow;
+  let firstInsertionColumn = ntcFirstDataColumn;
+
   let stats = [];
 
   let pendingFiles = sortPendingFiles_(pendingFolder.getFiles());
@@ -163,55 +178,54 @@ function importPendingFiles_(sheet, pendingFolder, importedFolder, firstDataRow,
     let stat     = null;
 
     if (fileName.startsWith(PAYPAL_FILE_PREFIX)) {
-      stat = importPayPalCsv_(sheet, f, firstDataRow, firstDataColumn);
+      stat = importPayPalCsv_(sheet, f, paypalFirstDataRow, paypalFirstDataColumn, firstInsertionRow, firstInsertionColumn);
     }
     else if (fileName.startsWith(CHECK_FILE_PREFIX)) {
-      stat = importSpreadsheet_(sheet, f, firstDataRow, firstDataColumn);
+      stat = importSpreadsheet_(sheet, f, ntcFirstDataRow, ntcFirstDataColumn, firstInsertionRow, firstInsertionColumn);
     }
     else {
-      console.log(`Unsupported file ${fileName} was not processed`);
+      stat = [false, `${fileName}`, 0, `${f.getName()} is an unsupported file type`];
     }
 
-    if (stat != null) {
-      if (stat[0] == true) {
-        f.moveTo(importedFolder);
-      }
-
-      stats.push(stat);
+    if (stat[0] == true) {
+      f.moveTo(importedFolder);
     }
+
+    stats.push(stat);
   });
 
   return stats;
 }
 
-function importPayPalCsv_(sheet, file, firstDataRow, firstDataColumn) {
+function importPayPalCsv_(sheet, file, firstDataRow, firstDataColumn, firstInsertionRow, firstInsertionColumn) {
   let aOkay = true;
 
+  let totalRows  = 0;
   let numRows    = 0;
   let numColumns = 0;
 
   let data = Utilities.parseCsv(file.getBlob().getDataAsString());
 
   if (data[0].length == PAYPAL_FILE_FIELD_COUNT) {
-    data.splice(0, 1);
+    totalRows = data.length;
 
-    let rows = normalizePaypalData_(data);
+    let rows = normalizePaypalData_(data, firstDataRow);
 
     numRows    = rows.length;
     numColumns = rows[0].length;
 
-    insertDonationData_(sheet, rows, firstDataRow, firstDataColumn, numRows, numColumns);
+    insertDonationData_(sheet, rows, firstInsertionRow, firstInsertionColumn, numRows, numColumns);
   }
   else {
     aOkay = false;
 
-    console.log(`File ${file.getName()} contains insufficient number of fields: expected ${PAYPAL_FILE_FIELD_COUNT} found ${data[0].length}.`);
+    numRows = `${file.getName()} contains unexpected number of fields: expected ${PAYPAL_FILE_FIELD_COUNT} found ${data[0].length}`;
   }
 
-  return [aOkay, file.getName(), numRows];
+  return [aOkay, file.getName(), totalRows, numRows];
 }
 
-function normalizePaypalData_(data) {
+function normalizePaypalData_(data, firstDataRow) {
   //out:Admin|Donation date|Last name|First name|Salutation/Other Names|Gross|Fee|Net|Payment type|Payment source |Payment Notes|Email address|Street address|City|State|Zip code
 
   let rows = [];
@@ -219,16 +233,16 @@ function normalizePaypalData_(data) {
   data.forEach(function(r) {
     let donationType = r[4];
 
-    if (isPayPalDonation(donationType)) {
+    if (isPayPalDonation_(donationType)) {
       let row = [];
 
       // Admin
       row.push("");
 
       // Donation date
-      row.push(r[0]);
+      row.push(normalizeDonationDate_(r[0]));
 
-      // Shipping address tokenizes the first and last "name" fields, so it's the preferred source for their values
+      // Shipping address tokenizes the its fields, including first and last "name", so it's the preferred source for those values
       let shippingAddress = r[13].trim();
       let lastName        = "";
       let firstName       = "";
@@ -325,7 +339,7 @@ function normalizePaypalData_(data) {
       row.push(r[33].trim());
       
       // Zip code
-      row.push(r[34].trim());
+      row.push(normalizeDonationZipcode_(r[34].trim()));
 
       rows.push(row);
     }
@@ -334,9 +348,10 @@ function normalizePaypalData_(data) {
   return rows;
 }
 
-function importSpreadsheet_(sheet, file, firstDataRow, firstDataColumn) {
+function importSpreadsheet_(sheet, file, firstDataRow, firstDataColumn, firstInsertionRow, firstInsertionColumn) {
   let aOkay = true;
 
+  let totalRows  = 0;
   let numRows    = 0;
   let numColumns = 0;
 
@@ -346,25 +361,70 @@ function importSpreadsheet_(sheet, file, firstDataRow, firstDataColumn) {
     let donationSheet = range.getSheet();
     let donationRange = donationSheet.getDataRange();
 
-    let rows = donationRange.getValues();
+    totalRows = donationRange.getNumRows();
 
-    rows.splice(0, (firstDataRow - 1));
+    let rows = normalizeCheckData_(donationRange.getValues(), firstDataRow);
 
     numRows    = rows.length;
     numColumns = rows[0].length;
 
-    insertDonationData_(sheet, rows, firstDataRow, firstDataColumn, numRows, numColumns);
+    insertDonationData_(sheet, rows, firstInsertionRow, firstInsertionColumn, numRows, numColumns);
   }
   else {
     aOkay = false;
 
-    console.log(`Range ${DONATION_DATA_RANGE} not defined in ${file.getName()}`)
+    numRows = `${DONATION_DATA_RANGE} range is not defined in ${file.getName()}`;
   }
 
-  return [aOkay, file.getName(), numRows];
+  return [aOkay, file.getName(), totalRows, numRows];
 }
 
-function isPayPalDonation(donationType) {
+function normalizeCheckData_(data, firstDataRow) {
+  //out:Admin|Donation date|Last name|First name|Salutation/Other Names|Gross|Fee|Net|Payment type|Payment source |Payment Notes|Email address|Street address|City|State|Zip code
+
+  data.splice(0, (firstDataRow - 1));
+
+  let rows = data;
+
+  data.forEach(function(r) {
+    // Donation date
+    r[1] = normalizeDonationDate_(r[1]);
+
+    // Zip code
+    r[15] = normalizeDonationZipcode_(r[15]);
+  });
+
+  return rows;
+}
+
+function normalizeDonationDate_(date) {
+  let normalizedDate = undefined;
+
+  if (Number.isInteger(date)) {
+    normalizedDate = date.toString();
+    normalizedDate = `${normalizedDate.substring(0, 4)}/${normalizedDate.substring(4, 6)}/${normalizedDate.substring(6, 8)}`;
+  }
+  else {
+    normalizedDate = date;
+  }
+
+  return normalizedDate;
+}
+
+function normalizeDonationZipcode_(zipCode) {
+  let normalizedZipcode = undefined;
+
+  if ((zipCode.length > 0) && (zipCode.length == (ZIPCODE_MINIMUM_LENGTH - 1))) {
+    normalizedZipcode = "0" + zipCode;
+  }
+  else {
+    normalizedZipcode = zipCode;
+  }
+
+  return normalizedZipcode;
+}
+
+function isPayPalDonation_(donationType) {
   return ((donationType == PAYPAL_DONATION_PAYMENT) || 
           (donationType == PAYPAL_SUBSCRIPTION_PAYMENT) ||
           (donationType == PAYPAL_MOBILE_PAYMENT) ||
@@ -385,14 +445,14 @@ function sortPendingFiles_(unsortedFiles) {
   return sortedFiles;
 }
 
-function insertDonationData_(sheet, rows, firstDataRow, firstDataColumn, numRows, numColumns) {
+function insertDonationData_(sheet, rows, firstInsertionRow, firstInsertionColumn, numRows, numColumns) {
   if (rows.length > 1) {
     rows.sort((a, b) => new Date(b[1]) - new Date(a[1]));
 
-    sheet.insertRows(firstDataRow, numRows);
-    sheet.getRange(firstDataRow, firstDataColumn, numRows, numColumns).
+    sheet.insertRows(firstInsertionRow, numRows);
+    sheet.getRange(firstInsertionRow, firstInsertionColumn, numRows, numColumns).
       setValues(rows).
-      setBackground(DONATION_NEW_ROW_BACKGROUND_COLOR);
+      setBackground(DONATION_NEW_ROW_BACKGROUND);
   }
 }
 

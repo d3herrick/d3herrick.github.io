@@ -55,12 +55,12 @@ const STREET_SUFFIXES = [
 function onOpen(e) {
   let ui = SpreadsheetApp.getUi();
 
-  ui
-    .createMenu(NEWTON_TREE_CONSERVANCY_MENU)
-      .addItem(ARCHIVE_DATA_FOR_PLANTING_DATE_MENU_ITEM, "onArchiveDataForPlantingDate")
-      .addSeparator()
-      .addItem(ABOUT_MENU_ITEM, "onAbout")
-      .addToUi();
+  ui.
+    createMenu(NEWTON_TREE_CONSERVANCY_MENU).
+      addItem(ARCHIVE_DATA_FOR_PLANTING_DATE_MENU_ITEM, "onArchiveDataForPlantingDate").
+      addSeparator().
+      addItem(ABOUT_MENU_ITEM, "onAbout").
+      addToUi();
 }
 
 function onEdit(e) {
@@ -247,11 +247,16 @@ function onArchiveDataForPlantingDate() {
 
 function onAbout() {
   let ui = SpreadsheetApp.getUi();
-
+  
   ui.alert(ABOUT_TITLE,
-    "Deployment ID\n " + DEPLOYMENT_ID + "\n\n" +
-    "Version\n" + DEPLOYMENT_VERSION + "\n\n\n" +
-    "Newton Tree Conservancy\n" +
-    "www.newtontreeconservancy.org",
+    `Deployment ID
+    ${DEPLOYMENT_ID}
+    
+    Version
+    ${DEPLOYMENT_VERSION}
+
+
+    Newton Tree Conservancy
+    www.newtontreeconservancy.org`,
     ui.ButtonSet.OK);
 }
