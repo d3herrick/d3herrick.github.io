@@ -16,30 +16,37 @@
 //                 "https://www.googleapis.com/auth/spreadsheets",
 //                 "https://www.googleapis.com/auth/drive.readonly",
 //                 "https://www.googleapis.com/auth/drive",
-//                 "https://www.googleapis.com/auth/script.container.ui"]
+//                 "https://www.googleapis.com/auth/script.container.ui",
+//                 "https://www.googleapis.com/auth/script.send_mail"]
 //
-const DEPLOYMENT_ID                   = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
-const DEPLOYMENT_VERSION              = "1";
-const DONATION_DATA_RANGE             = "donation_data";
-const PENDING_FOLDER_RANGE            = "pending_folder";
-const IMPORTED_FOLDER_RANGE           = "imported_folder";
-const ZIPCODE_MINIMUM_LENGTH          = 5;
-const NTC_FIRST_DATA_ROW_RANGE        = "ntc_first_data_row";
-const PAYPAL_FIRST_DATA_ROW_RANGE     = "paypal_first_data_row";
-const DONATION_NEW_ROW_BACKGROUND     = "#fffcd3";
-const ADDRESS_JOIN_SEPARATOR          = ", ";
-const PAYPAL_FILE_PREFIX              = "paypal";
-const PAYPAL_FILE_FIELD_COUNT         = 41;
-const PAYPAL_DONATION_PAYMENT         = "Donation Payment";
-const PAYPAL_SUBSCRIPTION_PAYMENT     = "Subscription Payment";
-const PAYPAL_MOBILE_PAYMENT           = "Mobile Payment";
-const PAYPAL_MASS_PAYMENT             = "Mass Pay Payment";
-const CHECK_FILE_PREFIX               = "check";
-const NEWTON_TREE_CONSERVANCY_MENU    = "Newton Tree Conservancy";
-const ABOUT_MENU_ITEM                 = "About...";
-const IMPORT_DONATION_DATA_MENU_ITEM  = "Import donation data";
-const IMPORT_DONATION_DATA_TITLE      = "Import Donation Data";
-const ABOUT_TITLE                     = "About Donation Ledger Spreadsheet";
+const DEPLOYMENT_ID                      = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
+const DEPLOYMENT_VERSION                 = "1";
+const DONATION_DATA_RANGE                = "donation_data";
+const PENDING_FOLDER_RANGE               = "pending_folder";
+const IMPORTED_FOLDER_RANGE              = "imported_folder";
+const ZIPCODE_MINIMUM_LENGTH             = 5;
+const IMPORT_ACK_EMAIL_DIST_LIST_RANGE   = "import_ack_email_dist_list"
+const IMPORT_ACK_EMAIL_SENDER_NAME_RANGE = "import_ack_email_sender_name"
+const IMPORT_ACK_EMAIL_REPLY_TO_RANGE    = "import_ack_email_reply_to";
+const IMPORT_ACK_EMAIL_SUBJECT_RANGE     = "import_ack_email_subject";
+const IMPORT_ACK_EMAIL_BODY_RANGE        = "import_ack_import_email_body";
+const IMPORT_ACK_EMAIL_BODY_TAG          = "insert-summary-text-here";
+const NTC_FIRST_DATA_ROW_RANGE           = "ntc_first_data_row";
+const PAYPAL_FIRST_DATA_ROW_RANGE        = "paypal_first_data_row";
+const DONATION_NEW_ROW_BACKGROUND        = "#fffcd3";
+const ADDRESS_JOIN_SEPARATOR             = ", ";
+const PAYPAL_FILE_PREFIX                 = "paypal";
+const PAYPAL_FILE_FIELD_COUNT            = 41;
+const PAYPAL_DONATION_PAYMENT            = "Donation Payment";
+const PAYPAL_SUBSCRIPTION_PAYMENT        = "Subscription Payment";
+const PAYPAL_MOBILE_PAYMENT              = "Mobile Payment";
+const PAYPAL_MASS_PAYMENT                = "Mass Pay Payment";
+const CHECK_FILE_PREFIX                  = "check";
+const NEWTON_TREE_CONSERVANCY_MENU       = "Newton Tree Conservancy";
+const ABOUT_MENU_ITEM                    = "About...";
+const IMPORT_DONATION_DATA_MENU_ITEM     = "Import donation data";
+const IMPORT_DONATION_DATA_TITLE         = "Import Donation Data";
+const ABOUT_TITLE                        = "About Donation Ledger Spreadsheet";
 
 // Payment types
 // P1 Regular tax deductible one time gift from PayPal
@@ -70,10 +77,10 @@ function onOpen(e) {
 }
 
 function onScheduledImport() {
-  onImportDonationData(false);
+  onImportDonationData(false, true);
 }
 
-function onImportDonationData(displayResult = true) {
+function onImportDonationData(displayResult = true, emailResult = false) {
   let sheet          = getDonationDataSheet_();
   let pendingFolder  = null;
   let importedFolder = null;
@@ -111,6 +118,27 @@ function onImportDonationData(displayResult = true) {
       });
 
       result += "</ul>"
+
+      if (emailResult) {
+        let senderName       = sheet.getRange(IMPORT_ACK_EMAIL_SENDER_NAME_RANGE).getValue();
+        let distributionList = sheet.getRange(IMPORT_ACK_EMAIL_DIST_LIST_RANGE).getValue();
+        let replyTo          = sheet.getRange(IMPORT_ACK_EMAIL_REPLY_TO_RANGE).getValue();
+        let subject          = sheet.getRange(IMPORT_ACK_EMAIL_SUBJECT_RANGE).getValue();
+        let body             = sheet.getRange(IMPORT_ACK_EMAIL_BODY_RANGE).getValue();
+
+        body = body.replace(IMPORT_ACK_EMAIL_BODY_TAG, result);
+        
+        MailApp.sendEmail(
+          distributionList,
+          subject,
+          null,
+          {
+            htmlBody: body,
+            replyTo : replyTo,
+            name    : senderName
+          }
+        );
+      }
     }
     else {
       result = "No files were pending import";
