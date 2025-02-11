@@ -10,7 +10,7 @@
 // Conservancy. These functions exist primarily to normalize and store incoming data to the layout captured
 // in the spreadsheets used to manage donations and memberships.
 //
-// This library requires the following authScopes:
+// This library requires the following oauthScopes:
 //
 // "oauthScopes": ["https://www.googleapis.com/auth/spreadsheets.currentonly",
 //                 "https://www.googleapis.com/auth/spreadsheets",
