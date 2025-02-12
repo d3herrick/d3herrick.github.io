@@ -20,7 +20,7 @@
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
 const DEPLOYMENT_ID                      = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
-const DEPLOYMENT_VERSION                 = "1";
+const DEPLOYMENT_VERSION                 = "2";
 const DONATION_DATA_RANGE                = "donation_data";
 const PENDING_FOLDER_RANGE               = "pending_folder";
 const IMPORTED_FOLDER_RANGE              = "imported_folder";
@@ -125,6 +125,8 @@ function onImportDonationData(displayResult = true, emailResult = false) {
         let replyTo          = sheet.getRange(IMPORT_ACK_EMAIL_REPLY_TO_RANGE).getValue();
         let subject          = sheet.getRange(IMPORT_ACK_EMAIL_SUBJECT_RANGE).getValue();
         let body             = sheet.getRange(IMPORT_ACK_EMAIL_BODY_RANGE).getValue();
+
+        result += `<p><p>View changes to the donation ledger by clicking <a href="${sheet.getParent().getUrl()}">here</a>.</p></p>`;
 
         body = body.replace(IMPORT_ACK_EMAIL_BODY_TAG, result);
         
@@ -474,8 +476,10 @@ function sortPendingFiles_(unsortedFiles) {
 }
 
 function insertDonationData_(sheet, rows, firstInsertionRow, firstInsertionColumn, numRows, numColumns) {
-  if (rows.length > 1) {
-    rows.sort((a, b) => new Date(b[1]) - new Date(a[1]));
+  if (rows.length > 0) {
+    if (rows.length > 1) {
+      rows.sort((a, b) => new Date(b[1]) - new Date(a[1]));
+    }
 
     sheet.insertRows(firstInsertionRow, numRows);
     sheet.getRange(firstInsertionRow, firstInsertionColumn, numRows, numColumns).
