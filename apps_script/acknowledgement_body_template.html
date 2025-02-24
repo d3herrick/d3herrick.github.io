@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<body style="font-family:calibri">
+<img src="ntc_logo.png" alt="Newton Tree Conservancy" width="110" height="110">
+<p>
+P.O. Box 233
+<br>Newton, MA 02460
+</p>
+<p>
+<?!=ackCreationDate?>
+</p>
+<p>
+<? if (streetAddress.length > 0) { ?>
+<?!=firstName?> <?!=lastName?>
+<br><?!=streetAddress?>
+<br><?!=city?>, <?!=state?>, <?!=zipCode?>
+<? } else if (emailAddress.length > 0) { ?>
+<?!=emailAddress?>
+<? } ?>
+</p>
+<p>
+Dear <?!=firstName?>,
+</p>
+<p>
+Thank you for supporting the Newton Tree Conservancy with your
+<? if (gross > 500) { ?>
+so very generous
+<? } else if (gross > 250) { ?>
+very generous
+<? } else if ((gross > 100) && (gross < 250)) { ?>
+generous
+<? } ?>
+contribution of <?!=gross ?> that we received on <?!=donationDate ?> from
+<? if (paymentType != "C1") { ?>
+a check.
+<? } else { ?>
+<?!=paymentSource?>.
+<? } ?>
+</p>
+</p>
+<p>
+Newton Tree Conservancy has had a productive 2024, with 175 trees planted in neighborhoods across Newton. Since our start in 2008 we've planted over 2,400 trees, helping to restore the 20,000 trees the city has lost since the 1970s. We also continued our new tree seedling give-away program for homeowners to plant on their own property, giving away 177 seedlings in 2024. 
+</p>
+<p>
+All of this is made possible by the generous support of the community, specifically, generous people like you, in helping to plant and care for the trees and to pay for the direct cost of the trees and supplies. The Newton Tree Conservancy will continue to beautify more neighborhoods, and improve Newton's climate resilience.
+</p>
+<p>
+With best wishes,
+</p>
+<p>
+Aline C. Sammut
+<br>Membership Director
+</p>
+<p style="text-align: center;">
+<strong>
+Visit us at www.newtontreeconservancy.org
+<br>Follow us on Instagram @newtontrees and Facebook
+</strong>
+</p>
+<? if ((paymentType != "D1") && (paymentType != "I1")) { ?>
+<p style="text-align: center;">
+For tax purposes, we certify as a 501(c)(3) organization that no goods or services were provided 
+<br>in return for your donation—it is tax deductible to the full extent allowable by law.
+</p>
+<? } ?>
+</body>
+</html>

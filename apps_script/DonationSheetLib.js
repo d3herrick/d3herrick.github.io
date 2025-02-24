@@ -525,21 +525,20 @@ function generateDonationAcks_(sheet, ackFolder) {
     let donationRange  = sheet.getRange(a[0], ntcFirstDataColumn, 1, numColumns);
     let donationObject = toDonationObject_(donationRange.getValues()[0]);
 
-    bodyTemplate.donationDate  = donationObject.donationDate;
-    bodyTemplate.lastName      = donationObject.lastName;
-    bodyTemplate.firstName     = donationObject.firstName;
-    bodyTemplate.gross         = donationObject.gross;
-    bodyTemplate.paymentType   = donationObject.paymentType;
-    bodyTemplate.paymentSource = donationObject.paymentSource;
-    bodyTemplate.emailAddress  = donationObject.emailAddress;
-    bodyTemplate.streetAddress = donationObject.streetAddress;
-    bodyTemplate.city          = donationObject.city;
-    bodyTemplate.state         = donationObject.state;
-    bodyTemplate.zipCode       = donationObject.zipCode;
+    bodyTemplate.ackCreationDate = new Intl.DateTimeFormat("en-US", {year: 'numeric', month: 'long', day: 'numeric'}).format(Date.now());
+    bodyTemplate.donationDate    = Intl.DateTimeFormat("en-US").format(donationObject.donationDate);
+    bodyTemplate.lastName        = donationObject.lastName;
+    bodyTemplate.firstName       = donationObject.firstName;
+    bodyTemplate.gross           = donationObject.gross;
+    bodyTemplate.paymentType     = donationObject.paymentType;
+    bodyTemplate.paymentSource   = donationObject.paymentSource;
+    bodyTemplate.emailAddress    = donationObject.emailAddress;
+    bodyTemplate.streetAddress   = donationObject.streetAddress;
+    bodyTemplate.city            = donationObject.city;
+    bodyTemplate.state           = donationObject.state;
+    bodyTemplate.zipCode         = donationObject.zipCode;
 
     let body = bodyTemplate.evaluate().getContent();
-
-    console.log(body);
 
     let aOkay = false;
 
