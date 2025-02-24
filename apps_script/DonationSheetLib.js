@@ -167,9 +167,11 @@ function onSendDonationAcks(displayResult = true, emailResult = false) {
     let result = "";
 
     if (stats.length > 0) {
+      //dah
     }
   }
 
+  //dah
   console.log("onSendDonationAcks is in progress!!!");
 }
 
@@ -489,58 +491,100 @@ function generateDonationAcks_(sheet, ackFolder) {
     throw Error(`${NTC_FIRST_DATA_ROW_RANGE} named range is not defined`);
   }
 
-  let spreadsheet       = sheet.getParent();
-  let range             = sheet.getDataRange();
-  let numRows           = range.getLastRow() - ntcFirstDataRow + 1;
-  let numColumns        = range.getLastColumn();
-  let rowRange          = sheet.getRange(ntcFirstDataRow, ntcFirstDataColumn, numRows, numColumns);
-  let rowA1Notation     = `'${sheet.getName()}'!${rowRange.getA1Notation()}`;
+  let spreadsheet   = sheet.getParent();
+  let range         = sheet.getDataRange();
+  let numRows       = range.getLastRow() - ntcFirstDataRow + 1;
+  let numColumns    = range.getLastColumn();
+  let ackRange      = sheet.getRange(ntcFirstDataRow, ntcFirstDataColumn, numRows, 1);
+  let ackA1Notation = `'${sheet.getName()}'!${ackRange.getA1Notation()}`;
 
-  let query = `=arrayformula(query({${rowA1Notation}, ROW(${rowA1Notation})}, "SELECT Col2 WHERE Col1 = FALSE", 0))`;
+  let query = `=arrayformula(query({${ackA1Notation}, ROW(${ackA1Notation})}, "SELECT Col2 WHERE Col1 = FALSE", 0))`;
 
   let queryResults = spreadsheet.insertSheet().hideSheet();
-  let donationData = null;
+  let ackData      = null;
 
   try {
     queryResults.getRange(1,1).setFormula(query);
 
-    donationData = queryResults.getDataRange().getValues();
+    ackData = queryResults.getDataRange().getValues();
   }
   finally {
     spreadsheet.deleteSheet(queryResults);
   }
 
-  let totalAcks   = donationData.length;
+  let totalAcks   = ackData.length;
   let numEmails   = 0;
   let numPdfs     = 0;
   let numFailures = 0;
+  
+  let bodyTemplate = HtmlService.createTemplateFromFile(sheet.getRange(ACK_BODY_TEMPLATE_RANGE).getValue());
 
   let stats = [];
 
-  donationData.forEach(function (d) {
-    let donationRange  = sheet.getRange(d[0], ntcFirstDataColumn, 1, numColumns);
+  ackData.forEach(function (a) {
+    let donationRange  = sheet.getRange(a[0], ntcFirstDataColumn, 1, numColumns);
     let donationObject = toDonationObject_(donationRange.getValues()[0]);
+
+    bodyTemplate.donationDate  = donationObject.donationDate;
+    bodyTemplate.lastName      = donationObject.lastName;
+    bodyTemplate.firstName     = donationObject.firstName;
+    bodyTemplate.gross         = donationObject.gross;
+    bodyTemplate.paymentType   = donationObject.paymentType;
+    bodyTemplate.paymentSource = donationObject.paymentSource;
+    bodyTemplate.emailAddress  = donationObject.emailAddress;
+    bodyTemplate.streetAddress = donationObject.streetAddress;
+    bodyTemplate.city          = donationObject.city;
+    bodyTemplate.state         = donationObject.state;
+    bodyTemplate.zipCode       = donationObject.zipCode;
+
+    let body = bodyTemplate.evaluate().getContent();
+
+    console.log(body);
 
     let aOkay = false;
 
     if (donation.emailAddress.length > 0) {
-      aOkay = sendEmail_(sheet, donationObject);
+      aOkay = sendEmail_(sheet, donationObject, body);
+
+      if (aOkay) {
+        numEmails++;
+      }
     }
     else {
-      aOkay = createPdf_(sheet, donationObject);
+      aOkay = createPdf_(sheet, donationObject, body);
+
+      if (aOkay) {
+        numPdfs++;
+      }
     }
+
+    if (aOkay) {
+      //dah:reset background of row
+      //dah:set ack generated to true
+    }
+    else {
+      numFailures++;
+    }
+
+    bodyOutput.clear();
   });
 
   return [totalAcks, numEmails, numPdfs, numFailures];
 }
 
-function sendEmail_(sheet, donationObject) {
+function sendEmail_(sheet, donationObject, body) {
   let aOkay = true;
+
+  let senderName   = sheet.getRange(PROCESSING_EMAIL_SENDER_NAME_RANGE).getValue();
+  let emailAddress = "d3herrick@gmail.com"; //dah donationObject.emailAddress;
+  let replyTo      = sheet.getRange(PROCESSING_EMAIL_REPLY_TO_RANGE).getValue();
+  
+
 
   return aOkay;
 }
 
-function createPdf_(sheet, donationObject) {
+function createPdf_(sheet, donationObject, body) {
   let aOkay = true;
 
   return aOkay;

@@ -76,7 +76,7 @@ function onEdit(e) {
       if (parts.length == 2) {
         if (!Number.isNaN(Number.parseInt(parts[0])) && (parts[0].length == 4)) {
           if ((parts[1] == "Spring") || (parts[1] == "Fall")) {
-            e.range.setValue(`${parts[0]} ${parts[1]}`);
+            e.range.setValue(parts[0] + " " + parts[1]);
           }
           else {
             isLegalValue = false;
@@ -84,7 +84,7 @@ function onEdit(e) {
         }
         else if (!Number.isNaN(Number.parseInt(parts[1])) && (parts[1].length == 4)) {
           if ((parts[0] == "Spring") || (parts[0] == "Fall")) {
-            e.range.setValue(`${parts[1]} ${parts[0]}`);
+            e.range.setValue(parts[1] + " " + parts[0]);
           }
           else {
             isLegalValue = false;
