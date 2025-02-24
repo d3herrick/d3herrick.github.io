@@ -31,7 +31,7 @@ const PROCESSING_EMAIL_SENDER_NAME_RANGE    = "processing_email_sender_name"
 const PROCESSING_EMAIL_REPLY_TO_RANGE       = "processing_email_reply_to";
 const PROCESSING_RESULT_BODY_TEMPLATE_RANGE = "processing_email_body_template";
 const IMPORT_RESULT_EMAIL_SUBJECT_RANGE     = "import_result_email_subject";
-const ACK_EMAIL_BODY_TEMPLATE_RANGE         = "acknowledgement_email_body_template";
+const ACK_BODY_TEMPLATE_RANGE               = "acknowledgement_body_template";
 const ACK_RESULT_EMAIL_SUBJECT_RANGE        = "acknowledgement_result_email_subject";
 const NTC_FIRST_DATA_ROW_RANGE              = "ntc_first_data_row";
 const PAYPAL_FIRST_DATA_ROW_RANGE           = "paypal_first_data_row";
@@ -552,7 +552,7 @@ function emailProcessingResult_(subject, result) {
   let replyTo          = sheet.getRange(PROCESSING_EMAIL_REPLY_TO_RANGE).getValue();
   let bodyTemplate     = HtmlService.createTemplateFromFile(sheet.getRange(PROCESSING_RESULT_BODY_TEMPLATE_RANGE).getValue());
 
-  bodyTemplate.bodyText = result;
+  bodyTemplate.result = result;
 
   let body = bodyTemplate.evaluate().getContent();
 
