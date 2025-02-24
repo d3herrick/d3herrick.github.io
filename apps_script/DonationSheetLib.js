@@ -19,34 +19,38 @@
 //                 "https://www.googleapis.com/auth/script.container.ui",
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
-const DEPLOYMENT_ID                      = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
-const DEPLOYMENT_VERSION                 = "2";
-const DONATION_DATA_RANGE                = "donation_data";
-const PENDING_FOLDER_RANGE               = "pending_folder";
-const IMPORTED_FOLDER_RANGE              = "imported_folder";
-const ZIPCODE_MINIMUM_LENGTH             = 5;
-const IMPORT_ACK_EMAIL_DIST_LIST_RANGE   = "import_ack_email_dist_list"
-const IMPORT_ACK_EMAIL_SENDER_NAME_RANGE = "import_ack_email_sender_name"
-const IMPORT_ACK_EMAIL_REPLY_TO_RANGE    = "import_ack_email_reply_to";
-const IMPORT_ACK_EMAIL_SUBJECT_RANGE     = "import_ack_email_subject";
-const IMPORT_ACK_EMAIL_BODY_RANGE        = "import_ack_import_email_body";
-const IMPORT_ACK_EMAIL_BODY_TAG          = "insert-summary-text-here";
-const NTC_FIRST_DATA_ROW_RANGE           = "ntc_first_data_row";
-const PAYPAL_FIRST_DATA_ROW_RANGE        = "paypal_first_data_row";
-const DONATION_NEW_ROW_BACKGROUND        = "#fffcd3";
-const ADDRESS_JOIN_SEPARATOR             = ", ";
-const PAYPAL_FILE_PREFIX                 = "paypal";
-const PAYPAL_FILE_FIELD_COUNT            = 41;
-const PAYPAL_DONATION_PAYMENT            = "Donation Payment";
-const PAYPAL_SUBSCRIPTION_PAYMENT        = "Subscription Payment";
-const PAYPAL_MOBILE_PAYMENT              = "Mobile Payment";
-const PAYPAL_MASS_PAYMENT                = "Mass Pay Payment";
-const CHECK_FILE_PREFIX                  = "check";
-const NEWTON_TREE_CONSERVANCY_MENU       = "Newton Tree Conservancy";
-const ABOUT_MENU_ITEM                    = "About...";
-const IMPORT_DONATION_DATA_MENU_ITEM     = "Import donation data";
-const IMPORT_DONATION_DATA_TITLE         = "Import Donation Data";
-const ABOUT_TITLE                        = "About Donation Ledger Spreadsheet";
+const DEPLOYMENT_ID                         = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
+const DEPLOYMENT_VERSION                    = "3";
+const DONATION_DATA_RANGE                   = "donation_data";
+const PENDING_FOLDER_RANGE                  = "pending_folder";
+const IMPORTED_FOLDER_RANGE                 = "imported_folder";
+const ACK_FOLDER_RANGE                      = "acknowledgement_folder";
+const ZIPCODE_MINIMUM_LENGTH                = 5;
+const PROCESSING_EMAIL_DIST_LIST_RANGE      = "processing_email_dist_list"
+const PROCESSING_EMAIL_SENDER_NAME_RANGE    = "processing_email_sender_name"
+const PROCESSING_EMAIL_REPLY_TO_RANGE       = "processing_email_reply_to";
+const PROCESSING_RESULT_BODY_TEMPLATE_RANGE = "processing_email_body_template";
+const IMPORT_RESULT_EMAIL_SUBJECT_RANGE     = "import_result_email_subject";
+const ACK_EMAIL_BODY_TEMPLATE_RANGE         = "acknowledgement_email_body_template";
+const ACK_RESULT_EMAIL_SUBJECT_RANGE        = "acknowledgement_result_email_subject";
+const NTC_FIRST_DATA_ROW_RANGE              = "ntc_first_data_row";
+const PAYPAL_FIRST_DATA_ROW_RANGE           = "paypal_first_data_row";
+const DONATION_NEW_ROW_BACKGROUND           = "#fffcd3";
+const ADDRESS_JOIN_SEPARATOR                = ", ";
+const PAYPAL_FILE_PREFIX                    = "paypal";
+const PAYPAL_FILE_FIELD_COUNT               = 41;
+const PAYPAL_DONATION_PAYMENT               = "Donation Payment";
+const PAYPAL_SUBSCRIPTION_PAYMENT           = "Subscription Payment";
+const PAYPAL_MOBILE_PAYMENT                 = "Mobile Payment";
+const PAYPAL_MASS_PAYMENT                   = "Mass Pay Payment";
+const CHECK_FILE_PREFIX                     = "check";
+const NEWTON_TREE_CONSERVANCY_MENU          = "Newton Tree Conservancy";
+const ABOUT_MENU_ITEM                       = "About...";
+const IMPORT_DONATION_DATA_MENU_ITEM        = "Import donation data";
+const IMPORT_DONATION_DATA_TITLE            = "Import Donation Data";
+const SEND_DONATION_ACKS_MENU_ITEM          = "Send donation acknowledgements";
+const SEND_DONATION_ACKS_DATA_TITLE         = "Send Donation Acknowledgements";
+const ABOUT_TITLE                           = "About Donation Ledger Spreadsheet";
 
 // Payment types
 // P1 Regular tax deductible one time gift from PayPal
@@ -63,7 +67,7 @@ const PAYMENT_TYPE_D1 = "D1";
 const PAYMENT_TYPE_I1 = "I1";
 
 // Payment sources
-const PAYMENT_SOURCE_PAYPAL ="PayPal";
+const PAYMENT_SOURCE_PAYPAL = "PayPal";
 
 function onOpen(e) {
   let ui = SpreadsheetApp.getUi();
@@ -71,6 +75,7 @@ function onOpen(e) {
   ui.
     createMenu(NEWTON_TREE_CONSERVANCY_MENU).
       addItem(IMPORT_DONATION_DATA_MENU_ITEM, "onImportDonationData").
+      //dah addItem(SEND_DONATION_ACKS_MENU_ITEM, "onSendDonationAcks").
       addSeparator().
       addItem(ABOUT_MENU_ITEM, "onAbout").
       addToUi();
@@ -78,6 +83,10 @@ function onOpen(e) {
 
 function onScheduledImport() {
   onImportDonationData(false, true);
+}
+
+function onScheduledSendDonationAcks() {
+  onSendDonationAcks(false, true);
 }
 
 function onImportDonationData(displayResult = true, emailResult = false) {
@@ -91,7 +100,7 @@ function onImportDonationData(displayResult = true, emailResult = false) {
     pendingFolder = DriveApp.getFolderById(pendingFolderRange.getValue());
   }
   else {
-    throw Error(`${PENDING_FOLDER_RANGE} range is not defined`);
+    throw Error(`${PENDING_FOLDER_RANGE} named range is not defined`);
   }
 
   let importedFolderRange = sheet.getRange(IMPORTED_FOLDER_RANGE);
@@ -100,7 +109,7 @@ function onImportDonationData(displayResult = true, emailResult = false) {
     importedFolder = DriveApp.getFolderById(importedFolderRange.getValue());
   }
   else {
-    throw Error(`${IMPORTED_FOLDER_RANGE} range is not defined`);
+    throw Error(`${IMPORTED_FOLDER_RANGE} named range is not defined`);
   }
 
   if ((pendingFolder != null) && (importedFolder != null)) {
@@ -120,26 +129,9 @@ function onImportDonationData(displayResult = true, emailResult = false) {
       result += "</ul>"
 
       if (emailResult) {
-        let senderName       = sheet.getRange(IMPORT_ACK_EMAIL_SENDER_NAME_RANGE).getValue();
-        let distributionList = sheet.getRange(IMPORT_ACK_EMAIL_DIST_LIST_RANGE).getValue();
-        let replyTo          = sheet.getRange(IMPORT_ACK_EMAIL_REPLY_TO_RANGE).getValue();
-        let subject          = sheet.getRange(IMPORT_ACK_EMAIL_SUBJECT_RANGE).getValue();
-        let body             = sheet.getRange(IMPORT_ACK_EMAIL_BODY_RANGE).getValue();
-
         result += `<p><p>View changes to the donation ledger by clicking <a href="${sheet.getParent().getUrl()}">here</a>.</p></p>`;
 
-        body = body.replace(IMPORT_ACK_EMAIL_BODY_TAG, result);
-        
-        MailApp.sendEmail(
-          distributionList,
-          subject,
-          null,
-          {
-            htmlBody: body,
-            replyTo : replyTo,
-            name    : senderName
-          }
-        );
+        emailProcessingResult_(sheet.getRange(IMPORT_RESULT_EMAIL_SUBJECT_RANGE).getValue(), result);
       }
     }
     else {
@@ -153,6 +145,32 @@ function onImportDonationData(displayResult = true, emailResult = false) {
       ui.showModelessDialog(html, IMPORT_DONATION_DATA_TITLE);
     }
   }
+}
+
+//dah:in progress...
+function onSendDonationAcks(displayResult = true, emailResult = false) {
+  let sheet     = getDonationDataSheet_();
+  let ackFolder = null;
+
+  let ackFolderRange = sheet.getRange(ACK_FOLDER_RANGE);
+
+  if (ackFolderRange != undefined) {
+    ackFolder = DriveApp.getFolderById(ackFolderRange.getValue());
+  }
+  else {
+    throw Error(`${ACK_FOLDER_RANGE} named range is not defined`);
+  }
+
+  if (ackFolder != null) {
+    let stats = generateDonationAcks_(sheet, ackFolder);
+
+    let result = "";
+
+    if (stats.length > 0) {
+    }
+  }
+
+  console.log("onSendDonationAcks is in progress!!!");
 }
 
 function onAbout() {
@@ -181,7 +199,7 @@ function importPendingFiles_(sheet, pendingFolder, importedFolder) {
     ntcFirstDataRow = ntcFirstDataRowRange.getValue();
   }
   else {
-    throw Error(`${NTC_FIRST_DATA_ROW_RANGE} range is not defined`);
+    throw Error(`${NTC_FIRST_DATA_ROW_RANGE} named range is not defined`);
   }  
 
   let paypalFirstDataRow    = undefined;
@@ -193,7 +211,7 @@ function importPendingFiles_(sheet, pendingFolder, importedFolder) {
     paypalFirstDataRow = paypalFirstDataRowRange.getValue();
   }
   else {
-    throw Error(`${PAYPAL_FIRST_DATA_ROW_RANGE} range is not defined`);
+    throw Error(`${PAYPAL_FIRST_DATA_ROW_RANGE} named range is not defined`);
   }
 
   let firstInsertionRow    = ntcFirstDataRow;
@@ -256,7 +274,7 @@ function importPayPalCsv_(sheet, file, firstDataRow, firstDataColumn, firstInser
 }
 
 function normalizePaypalData_(data, firstDataRow) {
-  //out:Admin|Donation date|Last name|First name|Salutation/Other Names|Gross|Fee|Net|Payment type|Payment source |Payment Notes|Email address|Street address|City|State|Zip code
+  //out:Ack emailed or generated|Donation date|Last name|First name|Salutation/Other Names|Gross|Fee|Net|Payment type|Payment source |Payment Notes|Email address|Street address|City|State|Zip code
 
   let rows = [];
 
@@ -266,7 +284,7 @@ function normalizePaypalData_(data, firstDataRow) {
     if (isPayPalDonation_(donationType)) {
       let row = [];
 
-      // Admin
+      // Ack emailed or generated
       row.push("");
 
       // Donation date
@@ -388,12 +406,10 @@ function importSpreadsheet_(sheet, file, firstDataRow, firstDataColumn, firstIns
   let range = SpreadsheetApp.openById(file.getId()).getRangeByName(DONATION_DATA_RANGE);
 
   if (range != null) {
-    let donationSheet = range.getSheet();
-    let donationRange = donationSheet.getDataRange();
+    range     = range.getSheet().getDataRange();
+    totalRows = range.getNumRows();
 
-    totalRows = donationRange.getNumRows();
-
-    let rows = normalizeCheckData_(donationRange.getValues(), firstDataRow);
+    let rows = normalizeCheckData_(range.getValues(), firstDataRow);
 
     numRows    = rows.length;
     numColumns = rows[0].length;
@@ -403,20 +419,25 @@ function importSpreadsheet_(sheet, file, firstDataRow, firstDataColumn, firstIns
   else {
     aOkay = false;
 
-    numRows = `${DONATION_DATA_RANGE} range is not defined in ${file.getName()}`;
+    numRows = `${DONATION_DATA_RANGE} named range is not defined in ${file.getName()}`;
   }
 
   return [aOkay, file.getName(), totalRows, numRows];
 }
 
 function normalizeCheckData_(data, firstDataRow) {
-  //out:Admin|Donation date|Last name|First name|Salutation/Other Names|Gross|Fee|Net|Payment type|Payment source |Payment Notes|Email address|Street address|City|State|Zip code
+  //out:Ack emailed or generated|Donation date|Last name|First name|Salutation/Other Names|Gross|Fee|Net|Payment type|Payment source |Payment Notes|Email address|Street address|City|State|Zip code
 
   data.splice(0, (firstDataRow - 1));
 
   let rows = data;
 
   data.forEach(function(r) {
+    r.unshift(1);
+
+    // Ack emailed or generated
+    r[0] = "";
+    
     // Donation date
     r[1] = normalizeDonationDate_(r[1]);
 
@@ -454,6 +475,121 @@ function normalizeDonationZipcode_(zipCode) {
   return normalizedZipcode;
 }
 
+//dah
+function generateDonationAcks_(sheet, ackFolder) {
+  let ntcFirstDataRow    = undefined;
+  let ntcFirstDataColumn = 1;
+  
+  let ntcFirstDataRowRange = sheet.getRange(NTC_FIRST_DATA_ROW_RANGE);
+
+  if (ntcFirstDataRowRange != undefined) {
+    ntcFirstDataRow = ntcFirstDataRowRange.getValue();
+  }
+  else {
+    throw Error(`${NTC_FIRST_DATA_ROW_RANGE} named range is not defined`);
+  }
+
+  let spreadsheet       = sheet.getParent();
+  let range             = sheet.getDataRange();
+  let numRows           = range.getLastRow() - ntcFirstDataRow + 1;
+  let numColumns        = range.getLastColumn();
+  let rowRange          = sheet.getRange(ntcFirstDataRow, ntcFirstDataColumn, numRows, numColumns);
+  let rowA1Notation     = `'${sheet.getName()}'!${rowRange.getA1Notation()}`;
+
+  let query = `=arrayformula(query({${rowA1Notation}, ROW(${rowA1Notation})}, "SELECT Col2 WHERE Col1 = FALSE", 0))`;
+
+  let queryResults = spreadsheet.insertSheet().hideSheet();
+  let donationData = null;
+
+  try {
+    queryResults.getRange(1,1).setFormula(query);
+
+    donationData = queryResults.getDataRange().getValues();
+  }
+  finally {
+    spreadsheet.deleteSheet(queryResults);
+  }
+
+  let totalAcks   = donationData.length;
+  let numEmails   = 0;
+  let numPdfs     = 0;
+  let numFailures = 0;
+
+  let stats = [];
+
+  donationData.forEach(function (d) {
+    let donationRange  = sheet.getRange(d[0], ntcFirstDataColumn, 1, numColumns);
+    let donationObject = toDonationObject_(donationRange.getValues()[0]);
+
+    let aOkay = false;
+
+    if (donation.emailAddress.length > 0) {
+      aOkay = sendEmail_(sheet, donationObject);
+    }
+    else {
+      aOkay = createPdf_(sheet, donationObject);
+    }
+  });
+
+  return [totalAcks, numEmails, numPdfs, numFailures];
+}
+
+function sendEmail_(sheet, donationObject) {
+  let aOkay = true;
+
+  return aOkay;
+}
+
+function createPdf_(sheet, donationObject) {
+  let aOkay = true;
+
+  return aOkay;
+}
+
+function emailProcessingResult_(subject, result) {
+  let senderName       = sheet.getRange(PROCESSING_EMAIL_SENDER_NAME_RANGE).getValue();
+  let distributionList = sheet.getRange(PROCESSING_EMAIL_DIST_LIST_RANGE).getValue();
+  let replyTo          = sheet.getRange(PROCESSING_EMAIL_REPLY_TO_RANGE).getValue();
+  let bodyTemplate     = HtmlService.createTemplateFromFile(sheet.getRange(PROCESSING_RESULT_BODY_TEMPLATE_RANGE).getValue());
+
+  bodyTemplate.bodyText = result;
+
+  let body = bodyTemplate.evaluate().getContent();
+
+  MailApp.sendEmail(
+    distributionList,
+    subject,
+    null,
+    {
+      htmlBody: body,
+      replyTo : replyTo,
+      name    : senderName
+    }
+  );
+}
+
+function toDonationObject_(donationRow) {
+  let donationObject = {
+    donationDate:  donationRow[1],
+    lastName:      donationRow[2],
+    firstName:     donationRow[3],
+    salutation:    donationRow[4],
+    gross:         donationRow[5],
+    fee:           donationRow[6],
+    net:           donationRow[7],
+    paymentType:   donationRow[8],
+    paymentSource: donationRow[9],
+    paymentNotes:  donationRow[10],
+    emailAddress:  donationRow[11],
+    streetAddress: donationRow[12],
+    city:          donationRow[13],
+    state:         donationRow[14],
+    zipCode:       donationRow[15]
+  };
+
+  return donationObject;
+}
+
 function isPayPalDonation_(donationType) {
   return ((donationType == PAYPAL_DONATION_PAYMENT) || 
           (donationType == PAYPAL_SUBSCRIPTION_PAYMENT) ||
@@ -485,6 +621,8 @@ function insertDonationData_(sheet, rows, firstInsertionRow, firstInsertionColum
     sheet.getRange(firstInsertionRow, firstInsertionColumn, numRows, numColumns).
       setValues(rows).
       setBackground(DONATION_NEW_ROW_BACKGROUND);
+    sheet.getRange(firstInsertionRow, firstInsertionColumn, numRows, firstInsertionColumn).
+      insertCheckboxes();
   }
 }
 

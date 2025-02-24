@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                            = "1DeKSwHUU3ECgFmC-odP_rpwQ6_Ba_Y_Oq5Ly4kNt-IUpHOctGIG1wRAS";
-const DEPLOYMENT_VERSION                       = "18";
+const DEPLOYMENT_VERSION                       = "19";
 const HEADER_ROW                               = 2;
 const PLANTING_DATE_RANGE                      = "planting_date";
 const GROUP_NAME_RANGE                         = "group_name";
@@ -24,7 +24,7 @@ const FORM_DATA_RANGE                          = "form_data";
 const APPL_ACK_EMAIL_SENDER_NAME_RANGE         = "application_ack_email_sender_name"
 const APPL_ACK_EMAIL_REPLY_TO_RANGE            = "application_ack_email_reply_to";
 const APPL_ACK_EMAIL_SUBJECT_RANGE             = "application_ack_email_subject";
-const APPL_ACK_EMAIL_BODY_RANGE                = "application_ack_email_body";
+const APPL_ACK_EMAIL_BODY_TEMPLATE_RANGE       = "application_ack_email_body_template";
 const EMAIL_ADDRESS_RANGE                      = "email_address";
 const PLANTER_FIRST_NAME_RANGE                 = "planter_first_name";
 const PLANTER_LAST_NAME_RANGE                  = "planter_last_name";
@@ -76,7 +76,7 @@ function onEdit(e) {
       if (parts.length == 2) {
         if (!Number.isNaN(Number.parseInt(parts[0])) && (parts[0].length == 4)) {
           if ((parts[1] == "Spring") || (parts[1] == "Fall")) {
-            e.range.setValue(parts[0] + " " + parts[1]);
+            e.range.setValue(`${parts[0]} ${parts[1]}`);
           }
           else {
             isLegalValue = false;
@@ -84,7 +84,7 @@ function onEdit(e) {
         }
         else if (!Number.isNaN(Number.parseInt(parts[1])) && (parts[1].length == 4)) {
           if ((parts[0] == "Spring") || (parts[0] == "Fall")) {
-            e.range.setValue(parts[1] + " " + parts[0]);
+            e.range.setValue(`${parts[1]} ${parts[0]}`);
           }
           else {
             isLegalValue = false;
@@ -103,8 +103,8 @@ function onEdit(e) {
       let ui         = SpreadsheetApp.getUi();
       let columnName = sheet.getRange(1, range.getLastColumn()).getValue();
 
-      ui.alert("Invalid Value Specified for " + columnName,
-        "Value \"" + e.value + "\" is invalid. Please specify \"YYYY\" followed by \"Spring\" or \"Fall\" with one space between the year and season, and the first letter of the season capitalized.\n\nExample: 2024 Spring",
+      ui.alert(`Invalid Value Specified for ${columnName}`,
+        `Value "${e.value}" is invalid. Please specify "YYYY" followed by "Spring" or "Fall" with one space between the year and season, and the first letter of the season capitalized.\n\nExample: 2024 Spring`,
         ui.ButtonSet.OK);
 
       e.range.setValue("");    
@@ -187,10 +187,12 @@ function onSubmit(e) {
       });
     }
 
-    let senderName = sheet.getRange(APPL_ACK_EMAIL_SENDER_NAME_RANGE).getValue();
-    let replyTo    = sheet.getRange(APPL_ACK_EMAIL_REPLY_TO_RANGE).getValue();
-    let subject    = sheet.getRange(APPL_ACK_EMAIL_SUBJECT_RANGE).getValue();
-    let body       = sheet.getRange(APPL_ACK_EMAIL_BODY_RANGE).getValue();
+    let senderName   = sheet.getRange(APPL_ACK_EMAIL_SENDER_NAME_RANGE).getValue();
+    let replyTo      = sheet.getRange(APPL_ACK_EMAIL_REPLY_TO_RANGE).getValue();
+    let subject      = sheet.getRange(APPL_ACK_EMAIL_SUBJECT_RANGE).getValue();
+    let bodyTemplate = HtmlService.createTemplateFromFile(sheet.getRange(APPL_ACK_EMAIL_BODY_TEMPLATE_RANGE).getValue());
+
+    let body = bodyTemplate.evaluate().getContent();
 
     MailApp.sendEmail(
       emailAddress,
@@ -222,7 +224,7 @@ function onArchiveDataForPlantingDate() {
 
     if (hits.length > 0) {
       let deletions = [];
-      let archive   = file.insertSheet(plantingDate + " " + "Archive", file.getSheets().length);
+      let archive   = file.insertSheet(`${plantingDate} Archive`, file.getSheets().length);
 
       sheet.getRange(HEADER_ROW, 1, 1, sheet.getLastColumn()).copyTo(archive.getRange("A1"));
 
@@ -240,7 +242,7 @@ function onArchiveDataForPlantingDate() {
     }
 
     ui.alert(COUNT_OF_ROW_ARCHIVED_TITLE,
-      "Number of rows archived is " + hits.length + ".",
+      `Number of rows archived is ${hits.length}.`,
       ui.ButtonSet.OK);
   }
 }
