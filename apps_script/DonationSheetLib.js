@@ -626,9 +626,9 @@ function createDocumentAck_(donationObject, ackFolder, body, isReviewNeeded) {
       pdfName = ACK_NEEDS_REVIEW_TAG + pdfName;
   }
 
-  let pdfBlob = Utilities.newBlob(body, 'text/html').getAs('application/pdf').setName(pdfName);
+  let pdfBlob = Utilities.newBlob(body, MimeType.HTML).getAs(MimeType.PDF).setName(pdfName);
   let pdfFile = DriveApp.createFile(pdfBlob);
-
+  
   pdfFile.moveTo(ackFolder);
 }
 
