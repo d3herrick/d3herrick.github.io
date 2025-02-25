@@ -32,10 +32,11 @@ const PROCESSING_EMAIL_REPLY_TO_RANGE       = "processing_email_reply_to";
 const PROCESSING_RESULT_BODY_TEMPLATE_RANGE = "processing_email_body_template";
 const IMPORT_RESULT_EMAIL_SUBJECT_RANGE     = "import_result_email_subject";
 const ACK_BODY_TEMPLATE_RANGE               = "acknowledgement_body_template";
+const ACK_SUBJECT_RANGE                     = "acknowledgement_subject";
 const ACK_RESULT_EMAIL_SUBJECT_RANGE        = "acknowledgement_result_email_subject";
+const ACK_NEEDS_REVIEW_TAG                  = "NEEDS_REVIEW_";
 const NTC_FIRST_DATA_ROW_RANGE              = "ntc_first_data_row";
 const PAYPAL_FIRST_DATA_ROW_RANGE           = "paypal_first_data_row";
-const DONATION_NEW_ROW_BACKGROUND           = "#fffcd3";
 const ADDRESS_JOIN_SEPARATOR                = ", ";
 const PAYPAL_FILE_PREFIX                    = "paypal";
 const PAYPAL_FILE_FIELD_COUNT               = 41;
@@ -75,7 +76,7 @@ function onOpen(e) {
   ui.
     createMenu(NEWTON_TREE_CONSERVANCY_MENU).
       addItem(IMPORT_DONATION_DATA_MENU_ITEM, "onImportDonationData").
-      //dah addItem(SEND_DONATION_ACKS_MENU_ITEM, "onSendDonationAcks").
+      addItem(SEND_DONATION_ACKS_MENU_ITEM, "onSendDonationAcks").
       addSeparator().
       addItem(ABOUT_MENU_ITEM, "onAbout").
       addToUi();
@@ -123,7 +124,7 @@ function onImportDonationData(displayResult = true, emailResult = false) {
       result += "<ul>"
 
       stats.forEach(function(s) {
-        result += `<li><p style="font-family:arial">${s[1]} (${s[2]}/${s[3]})</p>`;
+        result += `<li><p style="font-family:courier">${s[1]} (${s[2]}/${s[3]})</p>`;
       });
 
       result += "</ul>"
@@ -131,7 +132,7 @@ function onImportDonationData(displayResult = true, emailResult = false) {
       if (emailResult) {
         result += `<p><p>View changes to the donation ledger by clicking <a href="${sheet.getParent().getUrl()}">here</a>.</p></p>`;
 
-        emailProcessingResult_(sheet.getRange(IMPORT_RESULT_EMAIL_SUBJECT_RANGE).getValue(), result);
+        emailProcessingResult_(sheet, result);
       }
     }
     else {
@@ -147,7 +148,6 @@ function onImportDonationData(displayResult = true, emailResult = false) {
   }
 }
 
-//dah:in progress...
 function onSendDonationAcks(displayResult = true, emailResult = false) {
   let sheet     = getDonationDataSheet_();
   let ackFolder = null;
@@ -167,12 +167,35 @@ function onSendDonationAcks(displayResult = true, emailResult = false) {
     let result = "";
 
     if (stats.length > 0) {
-      //dah
+      result = "The following counts were recorded while processing donation acknowledgements:";
+
+      result += "<ul>"
+  
+      result += `<li><p style="font-family:courier">Total donations processed..........: ${s[0]}</p>`;
+      result += `<li><p style="font-family:courier">Email acknowledgements sent........: ${s[1]}</p>`;
+      result += `<li><p style="font-family:courier">Document acknowledgements generated: ${s[2]}</p>`;
+      result += `<li><p style="font-family:courier">Document acknowledgements to review: ${s[3]}</p>`;
+      result += `<li><p style="font-family:courier">Recurring donations skipped........: ${s[4]}</p>`;
+
+      result += "</ul>"
+
+      if (emailResult) {
+        result += `<p><p>View changes to the donation ledger by clicking <a href="${sheet.getParent().getUrl()}">here</a>.</p></p>`;
+
+        emailProcessingResult_(sheet, result);
+      }
+    }
+    else {
+      result = "No donations were pending processing";
+    }
+
+    if (displayResult) {
+      let ui   = SpreadsheetApp.getUi();
+      let html = HtmlService.createHtmlOutput(`<p style="font-family:arial">${result}</p>`);
+      
+      ui.showModelessDialog(html, IMPORT_DONATION_DATA_TITLE);
     }
   }
-
-  //dah
-  console.log("onSendDonationAcks is in progress!!!");
 }
 
 function onAbout() {
@@ -477,7 +500,6 @@ function normalizeDonationZipcode_(zipCode) {
   return normalizedZipcode;
 }
 
-//dah
 function generateDonationAcks_(sheet, ackFolder) {
   let ntcFirstDataRow    = undefined;
   let ntcFirstDataColumn = 1;
@@ -512,87 +534,109 @@ function generateDonationAcks_(sheet, ackFolder) {
     spreadsheet.deleteSheet(queryResults);
   }
 
-  let totalAcks   = ackData.length;
-  let numEmails   = 0;
-  let numPdfs     = 0;
-  let numFailures = 0;
-  
-  let bodyTemplate = HtmlService.createTemplateFromFile(sheet.getRange(ACK_BODY_TEMPLATE_RANGE).getValue());
-
   let stats = [];
 
-  ackData.forEach(function (a) {
-    let donationRange  = sheet.getRange(a[0], ntcFirstDataColumn, 1, numColumns);
-    let donationObject = toDonationObject_(donationRange.getValues()[0]);
+  if (ackData.length > 0) {
+    let emailProperties = {
+      senderName: sheet.getRange(PROCESSING_EMAIL_SENDER_NAME_RANGE).getValue(),
+      replyTo:    sheet.getRange(PROCESSING_EMAIL_REPLY_TO_RANGE).getValue(),
+      subject:    sheet.getRange(ACK_SUBJECT_RANGE).getValue()
+    };
 
-    bodyTemplate.ackCreationDate = new Intl.DateTimeFormat("en-US", {year: 'numeric', month: 'long', day: 'numeric'}).format(Date.now());
-    bodyTemplate.donationDate    = Intl.DateTimeFormat("en-US").format(donationObject.donationDate);
-    bodyTemplate.lastName        = donationObject.lastName;
-    bodyTemplate.firstName       = donationObject.firstName;
-    bodyTemplate.gross           = donationObject.gross;
-    bodyTemplate.paymentType     = donationObject.paymentType;
-    bodyTemplate.paymentSource   = donationObject.paymentSource;
-    bodyTemplate.emailAddress    = donationObject.emailAddress;
-    bodyTemplate.streetAddress   = donationObject.streetAddress;
-    bodyTemplate.city            = donationObject.city;
-    bodyTemplate.state           = donationObject.state;
-    bodyTemplate.zipCode         = donationObject.zipCode;
+    let bodyTemplate = HtmlService.createTemplateFromFile(sheet.getRange(ACK_BODY_TEMPLATE_RANGE).getValue());
 
-    let body = bodyTemplate.evaluate().getContent();
+    let totalAcks    = ackData.length;
+    let numEmailAcks = 0;
+    let numDocAcks   = 0;
+    let numReview    = 0;
+    let numRecurring = 0;
 
-    let aOkay = false;
+    ackData.forEach(function (a) {
+      let donationRange  = sheet.getRange(a[0], ntcFirstDataColumn, 1, numColumns);
+      let donationObject = toDonationObject_(donationRange.getValues()[0]);
 
-    if (donation.emailAddress.length > 0) {
-      aOkay = sendEmail_(sheet, donationObject, body);
+      bodyTemplate.ackCreationDate = new Intl.DateTimeFormat("en-US", {year: 'numeric', month: 'long', day: 'numeric'}).format(Date.now());
+      bodyTemplate.donationDate    = Intl.DateTimeFormat("en-US").format(donationObject.donationDate);
+      bodyTemplate.lastName        = donationObject.lastName;
+      bodyTemplate.firstName       = donationObject.firstName;
+      bodyTemplate.gross           = Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(donationObject.gross);
+      bodyTemplate.paymentType     = donationObject.paymentType;
+      bodyTemplate.paymentSource   = donationObject.paymentSource;
+      bodyTemplate.emailAddress    = donationObject.emailAddress;
+      bodyTemplate.streetAddress   = donationObject.streetAddress;
+      bodyTemplate.city            = donationObject.city;
+      bodyTemplate.state           = donationObject.state;
+      bodyTemplate.zipCode         = donationObject.zipCode;
 
-      if (aOkay) {
-        numEmails++;
+      let body = bodyTemplate.evaluate().getContent();
+
+      switch (donationObject.paymentType) {
+        case PAYMENT_TYPE_P1:
+          sendEmailAck_(emailProperties, body);
+          numEmailAcks++;
+          break;
+
+        case PAYMENT_TYPE_P2:
+          numRecurring++;
+          break;
+
+        case PAYMENT_TYPE_P3:
+          createDocumentAck_(donationObject, ackFolder, body, true);
+          numReview++;
+          numDocAcks++;
+          break;
+
+        case PAYMENT_TYPE_C1:
+        case PAYMENT_TYPE_D1:
+        case PAYMENT_TYPE_I1:
+          createDocumentAck_(donationObject, ackFolder, body, false);
+          numDocAcks++;
+          break;
+
+        default:
+          break;
       }
-    }
-    else {
-      aOkay = createPdf_(sheet, donationObject, body);
 
-      if (aOkay) {
-        numPdfs++;
-      }
-    }
+      sheet.getRange(a[0], ntcFirstDataColumn).check();
+    });
 
-    if (aOkay) {
-      //dah:reset background of row
-      //dah:set ack generated to true
-    }
-    else {
-      numFailures++;
-    }
+    stats = [totalAcks, numEmailAcks, numDocAcks, numReview, numRecurring]; 
+  }
 
-    bodyOutput.clear();
-  });
-
-  return [totalAcks, numEmails, numPdfs, numFailures];
+  return stats;
 }
 
-function sendEmail_(sheet, donationObject, body) {
-  let aOkay = true;
-
-  let senderName   = sheet.getRange(PROCESSING_EMAIL_SENDER_NAME_RANGE).getValue();
-  let emailAddress = "d3herrick@gmail.com"; //dah donationObject.emailAddress;
-  let replyTo      = sheet.getRange(PROCESSING_EMAIL_REPLY_TO_RANGE).getValue();
-  
-
-
-  return aOkay;
+function sendEmailAck_(emailProperties, body) {
+  MailApp.sendEmail(
+    "d3herrick@gmail.com", //dah donationObject.emailAddress;,
+    emailProperties.subject,
+    null,
+    {
+      htmlBody: body,
+      replyTo : emailProperties.replyTo,
+      name    : emailProperties.senderName
+    }
+  );
 }
 
-function createPdf_(sheet, donationObject, body) {
-  let aOkay = true;
+function createDocumentAck_(donationObject, ackFolder, body, isReviewNeeded) {
+  let pdfName = `${donationObject.lastName}_${donationObject.firstName}_${Intl.DateTimeFormat("en-US").format(donationObject.donationDate)}.pdf`;
 
-  return aOkay;
+  if (isReviewNeeded) {
+      pdfName = ACK_NEEDS_REVIEW_TAG + pdfName;
+  }
+
+  let pdfBlob = Utilities.newBlob(body, 'text/html').getAs('application/pdf').setName(pdfName);
+  let pdfFile = DriveApp.createFile(pdfBlob);
+
+  pdfFile.moveTo(ackFolder);
 }
 
-function emailProcessingResult_(subject, result) {
+function emailProcessingResult_(sheet, result) {
   let senderName       = sheet.getRange(PROCESSING_EMAIL_SENDER_NAME_RANGE).getValue();
   let distributionList = sheet.getRange(PROCESSING_EMAIL_DIST_LIST_RANGE).getValue();
   let replyTo          = sheet.getRange(PROCESSING_EMAIL_REPLY_TO_RANGE).getValue();
+  let subject          = sheet.getRange(IMPORT_RESULT_EMAIL_SUBJECT_RANGE).getValue()
   let bodyTemplate     = HtmlService.createTemplateFromFile(sheet.getRange(PROCESSING_RESULT_BODY_TEMPLATE_RANGE).getValue());
 
   bodyTemplate.result = result;
@@ -662,8 +706,7 @@ function insertDonationData_(sheet, rows, firstInsertionRow, firstInsertionColum
 
     sheet.insertRows(firstInsertionRow, numRows);
     sheet.getRange(firstInsertionRow, firstInsertionColumn, numRows, numColumns).
-      setValues(rows).
-      setBackground(DONATION_NEW_ROW_BACKGROUND);
+      setValues(rows);
     sheet.getRange(firstInsertionRow, firstInsertionColumn, numRows, firstInsertionColumn).
       insertCheckboxes();
   }

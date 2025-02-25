@@ -1,7 +1,15 @@
 <!DOCTYPE html>
 <html>
-<body style="font-family:calibri">
-<img src="ntc_logo.png" alt="Newton Tree Conservancy" width="110" height="110">
+<head>
+<style>
+  *{
+  font-family: Arial;
+  font-size: 12px;
+  }
+</style
+</head>
+<body>
+<img src="https://images.squarespace-cdn.com/content/v1/5ea86c823cbaca067695a6c9/1592434962146-Y2ZXU6QJR4F3A2R3ZT2Y/ntc+logo+tight-01.png?format=300w" alt="Newton Tree Conservancy" width="110" height="110"/>
 <p>
 P.O. Box 233
 <br>Newton, MA 02460
@@ -31,10 +39,14 @@ very generous
 generous
 <? } ?>
 contribution of <?!=gross ?> that we received on <?!=donationDate ?> from
-<? if (paymentType != "C1") { ?>
-a check.
+<? if ((paymentType != "P1") || (paymentType != "P2") || (paymentType != "P3")) { ?>
+a credit card.
+<? } else if (paymentType != "D1") { ?>
+a Donor Advised Fund.
+<? } else if (paymentType != "I1") { ?>
+an IRA distribution.
 <? } else { ?>
-<?!=paymentSource?>.
+a check.
 <? } ?>
 </p>
 </p>
