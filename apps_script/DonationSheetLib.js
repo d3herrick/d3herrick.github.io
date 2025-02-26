@@ -48,8 +48,8 @@ const NEWTON_TREE_CONSERVANCY_MENU          = "Newton Tree Conservancy";
 const ABOUT_MENU_ITEM                       = "About...";
 const IMPORT_DONATION_DATA_MENU_ITEM        = "Import donation data";
 const IMPORT_DONATION_DATA_TITLE            = "Import Donation Data";
-const SEND_DONATION_ACKS_MENU_ITEM          = "Send donation acknowledgements";
-const SEND_DONATION_ACKS_DATA_TITLE         = "Send Donation Acknowledgements";
+const GENERATE_DONATION_ACKS_MENU_ITEM      = "Generate donation acknowledgements";
+const GENERATE_DONATION_ACKS_DATA_TITLE     = "Generate Donation Acknowledgements";
 const ABOUT_TITLE                           = "About Donation Ledger Spreadsheet";
 
 // Payment types
@@ -75,7 +75,7 @@ function onOpen(e) {
   ui.
     createMenu(NEWTON_TREE_CONSERVANCY_MENU).
       addItem(IMPORT_DONATION_DATA_MENU_ITEM, "onImportDonationData").
-      addItem(SEND_DONATION_ACKS_MENU_ITEM, "onSendDonationAcks").
+      addItem(GENERATE_DONATION_ACKS_MENU_ITEM, "onGenerateDonationAcks").
       addSeparator().
       addItem(ABOUT_MENU_ITEM, "onAbout").
       addToUi();
@@ -85,11 +85,11 @@ function onScheduledImport() {
   onImportDonationData(false, true);
 }
 
-function onScheduledSendDonationAcks() {
-  onSendDonationAcks(false, true);
+function onScheduledGenerateDonationAcks() {
+  onGenerateDonationAcks(false, true);
 }
 
-function onImportDonationData(displayResult = true, emailResult = false) {
+function onImportDonationData(displayResult = true, emailResult = true /*dah false*/) {
   let sheet          = getDonationDataSheet_();
   let pendingFolder  = null;
   let importedFolder = null;
@@ -113,41 +113,69 @@ function onImportDonationData(displayResult = true, emailResult = false) {
   }
 
   if ((pendingFolder != null) && (importedFolder != null)) {
-    let stats = importPendingFiles_(sheet, pendingFolder, importedFolder);
-
+    let stats  = importPendingFiles_(sheet, pendingFolder, importedFolder);
     let result = "";
 
     if (stats.length > 0) {
-      result = "The following files (total/payments) were imported:";
+      result = `<p style="font-family:arial;font-size:12px;">The following files (total/payments) were imported:</p>`;
 
       result += "<ul>"
 
       stats.forEach(function(s) {
-        result += `<li style="font-family:courier">${s[1]} (${s[2]}/${s[3]})</li>`;
+        result += `<li style="font-family:courier;font-size:12px;">${s.fileStats[1]} (${s.fileStats[2]}/${s.fileStats[3]})</li>`;
       });
 
       result += "</ul>"
 
+      stats.forEach(function(s) {
+        if (s.paymentNotes.length > 0) {
+          result += `<p><p style="font-family:arial;font-size:12px;">The following donations included a payment note:</p></p>`;
+          result += 
+            `<p>
+            <table style="font-family:arial;font-size:12px;border-collapse: collapse;border: 2px solid;letter-spacing: 1px;">
+            <tr>
+            <th style="vertical-align:bottom;background-color: LightGray;border: 1px solid;text-align:left;vertical-align:bottom;white-space: nowrap;">Donation date
+            <th style="vertical-align:bottom;background-color: LightGray;border: 1px solid;text-align:left;vertical-align:bottom;">Last name
+            <th style="vertical-align:bottom;background-color: LightGray;border: 1px solid;text-align:left;vertical-align:bottom;">First name
+            <th style="vertical-align:bottom;background-color: LightGray;border: 1px solid;text-align:left;vertical-align:bottom;">Payment note
+            </tr>`;
+
+          s.paymentNotes.forEach(function (n) {
+            result +=
+              `<tr>
+              <td style="border: 1px solid;text-align:left;vertical-align:top;">${n[0]}</td>
+              <td style="border: 1px solid;text-align:left;vertical-align:top;">${n[1]}</td>
+              <td style="border: 1px solid;text-align:left;vertical-align:top;">${n[2]}</td>
+              <td style="border: 1px solid;text-align:left;vertical-align:top;">${n[3]}</td>
+              </tr>`;
+          });
+
+          result += 
+            `</table>
+            </p>`;
+        }
+      });
+
       if (emailResult) {
-        result += `<p><p>View changes to the donation ledger by clicking <a href="${sheet.getParent().getUrl()}">here</a>.</p></p>`;
+        result += `<p><p style="font-family:arial;font-size:12px;">View changes to the donation ledger by clicking <a href="${sheet.getParent().getUrl()}">here</a>.</p></p>`;
 
         sendEmailProcessingResult_(sheet, sheet.getRange(IMPORT_RESULT_EMAIL_SUBJECT_RANGE).getValue(), result);
       }
     }
     else {
-      result = "No files were pending import";
+      result = `<p style="font-family:arial;font-size:12px;">No files were pending import</p>`;
     }
 
     if (displayResult) {
       let ui   = SpreadsheetApp.getUi();
-      let html = HtmlService.createHtmlOutput(`<p style="font-family:arial">${result}</p>`);
+      let html = HtmlService.createHtmlOutput(`<p style="font-family:Arial;font-size:12px;">${result}</p>`);
       
       ui.showModelessDialog(html, IMPORT_DONATION_DATA_TITLE);
     }
   }
 }
 
-function onSendDonationAcks(displayResult = true, emailResult = false) {
+function onGenerateDonationAcks(displayResult = true, emailResult = false) {
   let sheet     = getDonationDataSheet_();
   let ackFolder = null;
 
@@ -161,35 +189,34 @@ function onSendDonationAcks(displayResult = true, emailResult = false) {
   }
 
   if (ackFolder != null) {
-    let stats = generateDonationAcks_(sheet, ackFolder);
-
+    let stats  = generateDonationAcks_(sheet, ackFolder)
     let result = "";
 
     if (stats.length > 0) {
-      result = "The following counts were recorded while processing donation acknowledgements:";
+      result = `<p style="font-family:arial;font-size:12px;">The following counts were recorded while processing donation acknowledgements:</p>`;
 
       result += "<ul>"
   
-      result += `<li style="font-family:courier">Total donations processed........: ${stats[0]}</li>`;
-      result += `<li style="font-family:courier">Email acknowledgements sent......: ${stats[1]}</li>`;
-      result += `<li style="font-family:courier">Document acknowledgements created: ${stats[2]}</li>`;
-      result += `<li style="font-family:courier">Recurring donations skipped......: ${stats[3]}</li>`;
+      result += `<li style="font-family:courier">Total donations processed........: ${stats.ackStats[0]}</li>`;
+      result += `<li style="font-family:courier">Email acknowledgements sent......: ${stats.ackStats[1]}</li>`;
+      result += `<li style="font-family:courier">Document acknowledgements created: ${stats.ackStats[2]}</li>`;
+      result += `<li style="font-family:courier">Recurring donations skipped......: ${stats.ackStats[3]}</li>`;
 
       result += "</ul>"
 
       if (emailResult) {
-        result += `<p><p>View changes to the donation ledger by clicking <a href="${sheet.getParent().getUrl()}">here</a>.</p></p>`;
+        result += `<p><p style="font-family:arial;font-size:12px;">View changes to the donation ledger by clicking <a href="${sheet.getParent().getUrl()}">here</a>.</p></p>`;
 
         sendEmailProcessingResult_(sheet, sheet.getRange(ACK_RESULT_EMAIL_SUBJECT_RANGE).getValue(), result);
       }
     }
     else {
-      result = "No donations were pending processing";
+      result = `<p style="font-family:arial;font-size:12px;">No donations were pending processing</p>`;
     }
 
     if (displayResult) {
       let ui   = SpreadsheetApp.getUi();
-      let html = HtmlService.createHtmlOutput(`<p style="font-family:arial">${result}</p>`);
+      let html = HtmlService.createHtmlOutput(`<p style="font-family:arial;font-size:12px;">${result}</p>`);
       
       ui.showModelessDialog(html, IMPORT_DONATION_DATA_TITLE);
     }
@@ -255,10 +282,13 @@ function importPendingFiles_(sheet, pendingFolder, importedFolder) {
       stat = importSpreadsheet_(sheet, f, ntcFirstDataRow, ntcFirstDataColumn, firstInsertionRow, firstInsertionColumn);
     }
     else {
-      stat = [false, `${fileName}`, 0, `${f.getName()} is an unsupported file type`];
+      stat = {
+        fileStats:    [false, `${fileName}`, 0, `${f.getName()} is an unsupported file type`],
+        paymentNotes: []
+      };
     }
 
-    if (stat[0] == true) {
+    if (stat.fileStats[0] == true) {
       f.moveTo(importedFolder);
     }
 
@@ -271,21 +301,24 @@ function importPendingFiles_(sheet, pendingFolder, importedFolder) {
 function importPayPalCsv_(sheet, file, firstDataRow, firstDataColumn, firstInsertionRow, firstInsertionColumn) {
   let aOkay = true;
 
-  let totalRows  = 0;
-  let numRows    = 0;
-  let numColumns = 0;
+  let totalRows    = 0;
+  let numRows      = 0;
+  let numColumns   = 0;
+  let paymentNotes = [];
 
   let data = Utilities.parseCsv(file.getBlob().getDataAsString());
 
   if (data[0].length == PAYPAL_FILE_FIELD_COUNT) {
     totalRows = data.length;
 
-    let rows = normalizePaypalData_(data, firstDataRow);
+    let donations = normalizePaypalData_(data, firstDataRow);
 
-    numRows    = rows.length;
-    numColumns = rows[0].length;
+    numRows    = donations.length;
+    numColumns = donations[0].length;
 
-    insertDonationData_(sheet, rows, firstInsertionRow, firstInsertionColumn, numRows, numColumns);
+    insertDonationData_(sheet, donations, firstInsertionRow, firstInsertionColumn, numRows, numColumns);
+
+    paymentNotes = tabulatePaymentNotes_(donations);
   }
   else {
     aOkay = false;
@@ -293,11 +326,14 @@ function importPayPalCsv_(sheet, file, firstDataRow, firstDataColumn, firstInser
     numRows = `${file.getName()} contains unexpected number of fields: expected ${PAYPAL_FILE_FIELD_COUNT} found ${data[0].length}`;
   }
 
-  return [aOkay, file.getName(), totalRows, numRows];
+  return {
+    fileStats:    [aOkay, file.getName(), totalRows, numRows],
+    paymentNotes: paymentNotes
+  };
 }
 
 function normalizePaypalData_(data, firstDataRow) {
-  //out:Ack emailed or generated|Donation date|Last name|First name|Salutation/Other Names|Gross|Fee|Net|Payment type|Payment source |Payment Notes|Email address|Street address|City|State|Zip code
+  //out:Ack emailed or generated|Donation date|Last name|First name|Salutation/Other names|Gross|Fee|Net|Payment type|Payment source |Payment note|Email address|Street address|City|State|Zip code
 
   let rows = [];
 
@@ -387,7 +423,7 @@ function normalizePaypalData_(data, firstDataRow) {
       // Payment source 
       row.push(PAYMENT_SOURCE_PAYPAL);
       
-      // Payment Notes
+      // Payment note
       row.push(r[38].trim());
       
       // Email address
@@ -422,9 +458,10 @@ function normalizePaypalData_(data, firstDataRow) {
 function importSpreadsheet_(sheet, file, firstDataRow, firstDataColumn, firstInsertionRow, firstInsertionColumn) {
   let aOkay = true;
 
-  let totalRows  = 0;
-  let numRows    = 0;
-  let numColumns = 0;
+  let totalRows    = 0;
+  let numRows      = 0;
+  let numColumns   = 0;
+  let paymentNotes = [];
 
   let range = SpreadsheetApp.openById(file.getId()).getRangeByName(DONATION_DATA_RANGE);
 
@@ -432,12 +469,14 @@ function importSpreadsheet_(sheet, file, firstDataRow, firstDataColumn, firstIns
     range     = range.getSheet().getDataRange();
     totalRows = range.getNumRows();
 
-    let rows = normalizeCheckData_(range.getValues(), firstDataRow);
+    let donations = normalizeCheckData_(range.getValues(), firstDataRow);
 
-    numRows    = rows.length;
-    numColumns = rows[0].length;
+    numRows    = donations.length;
+    numColumns = donations[0].length;
 
-    insertDonationData_(sheet, rows, firstInsertionRow, firstInsertionColumn, numRows, numColumns);
+    insertDonationData_(sheet, donations, firstInsertionRow, firstInsertionColumn, numRows, numColumns);
+
+    paymentNotes = tabulatePaymentNotes_(donations);
   }
   else {
     aOkay = false;
@@ -445,11 +484,14 @@ function importSpreadsheet_(sheet, file, firstDataRow, firstDataColumn, firstIns
     numRows = `${DONATION_DATA_RANGE} named range is not defined in ${file.getName()}`;
   }
 
-  return [aOkay, file.getName(), totalRows, numRows];
+  return {
+    fileStats:    [aOkay, file.getName(), totalRows, numRows],
+    paymentNotes: paymentNotes
+  };
 }
 
 function normalizeCheckData_(data, firstDataRow) {
-  //out:Ack emailed or generated|Donation date|Last name|First name|Salutation/Other Names|Gross|Fee|Net|Payment type|Payment source |Payment Notes|Email address|Street address|City|State|Zip code
+  //out:Ack emailed or generated|Donation date|Last name|First name|Salutation/Other names|Gross|Fee|Net|Payment type|Payment source |Payment note|Email address|Street address|City|State|Zip code
 
   data.splice(0, (firstDataRow - 1));
 
@@ -463,6 +505,36 @@ function normalizeCheckData_(data, firstDataRow) {
     
     // Donation date
     r[1] = normalizeDonationDate_(r[1]);
+
+    // Last name
+    r[2] = r[2].trim();
+
+    // First name
+    r[3] = r[3].trim();
+
+    // Salutation/Other names
+    r[4] = r[4].trim();
+
+    // Payment type
+    r[8] = r[8].trim();
+
+    // Payment source
+    r[9] = r[9].trim();
+    
+    // Payment note
+    r[10] = r[10].trim();
+    
+    // Email address
+    r[11] = r[11].trim();
+    
+    // Street address
+    r[12] = r[12].trim();
+    
+    // City
+    r[13] = r[13].trim();
+    
+    // State
+    r[14] = r[14].trim();
 
     // Zip code
     r[15] = normalizeDonationZipcode_(r[15]);
@@ -496,6 +568,26 @@ function normalizeDonationZipcode_(zipCode) {
   }
 
   return normalizedZipcode;
+}
+
+function tabulatePaymentNotes_(donations) {
+  let paymentNotes = [];
+
+  if (donations.length > 0) {
+    donations.forEach(function (d) {
+      let donationObject = toDonationObject_(d);
+
+      if (donationObject.paymentNote.length > 0) {
+        paymentNotes.push([donationObject.donationDate,
+          donationObject.lastName,
+          donationObject.firstName,
+          donationObject.paymentNote
+        ]);
+      }
+    });
+  }
+
+  return paymentNotes;
 }
 
 function generateDonationAcks_(sheet, ackFolder) {
@@ -593,7 +685,9 @@ function generateDonationAcks_(sheet, ackFolder) {
     stats = [totalAcks, numEmailAcks, numDocAcks, numRecurring]; 
   }
 
-  return stats;
+  return {
+    ackStats: stats
+  };
 }
 
 function sendEmailAck_(emailProperties, bodyTemplate) {
@@ -658,7 +752,7 @@ function toDonationObject_(donationRow) {
     net:           donationRow[7],
     paymentType:   donationRow[8],
     paymentSource: donationRow[9],
-    paymentNotes:  donationRow[10],
+    paymentNote:   donationRow[10],
     emailAddress:  donationRow[11],
     streetAddress: donationRow[12],
     city:          donationRow[13],
@@ -690,15 +784,15 @@ function sortPendingFiles_(unsortedFiles) {
   return sortedFiles;
 }
 
-function insertDonationData_(sheet, rows, firstInsertionRow, firstInsertionColumn, numRows, numColumns) {
-  if (rows.length > 0) {
-    if (rows.length > 1) {
-      rows.sort((a, b) => new Date(b[1]) - new Date(a[1]));
+function insertDonationData_(sheet, donations, firstInsertionRow, firstInsertionColumn, numRows, numColumns) {
+  if (donations.length > 0) {
+    if (donations.length > 1) {
+      donations.sort((a, b) => new Date(b[1]) - new Date(a[1]));
     }
 
     sheet.insertRows(firstInsertionRow, numRows);
     sheet.getRange(firstInsertionRow, firstInsertionColumn, numRows, numColumns).
-      setValues(rows);
+      setValues(donations);
     sheet.getRange(firstInsertionRow, firstInsertionColumn, numRows, firstInsertionColumn).
       insertCheckboxes();
   }
