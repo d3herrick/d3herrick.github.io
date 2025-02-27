@@ -309,7 +309,7 @@ function importPayPalCsv_(sheet, file, firstDataRow, firstDataColumn, firstInser
   if (data[0].length == PAYPAL_FILE_FIELD_COUNT) {
     totalRows = data.length;
 
-    let donations = removeEmptyRows_(normalizePaypalData_(data), firstDataRow);
+    let donations = normalizePaypalData_(data, firstDataRow);
 
     numRows    = donations.length;
     numColumns = donations[0].length;
@@ -336,117 +336,119 @@ function normalizePaypalData_(data, firstDataRow) {
   let rows = [];
 
   data.forEach(function(r) {
-    let donationType = r[4];
+    if (!isEmptyRow_(r)) {
+      let donationType = r[4];
 
-    if (isPayPalDonation_(donationType)) {
-      let row = [];
+      if (isPayPalDonation_(donationType)) {
+        let row = [];
 
-      // Ack emailed or generated
-      row.push("");
+        // Ack emailed or generated
+        row.push("");
 
-      // Donation date
-      row.push(normalizeDonationDate_(r[0]));
+        // Donation date
+        row.push(normalizeDonationDate_(r[0]));
 
-      // Shipping address tokenizes the its fields, including first and last "name", so it's the preferred source for those values
-      let shippingAddress = r[13].trim();
-      let lastName        = "";
-      let firstName       = "";
+        // Shipping address tokenizes the its fields, including first and last "name", so it's the preferred source for those values
+        let shippingAddress = r[13].trim();
+        let lastName        = "";
+        let firstName       = "";
 
-      if (shippingAddress.length > 0) {
-        let tokens = shippingAddress.split(/\s*,\s*/)
+        if (shippingAddress.length > 0) {
+          let tokens = shippingAddress.split(/\s*,\s*/)
 
-        lastName  = tokens[1];
-        firstName = tokens[0];
-      }
-      else if (donationType == PAYPAL_MASS_PAYMENT) {
-        lastName  = r[3].trim();
-        firstName = "";
-      }
-      else {
-        let tokens = r[3].trim().split(/\s+/);
-
-        if (tokens.length > 1) {
-          lastName  = tokens[tokens.length - 1].trim();
-          firstName = tokens.slice(0, -1).join(" ");
+          lastName  = tokens[1];
+          firstName = tokens[0];
         }
-        else {
-          lastName  = tokens[0].trim();
+        else if (donationType == PAYPAL_MASS_PAYMENT) {
+          lastName  = r[3].trim();
           firstName = "";
         }
-      }
+        else {
+          let tokens = r[3].trim().split(/\s+/);
 
-      if (lastName.search(/\s+/) == -1) {
-        lastName = lastName.toLocaleLowerCase();
-      }
-
-      if (firstName.search(/\s+/) == -1) {
-        firstName = firstName.toLocaleLowerCase();
-      }
-
-      // Last name
-      row.push(lastName.charAt(0).toUpperCase() + lastName.slice(1));
-
-      // First name
-      row.push(firstName.charAt(0).toUpperCase() + firstName.slice(1));
-
-      // Salutation/Other names
-      row.push("");
-
-      // Gross
-      row.push(r[7]);
-      
-      // Fee
-      row.push(r[8]);
-      
-      // Net
-      row.push(r[9]);
-      
-      // Payment type
-      let paymentType = PAYMENT_TYPE_P1;
-
-      if (donationType == PAYPAL_DONATION_PAYMENT) {
-        if (r[38].trim().length > 0) {
-          paymentType = PAYMENT_TYPE_P3;
+          if (tokens.length > 1) {
+            lastName  = tokens[tokens.length - 1].trim();
+            firstName = tokens.slice(0, -1).join(" ");
+          }
+          else {
+            lastName  = tokens[0].trim();
+            firstName = "";
+          }
         }
+
+        if (lastName.search(/\s+/) == -1) {
+          lastName = lastName.toLocaleLowerCase();
+        }
+
+        if (firstName.search(/\s+/) == -1) {
+          firstName = firstName.toLocaleLowerCase();
+        }
+
+        // Last name
+        row.push(lastName.charAt(0).toUpperCase() + lastName.slice(1));
+
+        // First name
+        row.push(firstName.charAt(0).toUpperCase() + firstName.slice(1));
+
+        // Salutation/Other names
+        row.push("");
+
+        // Gross
+        row.push(r[7]);
+        
+        // Fee
+        row.push(r[8]);
+        
+        // Net
+        row.push(r[9]);
+        
+        // Payment type
+        let paymentType = PAYMENT_TYPE_P1;
+
+        if (donationType == PAYPAL_DONATION_PAYMENT) {
+          if (r[38].trim().length > 0) {
+            paymentType = PAYMENT_TYPE_P3;
+          }
+        }
+        else if (donationType == PAYPAL_SUBSCRIPTION_PAYMENT) {
+          paymentType = PAYMENT_TYPE_P2;
+        }
+        else if (donationType == PAYPAL_MASS_PAYMENT) {
+          paymentType = PAYMENT_TYPE_D1;
+        }
+
+        row.push(paymentType);
+        
+        // Payment source 
+        row.push(PAYMENT_SOURCE_PAYPAL);
+        
+        // Payment note
+        row.push(r[38].trim());
+        
+        // Email address
+        row.push(r[10].trim());
+
+        let streetAddress1 = r[30].trim();
+        let streetAddress2 = r[31].trim();
+
+        if (streetAddress2.length > 0) {
+          streetAddress1 += ADDRESS_JOIN_SEPARATOR + streetAddress2;
+        } 
+
+        // Street address
+        row.push(streetAddress1);
+        
+        // City
+        row.push(r[32].trim());
+        
+        // State
+        row.push(r[33].trim());
+        
+        // Zip code
+        row.push(normalizeDonationZipcode_(r[34].trim()));
+
+        rows.push(row);
       }
-      else if (donationType == PAYPAL_SUBSCRIPTION_PAYMENT) {
-        paymentType = PAYMENT_TYPE_P2;
-      }
-      else if (donationType == PAYPAL_MASS_PAYMENT) {
-        paymentType = PAYMENT_TYPE_D1;
-      }
-
-      row.push(paymentType);
-      
-      // Payment source 
-      row.push(PAYMENT_SOURCE_PAYPAL);
-      
-      // Payment note
-      row.push(r[38].trim());
-      
-      // Email address
-      row.push(r[10].trim());
-
-      let streetAddress1 = r[30].trim();
-      let streetAddress2 = r[31].trim();
-
-      if (streetAddress2.length > 0) {
-        streetAddress1 += ADDRESS_JOIN_SEPARATOR + streetAddress2;
-      } 
-
-      // Street address
-      row.push(streetAddress1);
-      
-      // City
-      row.push(r[32].trim());
-      
-      // State
-      row.push(r[33].trim());
-      
-      // Zip code
-      row.push(normalizeDonationZipcode_(r[34].trim()));
-
-      rows.push(row);
     }
   });
 
@@ -467,7 +469,7 @@ function importSpreadsheet_(sheet, file, firstDataRow, firstDataColumn, firstIns
     range     = range.getSheet().getDataRange();
     totalRows = range.getNumRows();
 
-    let donations = removeEmptyRows_(normalizeCheckData_(range.getValues(), firstDataRow));
+    let donations = normalizeCheckData_(range.getValues(), firstDataRow);
 
     numRows    = donations.length;
     numColumns = donations[0].length;
@@ -493,49 +495,62 @@ function normalizeCheckData_(data, firstDataRow) {
 
   data.splice(0, (firstDataRow - 1));
 
-  let rows = data;
+  let rows = [];
 
   data.forEach(function(r) {
-    r.unshift(1);
+    if (!isEmptyRow_(r)) {
+      let row = [];
 
-    // Ack emailed or generated
-    r[0] = "";
-    
-    // Donation date
-    r[1] = normalizeDonationDate_(r[1]);
+      // Ack emailed or generated
+      row.push("");
+      
+      // Donation date
+      row.push(normalizeDonationDate_(r[0]));
 
-    // Last name
-    r[2] = r[2].toString().trim();
+      // Last name
+      row.push(r[1].toString().trim());
 
-    // First name
-    r[3] = r[3].toString().trim();
+      // First name
+      row.push(r[2].toString().trim());
 
-    // Salutation/Other names
-    r[4] = r[4].toString().trim();
+      // Salutation/Other names
+      row.push(r[3] = r[3].toString().trim());
 
-    // Payment type
-    r[8] = r[8].toString().trim();
+      // Gross: copy net to gross
+      row.push(r[6]);
+      
+      // Fee
+      row.push(r[5]);
+      
+      // Net
+      row.push(r[6]);
 
-    // Payment source
-    r[9] = r[9].toString().trim();
-    
-    // Payment note
-    r[10] = r[10].toString().trim();
-    
-    // Email address
-    r[11] = r[11].toString().trim();
-    
-    // Street address
-    r[12] = r[12].toString().trim();
-    
-    // City
-    r[13] = r[13].toString().trim();
-    
-    // State
-    r[14] = r[14].toString().trim();
+      // Payment type
+      row.push(r[7].toString().trim());
 
-    // Zip code
-    r[15] = normalizeDonationZipcode_(r[15]);
+      // Payment source
+      row.push(r[8].toString().trim());
+      
+      // Payment note
+      row.push(r[9].toString().trim());
+      
+      // Email address
+      row.push(r[10].toString().trim());
+      
+      // Street address
+      row.push(r[11].toString().trim());
+      
+      // City
+      row.push(r[12].toString().trim());
+      
+      // State
+      row.push(r[13].toString().trim());
+
+      // Zip code
+      row.push(normalizeDonationZipcode_(r[14]));
+
+      rows.push(row);
+    }
   });
 
   return rows;
@@ -568,32 +583,19 @@ function normalizeDonationZipcode_(zipCode) {
   return normalizedZipcode;
 }
 
-function removeEmptyRows_(rows) {
-  let validatedRows = [];
+function isEmptyRow_(row) {
+  let isEmpty = true;
 
-  if (rows != null) {
-    rows.forEach(function (r) {
-      if ((r != null) && (r.length > 0)) {
-        let isEmpty = true;
-
-        for (let i = 0; i < r.length; i++) {
-          if ((r[i] != null) && (r[i].toString().length > 0)) {
-            isEmpty = false;
-            break;
-          }
-        }
-
-        if (!isEmpty) {
-          validatedRows.push(r);
-        }
+  if ((row != null) && (row.length > 0)) {
+    for (let i = 0; i < row.length; i++) {
+      if ((row[i] != null) && (row[i].toString().length > 0)) {
+        isEmpty = false;
+        break;
       }
-    });
-  }
-  else {
-    isEmpty = true;
+    }
   }
 
-  return validatedRows;
+  return isEmpty;
 }
 
 function tabulatePaymentNotes_(donations) {
