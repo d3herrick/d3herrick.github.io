@@ -52,6 +52,14 @@ const GENERATE_DONATION_ACKS_MENU_ITEM      = "Generate donation acknowledgement
 const GENERATE_DONATION_ACKS_DATA_TITLE     = "Generate Donation Acknowledgements";
 const ABOUT_TITLE                           = "About Donation Ledger Spreadsheet";
 
+// HTML inline styles. The modeless dialog widget seems unable to process style elements, thus these inline styles
+const STYLE_STANDARD_FONT     = "font-family:arial;font-size:14px";
+const STYLE_MONOSPACED_FONT   = "font-family:courier;font-size:14px";
+const STYLE_NO_WRAP           = "white-space: nowrap";
+const STYLE_TABLE             = "border-collapse: collapse;border: 2px solid;letter-spacing: 1px";
+const STYLE_TABLE_HEADER_CELL = "vertical-align:bottom;background-color: LightGray;border: 1px solid;text-align:left;vertical-align:bottom";
+const STYLE_TABLE_ROW_CELL    = "border: 1px solid;text-align:left;vertical-align:top";
+
 // Payment types
 // P1 Regular tax deductible one time gift from PayPal
 // P2 Monthly regular tax deductible from PayPal
@@ -89,7 +97,7 @@ function onScheduledGenerateDonationAcks() {
   onGenerateDonationAcks(false, true);
 }
 
-function onImportDonationData(displayResult = true, emailResult = true /*dah false*/) {
+function onImportDonationData(displayResult = true, emailResult = false) {
   let sheet          = getDonationDataSheet_();
   let pendingFolder  = null;
   let importedFolder = null;
@@ -117,36 +125,36 @@ function onImportDonationData(displayResult = true, emailResult = true /*dah fal
     let result = "";
 
     if (stats.length > 0) {
-      result = `<p style="font-family:arial;font-size:12px;">The following files (total/payments) were imported:</p>`;
+      result = `<p style="${STYLE_STANDARD_FONT}">The following files (total/payments) were imported:</p>`;
 
       result += "<ul>"
 
       stats.forEach(function(s) {
-        result += `<li style="font-family:courier;font-size:12px;">${s.fileStats[1]} (${s.fileStats[2]}/${s.fileStats[3]})</li>`;
+        result += `<li style="${STYLE_MONOSPACED_FONT}">${s.fileStats[1]} (${s.fileStats[2]}/${s.fileStats[3]})</li>`;
       });
 
       result += "</ul>"
 
       stats.forEach(function(s) {
         if (s.paymentNotes.length > 0) {
-          result += `<p><p style="font-family:arial;font-size:12px;">The following donations included a payment note:</p></p>`;
+          result += `<p><p style="${STYLE_STANDARD_FONT}">The following donations included a payment note:</p></p>`;
           result += 
             `<p>
-            <table style="font-family:arial;font-size:12px;border-collapse: collapse;border: 2px solid;letter-spacing: 1px;">
+            <table style="${STYLE_STANDARD_FONT};${STYLE_TABLE}">
             <tr>
-            <th style="vertical-align:bottom;background-color: LightGray;border: 1px solid;text-align:left;vertical-align:bottom;white-space: nowrap;">Donation date
-            <th style="vertical-align:bottom;background-color: LightGray;border: 1px solid;text-align:left;vertical-align:bottom;">Last name
-            <th style="vertical-align:bottom;background-color: LightGray;border: 1px solid;text-align:left;vertical-align:bottom;">First name
-            <th style="vertical-align:bottom;background-color: LightGray;border: 1px solid;text-align:left;vertical-align:bottom;">Payment note
+            <th style="${STYLE_TABLE_HEADER_CELL};${STYLE_NO_WRAP}">Donation date
+            <th style="${STYLE_TABLE_HEADER_CELL};">Last name
+            <th style="${STYLE_TABLE_HEADER_CELL};">First name
+            <th style="${STYLE_TABLE_HEADER_CELL};">Payment note
             </tr>`;
 
           s.paymentNotes.forEach(function (n) {
             result +=
               `<tr>
-              <td style="border: 1px solid;text-align:left;vertical-align:top;">${n[0]}</td>
-              <td style="border: 1px solid;text-align:left;vertical-align:top;">${n[1]}</td>
-              <td style="border: 1px solid;text-align:left;vertical-align:top;">${n[2]}</td>
-              <td style="border: 1px solid;text-align:left;vertical-align:top;">${n[3]}</td>
+              <td style="${STYLE_TABLE_ROW_CELL}">${n[0]}</td>
+              <td style="${STYLE_TABLE_ROW_CELL}">${n[1]}</td>
+              <td style="${STYLE_TABLE_ROW_CELL}">${n[2]}</td>
+              <td style="${STYLE_TABLE_ROW_CELL}">${n[3]}</td>
               </tr>`;
           });
 
@@ -157,20 +165,15 @@ function onImportDonationData(displayResult = true, emailResult = true /*dah fal
       });
 
       if (emailResult) {
-        result += `<p><p style="font-family:arial;font-size:12px;">View changes to the donation ledger by clicking <a href="${sheet.getParent().getUrl()}">here</a>.</p></p>`;
-
         sendEmailProcessingResult_(sheet, sheet.getRange(IMPORT_RESULT_EMAIL_SUBJECT_RANGE).getValue(), result);
       }
     }
     else {
-      result = `<p style="font-family:arial;font-size:12px;">No files were pending import</p>`;
+      result = `<p style="${STYLE_STANDARD_FONT}">No files were pending import</p>`;
     }
 
     if (displayResult) {
-      let ui   = SpreadsheetApp.getUi();
-      let html = HtmlService.createHtmlOutput(`<p style="font-family:Arial;font-size:12px;">${result}</p>`);
-      
-      ui.showModelessDialog(html, IMPORT_DONATION_DATA_TITLE);
+      displayProcessingResult_(IMPORT_DONATION_DATA_TITLE, result);
     }
   }
 }
@@ -192,33 +195,28 @@ function onGenerateDonationAcks(displayResult = true, emailResult = false) {
     let stats  = generateDonationAcks_(sheet, ackFolder)
     let result = "";
 
-    if (stats.length > 0) {
-      result = `<p style="font-family:arial;font-size:12px;">The following counts were recorded while processing donation acknowledgements:</p>`;
+    if (stats.ackStats.length > 0) {
+      result = `<p style="${STYLE_STANDARD_FONT}">The following counts were recorded while processing donation acknowledgements:</p>`;
 
       result += "<ul>"
   
-      result += `<li style="font-family:courier">Total donations processed........: ${stats.ackStats[0]}</li>`;
-      result += `<li style="font-family:courier">Email acknowledgements sent......: ${stats.ackStats[1]}</li>`;
-      result += `<li style="font-family:courier">Document acknowledgements created: ${stats.ackStats[2]}</li>`;
-      result += `<li style="font-family:courier">Recurring donations skipped......: ${stats.ackStats[3]}</li>`;
+      result += `<li style="${STYLE_MONOSPACED_FONT}">Total donations processed........: ${stats.ackStats[0]}</li>`;
+      result += `<li style="${STYLE_MONOSPACED_FONT}">Email acknowledgements sent......: ${stats.ackStats[1]}</li>`;
+      result += `<li style="${STYLE_MONOSPACED_FONT}">Document acknowledgements created: ${stats.ackStats[2]}</li>`;
+      result += `<li style="${STYLE_MONOSPACED_FONT}">Recurring donations skipped......: ${stats.ackStats[3]}</li>`;
 
       result += "</ul>"
 
       if (emailResult) {
-        result += `<p><p style="font-family:arial;font-size:12px;">View changes to the donation ledger by clicking <a href="${sheet.getParent().getUrl()}">here</a>.</p></p>`;
-
         sendEmailProcessingResult_(sheet, sheet.getRange(ACK_RESULT_EMAIL_SUBJECT_RANGE).getValue(), result);
       }
     }
     else {
-      result = `<p style="font-family:arial;font-size:12px;">No donations were pending processing</p>`;
+      result = `<p style="${STYLE_STANDARD_FONT}">No donations were pending processing</p>`;
     }
 
     if (displayResult) {
-      let ui   = SpreadsheetApp.getUi();
-      let html = HtmlService.createHtmlOutput(`<p style="font-family:arial;font-size:12px;">${result}</p>`);
-      
-      ui.showModelessDialog(html, IMPORT_DONATION_DATA_TITLE);
+      displayProcessingResult_(GENERATE_DONATION_ACKS_DATA_TITLE, result);
     }
   }
 }
@@ -311,7 +309,7 @@ function importPayPalCsv_(sheet, file, firstDataRow, firstDataColumn, firstInser
   if (data[0].length == PAYPAL_FILE_FIELD_COUNT) {
     totalRows = data.length;
 
-    let donations = normalizePaypalData_(data, firstDataRow);
+    let donations = removeEmptyRows_(normalizePaypalData_(data), firstDataRow);
 
     numRows    = donations.length;
     numColumns = donations[0].length;
@@ -469,7 +467,7 @@ function importSpreadsheet_(sheet, file, firstDataRow, firstDataColumn, firstIns
     range     = range.getSheet().getDataRange();
     totalRows = range.getNumRows();
 
-    let donations = normalizeCheckData_(range.getValues(), firstDataRow);
+    let donations = removeEmptyRows_(normalizeCheckData_(range.getValues(), firstDataRow));
 
     numRows    = donations.length;
     numColumns = donations[0].length;
@@ -507,34 +505,34 @@ function normalizeCheckData_(data, firstDataRow) {
     r[1] = normalizeDonationDate_(r[1]);
 
     // Last name
-    r[2] = r[2].trim();
+    r[2] = r[2].toString().trim();
 
     // First name
-    r[3] = r[3].trim();
+    r[3] = r[3].toString().trim();
 
     // Salutation/Other names
-    r[4] = r[4].trim();
+    r[4] = r[4].toString().trim();
 
     // Payment type
-    r[8] = r[8].trim();
+    r[8] = r[8].toString().trim();
 
     // Payment source
-    r[9] = r[9].trim();
+    r[9] = r[9].toString().trim();
     
     // Payment note
-    r[10] = r[10].trim();
+    r[10] = r[10].toString().trim();
     
     // Email address
-    r[11] = r[11].trim();
+    r[11] = r[11].toString().trim();
     
     // Street address
-    r[12] = r[12].trim();
+    r[12] = r[12].toString().trim();
     
     // City
-    r[13] = r[13].trim();
+    r[13] = r[13].toString().trim();
     
     // State
-    r[14] = r[14].trim();
+    r[14] = r[14].toString().trim();
 
     // Zip code
     r[15] = normalizeDonationZipcode_(r[15]);
@@ -568,6 +566,34 @@ function normalizeDonationZipcode_(zipCode) {
   }
 
   return normalizedZipcode;
+}
+
+function removeEmptyRows_(rows) {
+  let validatedRows = [];
+
+  if (rows != null) {
+    rows.forEach(function (r) {
+      if ((r != null) && (r.length > 0)) {
+        let isEmpty = true;
+
+        for (let i = 0; i < r.length; i++) {
+          if ((r[i] != null) && (r[i].toString().length > 0)) {
+            isEmpty = false;
+            break;
+          }
+        }
+
+        if (!isEmpty) {
+          validatedRows.push(r);
+        }
+      }
+    });
+  }
+  else {
+    isEmpty = true;
+  }
+
+  return validatedRows;
 }
 
 function tabulatePaymentNotes_(donations) {
@@ -626,7 +652,7 @@ function generateDonationAcks_(sheet, ackFolder) {
 
   let stats = [];
 
-  if (ackData.length > 0) {
+  if ((ackData.length > 0) && (ackData[0] != "#N/A")) {
     let emailProperties = {
       senderName: sheet.getRange(PROCESSING_EMAIL_SENDER_NAME_RANGE).getValue(),
       replyTo:    sheet.getRange(PROCESSING_EMAIL_REPLY_TO_RANGE).getValue(),
@@ -644,11 +670,9 @@ function generateDonationAcks_(sheet, ackFolder) {
       let donationRange  = sheet.getRange(a[0], ntcFirstDataColumn, 1, numColumns);
       let donationObject = toDonationObject_(donationRange.getValues()[0]);
 
-      bodyTemplate.ackCreationDate = new Intl.DateTimeFormat("en-US", {year: 'numeric', month: 'long', day: 'numeric'}).format(Date.now());
-      bodyTemplate.donationDate    = Intl.DateTimeFormat("en-US").format(donationObject.donationDate);
+      bodyTemplate.donationDate    = donationObject.donationDate;
       bodyTemplate.lastName        = donationObject.lastName;
       bodyTemplate.firstName       = donationObject.firstName;
-      bodyTemplate.gross           = Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(donationObject.gross);
       bodyTemplate.paymentType     = donationObject.paymentType;
       bodyTemplate.paymentSource   = donationObject.paymentSource;
       bodyTemplate.emailAddress    = donationObject.emailAddress;
@@ -660,7 +684,8 @@ function generateDonationAcks_(sheet, ackFolder) {
       switch (donationObject.paymentType) {
         case PAYMENT_TYPE_P1:
         case PAYMENT_TYPE_P3:
-          sendEmailAck_(emailProperties, bodyTemplate);
+          bodyTemplate.paymentAmount = donationObject.gross;
+          sendEmailAck_(donationObject, bodyTemplate, emailProperties);
           numEmailAcks++;
           break;
 
@@ -671,6 +696,7 @@ function generateDonationAcks_(sheet, ackFolder) {
         case PAYMENT_TYPE_C1:
         case PAYMENT_TYPE_D1:
         case PAYMENT_TYPE_I1:
+          bodyTemplate.paymentAmount = donationObject.net;
           createDocumentAck_(donationObject, bodyTemplate, ackFolder);
           numDocAcks++;
           break;
@@ -690,13 +716,13 @@ function generateDonationAcks_(sheet, ackFolder) {
   };
 }
 
-function sendEmailAck_(emailProperties, bodyTemplate) {
+function sendEmailAck_(donationObject, bodyTemplate, emailProperties) {
   bodyTemplate.doInlineImage = false;
 
   let body = bodyTemplate.evaluate().getContent();
 
   MailApp.sendEmail(
-    "d3herrick@gmail.com", //dah donationObject.emailAddress;,
+    donationObject.emailAddress,
     emailProperties.subject,
     null,
     {
@@ -719,13 +745,24 @@ function createDocumentAck_(donationObject, bodyTemplate, ackFolder) {
   docFile.moveTo(ackFolder);
 }
 
+function displayProcessingResult_(subject, result) {
+    let ui   = SpreadsheetApp.getUi();
+    let html = HtmlService.createHtmlOutput(`<p style="${STYLE_STANDARD_FONT}">${result}</p>`);
+
+    html.setHeight(400);
+    html.setWidth(600);
+    
+    ui.showModelessDialog(html, subject);
+}
+
 function sendEmailProcessingResult_(sheet, subject, result) {
   let senderName       = sheet.getRange(PROCESSING_EMAIL_SENDER_NAME_RANGE).getValue();
   let distributionList = sheet.getRange(PROCESSING_EMAIL_DIST_LIST_RANGE).getValue();
   let replyTo          = sheet.getRange(PROCESSING_EMAIL_REPLY_TO_RANGE).getValue();
   let bodyTemplate     = HtmlService.createTemplateFromFile(sheet.getRange(PROCESSING_RESULT_BODY_TEMPLATE_RANGE).getValue());
 
-  bodyTemplate.result = result;
+  bodyTemplate.result = result +
+    `<p><p style="${STYLE_STANDARD_FONT}">View the donation ledger by clicking <a href="${sheet.getParent().getUrl()}">here</a>.</p></p>`;
 
   let body = bodyTemplate.evaluate().getContent();
 

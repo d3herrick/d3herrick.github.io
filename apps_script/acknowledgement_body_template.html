@@ -19,7 +19,7 @@ P.O. Box 233
 <br>Newton, MA 02460
 </p>
 <p>
-<?!=ackCreationDate?>
+<?!=Intl.DateTimeFormat("en-US", {year: 'numeric', month: 'long', day: 'numeric'}).format(Date.now())?>
 </p>
 <p>
 <? if (streetAddress.length > 0) { ?>
@@ -35,19 +35,19 @@ Dear <?!=firstName?>,
 </p>
 <p>
 Thank you for supporting the Newton Tree Conservancy with your
-<? if (gross > 500) { ?>
+<? if (paymentAmount > 500) { ?>
 so very generous
-<? } else if (gross > 250) { ?>
+<? } else if (paymentAmount > 250) { ?>
 very generous
-<? } else if ((gross > 100) && (gross < 250)) { ?>
+<? } else if ((paymentAmount > 100) && (paymentAmount < 250)) { ?>
 generous
 <? } ?>
-contribution of <?!=gross ?> that we received on <?!=donationDate ?> from
-<? if ((paymentType != "P1") || (paymentType != "P2") || (paymentType != "P3")) { ?>
+contribution of <?!=Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(paymentAmount)?> that we received on <?!=Intl.DateTimeFormat("en-US").format(donationDate)?> from
+<? if ((paymentType == "P1") || (paymentType == "P2") || (paymentType == "P3")) { ?>
 a credit card.
-<? } else if (paymentType != "D1") { ?>
+<? } else if (paymentType == "D1") { ?>
 a Donor Advised Fund.
-<? } else if (paymentType != "I1") { ?>
+<? } else if (paymentType == "I1") { ?>
 an IRA distribution.
 <? } else { ?>
 a check.
