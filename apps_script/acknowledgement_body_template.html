@@ -23,7 +23,6 @@ P.O. Box 233
 </p>
 <p>
 <? let salutationTokens = []; ?>
-<? if (streetAddress.length > 0) { ?>
 <? if (salutation.length > 0) { ?>
 <? salutationTokens = salutation.split(/\s+/); ?>
 <? if (salutationTokens.length == 1) { ?>
@@ -34,10 +33,11 @@ P.O. Box 233
 <? } else { ?>
 <?!=firstName?> <?!=lastName?>
 <? } ?>
+<? if (streetAddress.length > 0) { ?>
 <br><?!=streetAddress?>
 <br><?!=city?>, <?!=state?>, <?!=zipCode?>
 <? } else if (emailAddress.length > 0) { ?>
-<?!=emailAddress?>
+<br><?!=emailAddress?>
 <? } ?>
 </p>
 <p>
