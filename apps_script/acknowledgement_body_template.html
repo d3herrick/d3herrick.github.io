@@ -49,7 +49,12 @@ Dear
 <? } ?>
 </p>
 <p>
-Thank you for supporting the Newton Tree Conservancy with your
+Thank you for supporting the Newton Tree Conservancy with
+<? if ((paymentType == "D1") || (paymentType == "I1")) { ?>
+the
+<? } else { ?>
+your
+<? } ?>
 <? if (paymentAmount > 500) { ?>
 so very generous
 <? } else if (paymentAmount > 250) { ?>
