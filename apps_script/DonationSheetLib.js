@@ -97,7 +97,7 @@ function onScheduledGenerateDonationAcks() {
   onGenerateDonationAcks(false, true);
 }
 
-function onImportDonationData(displayResult = true, emailResult = false) {
+function onImportDonationData(displayResult = true, emailResult = true) {
   let sheet          = getDonationDataSheet_();
   let pendingFolder  = null;
   let importedFolder = null;
@@ -178,7 +178,7 @@ function onImportDonationData(displayResult = true, emailResult = false) {
   }
 }
 
-function onGenerateDonationAcks(displayResult = true, emailResult = false) {
+function onGenerateDonationAcks(displayResult = true, emailResult = true) {
   let sheet     = getDonationDataSheet_();
   let ackFolder = null;
 
@@ -675,6 +675,7 @@ function generateDonationAcks_(sheet, ackFolder) {
       bodyTemplate.donationDate    = donationObject.donationDate;
       bodyTemplate.lastName        = donationObject.lastName;
       bodyTemplate.firstName       = donationObject.firstName;
+      bodyTemplate.salutation      = donationObject.salutation;
       bodyTemplate.paymentType     = donationObject.paymentType;
       bodyTemplate.paymentSource   = donationObject.paymentSource;
       bodyTemplate.emailAddress    = donationObject.emailAddress;
@@ -683,15 +684,16 @@ function generateDonationAcks_(sheet, ackFolder) {
       bodyTemplate.state           = donationObject.state;
       bodyTemplate.zipCode         = donationObject.zipCode;
 
+      let doGenerateAck = true;
+
       switch (donationObject.paymentType) {
         case PAYMENT_TYPE_P1:
         case PAYMENT_TYPE_P3:
           bodyTemplate.paymentAmount = donationObject.gross;
-          sendEmailAck_(donationObject, bodyTemplate, emailProperties);
-          numEmailAcks++;
           break;
 
         case PAYMENT_TYPE_P2:
+          doGenerateAck = false;
           numRecurring++;
           break;
 
@@ -699,12 +701,21 @@ function generateDonationAcks_(sheet, ackFolder) {
         case PAYMENT_TYPE_D1:
         case PAYMENT_TYPE_I1:
           bodyTemplate.paymentAmount = donationObject.net;
-          createDocumentAck_(donationObject, bodyTemplate, ackFolder);
-          numDocAcks++;
           break;
 
         default:
           break;
+      }
+
+      if (doGenerateAck) {
+        if (donationObject.emailAddress.length > 0) {
+          sendEmailAck_(donationObject, bodyTemplate, emailProperties);
+          numEmailAcks++;
+        }
+        else {
+          createDocumentAck_(donationObject, bodyTemplate, ackFolder);
+          numDocAcks++;
+        }
       }
 
       sheet.getRange(a[0], ntcFirstDataColumn).check();

@@ -22,8 +22,18 @@ P.O. Box 233
 <?!=Intl.DateTimeFormat("en-US", {year: 'numeric', month: 'long', day: 'numeric'}).format(Date.now())?>
 </p>
 <p>
+<? let salutationTokens = []; ?>
 <? if (streetAddress.length > 0) { ?>
+<? if (salutation.length > 0) { ?>
+<? salutationTokens = salutation.split(/\s+/); ?>
+<? if (salutationTokens.length == 1) { ?>
+<?!=firstName?> and <?!=salutation?> <?!=lastName?>
+<? } else if (salutationTokens.length >= 2) { ?>
+<?!=firstName?> <?!=lastName?> and <?!=salutation?>
+<? } ?>
+<? } else { ?>
 <?!=firstName?> <?!=lastName?>
+<? } ?>
 <br><?!=streetAddress?>
 <br><?!=city?>, <?!=state?>, <?!=zipCode?>
 <? } else if (emailAddress.length > 0) { ?>
@@ -31,7 +41,12 @@ P.O. Box 233
 <? } ?>
 </p>
 <p>
-Dear <?!=firstName?>,
+Dear
+<? if (salutationTokens.length == 0) { ?>
+<?!=firstName?>,
+<? } else if (salutationTokens.length >= 1) { ?>
+<?!=firstName?> and <?!=salutationTokens[0]?>,
+<? } ?>
 </p>
 <p>
 Thank you for supporting the Newton Tree Conservancy with your
