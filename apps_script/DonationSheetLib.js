@@ -204,6 +204,7 @@ function onGenerateDonationAcks(displayResult = true, emailResult = true) {
       result += `<li style="${STYLE_MONOSPACED_FONT}">Email acknowledgements sent......: ${stats.ackStats[1]}</li>`;
       result += `<li style="${STYLE_MONOSPACED_FONT}">Document acknowledgements created: ${stats.ackStats[2]}</li>`;
       result += `<li style="${STYLE_MONOSPACED_FONT}">Recurring donations skipped......: ${stats.ackStats[3]}</li>`;
+      result += `<li style="${STYLE_MONOSPACED_FONT}">Number of errors encountered.....: ${stats.ackStats[4]}</li>`;
 
       result += "</ul>"
 
@@ -682,6 +683,7 @@ function generateDonationAcks_(sheet, ackFolder) {
     let numEmailAcks = 0;
     let numDocAcks   = 0;
     let numRecurring = 0;
+    let numErrors    = 0;
 
     ackData.forEach(function (a) {
       let donationRange  = sheet.getRange(a[0], ntcFirstDataColumn, 1, numColumns);
@@ -723,30 +725,26 @@ function generateDonationAcks_(sheet, ackFolder) {
       }
 
       if (doGenerateAck) {
-        if (donationObject.emailAddress.length > 0) {
-          try {
+        try {
+          if (donationObject.emailAddress.length > 0) {
             sendEmailAck_(donationObject, bodyTemplate, emailProperties);
             numEmailAcks++;
           }
-          catch (e) {
-            console.log(e);
-          }
-        }
-        else {
-          try {
+          else {
             createDocumentAck_(donationObject, bodyTemplate, ackFolder);
             numDocAcks++;
           }
-          catch (e) {
-            console.log(e);
-          }
+        }
+        catch (e) {
+          console.log(e);
+          numErrors++;
         }
       }
 
       sheet.getRange(a[0], ntcFirstDataColumn).check();
     });
 
-    stats = [totalAcks, numEmailAcks, numDocAcks, numRecurring]; 
+    stats = [totalAcks, numEmailAcks, numDocAcks, numRecurring, numErrors]; 
   }
 
   return {
