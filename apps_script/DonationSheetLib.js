@@ -394,19 +394,20 @@ function normalizePaypalData_(data, firstDataRow) {
         row.push("");
 
         // Gross
-        row.push(r[7]);
+        row.push(normalizeNumber_(r[7]));
         
         // Fee
-        row.push(r[8]);
+        row.push(normalizeNumber_(r[8]));
         
         // Net
-        row.push(r[9]);
+        row.push(normalizeNumber_(r[9]));
         
         // Payment type
         let paymentType = PAYMENT_TYPE_P1;
+        let paymentNote = normalizeString_(r[38]);
 
         if (donationType == PAYPAL_DONATION_PAYMENT) {
-          if (r[38].trim().length > 0) {
+          if (paymentNote.length > 0) {
             paymentType = PAYMENT_TYPE_P3;
           }
         }
@@ -423,10 +424,10 @@ function normalizePaypalData_(data, firstDataRow) {
         row.push(PAYMENT_SOURCE_PAYPAL);
         
         // Payment note
-        row.push(r[38].trim());
+        row.push(paymentNote);
         
         // Email address
-        row.push(normalizeEmailAddress_(r[10].trim()));
+        row.push(normalizeEmailAddress_(r[10]));
 
         let streetAddress1 = r[30].trim();
         let streetAddress2 = r[31].trim();
@@ -439,10 +440,10 @@ function normalizePaypalData_(data, firstDataRow) {
         row.push(streetAddress1);
         
         // City
-        row.push(r[32].trim());
+        row.push(normalizeString_(r[32]));
         
         // State
-        row.push(r[33].trim());
+        row.push(normalizeString_(r[33]));
         
         // Zip code
         row.push(normalizeDonationZipcode_(r[34].trim()));
@@ -508,43 +509,45 @@ function normalizeCheckData_(data, firstDataRow) {
       row.push(normalizeDonationDate_(r[0]));
 
       // Last name
-      row.push(r[1].toString().trim());
+      row.push(normalizeString_(r[1]));
 
       // First name
-      row.push(r[2].toString().trim());
+      row.push(normalizeString_(r[2]));
 
       // Salutation/Other names
-      row.push(r[3] = r[3].toString().trim());
+      row.push(normalizeString_(r[3]));
 
       // Gross: copy net to gross
-      row.push(r[6]);
+      let net = normalizeNumber_(r[6]);
+
+      row.push(net);
       
       // Fee
-      row.push(r[5]);
+      row.push(normalizeNumber_(r[5]));
       
       // Net
-      row.push(r[6]);
+      row.push(net);
 
       // Payment type
-      row.push(r[7].toString().trim());
+      row.push(normalizeString_(r[7]));
 
       // Payment source
-      row.push(r[8].toString().trim());
+      row.push(normalizeString_(r[8]));
       
       // Payment note
-      row.push(r[9].toString().trim());
+      row.push(normalizeString_(r[9]));
       
       // Email address
-      row.push(normalizeEmailAddress_(r[10].toString().trim()));
+      row.push(normalizeEmailAddress_(r[10]));
       
       // Street address
-      row.push(r[11].toString().trim());
+      row.push(normalizeString_(r[11]));
       
       // City
-      row.push(r[12].toString().trim());
+      row.push(normalizeString_(r[12]));
       
       // State
-      row.push(r[13].toString().trim());
+      row.push(normalizeString_(r[13]));
 
       // Zip code
       row.push(normalizeDonationZipcode_(r[14]));
@@ -554,6 +557,14 @@ function normalizeCheckData_(data, firstDataRow) {
   });
 
   return rows;
+}
+
+function normalizeString_(value) {
+  return value.toString().trim();
+}
+
+function normalizeNumber_(value) {
+  return value;
 }
 
 function normalizeDonationDate_(date) {
@@ -568,7 +579,7 @@ function normalizeDonationDate_(date) {
 }
 
 function normalizeEmailAddress_(emailAddress) {
-  let normalizedEmailAddress = emailAddress.trim();
+  let normalizedEmailAddress = normalizeString_(emailAddress);
 
   if ((normalizedEmailAddress.length > 0) && (/[.!;?]$/.test(normalizedEmailAddress))) {
     normalizedEmailAddress = normalizedEmailAddress.slice(0, -1).trim();
