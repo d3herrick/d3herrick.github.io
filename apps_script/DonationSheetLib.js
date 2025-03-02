@@ -20,7 +20,7 @@
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
 const DEPLOYMENT_ID                         = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
-const DEPLOYMENT_VERSION                    = "3";
+const DEPLOYMENT_VERSION                    = "4";
 const DONATION_DATA_RANGE                   = "donation_data";
 const PENDING_FOLDER_RANGE                  = "pending_folder";
 const IMPORTED_FOLDER_RANGE                 = "imported_folder";
@@ -426,7 +426,7 @@ function normalizePaypalData_(data, firstDataRow) {
         row.push(r[38].trim());
         
         // Email address
-        row.push(r[10].trim());
+        row.push(normalizeEmailAddress_(r[10].trim()));
 
         let streetAddress1 = r[30].trim();
         let streetAddress2 = r[31].trim();
@@ -535,7 +535,7 @@ function normalizeCheckData_(data, firstDataRow) {
       row.push(r[9].toString().trim());
       
       // Email address
-      row.push(r[10].toString().trim());
+      row.push(normalizeEmailAddress_(r[10].toString().trim()));
       
       // Street address
       row.push(r[11].toString().trim());
@@ -557,27 +557,31 @@ function normalizeCheckData_(data, firstDataRow) {
 }
 
 function normalizeDonationDate_(date) {
-  let normalizedDate = undefined;
+  let normalizedDate = date;
 
-  if (Number.isInteger(date)) {
-    normalizedDate = date.toString();
+  if (Number.isInteger(normalizedDate)) {
+    normalizedDate = normalizedDate.toString();
     normalizedDate = `${normalizedDate.substring(0, 4)}/${normalizedDate.substring(4, 6)}/${normalizedDate.substring(6, 8)}`;
-  }
-  else {
-    normalizedDate = date;
   }
 
   return normalizedDate;
 }
 
-function normalizeDonationZipcode_(zipCode) {
-  let normalizedZipcode = undefined;
+function normalizeEmailAddress_(emailAddress) {
+  let normalizedEmailAddress = emailAddress.trim();
 
-  if ((zipCode.length > 0) && (zipCode.length == (ZIPCODE_MINIMUM_LENGTH - 1))) {
-    normalizedZipcode = "0" + zipCode;
+  if ((normalizedEmailAddress.length > 0) && (/[.!;?]$/.test(normalizedEmailAddress))) {
+    normalizedEmailAddress = normalizedEmailAddress.slice(0, -1).trim();
   }
-  else {
-    normalizedZipcode = zipCode;
+
+  return normalizedEmailAddress;
+}
+
+function normalizeDonationZipcode_(zipCode) {
+  let normalizedZipcode = zipCode;
+
+  if ((normalizedZipcode.length > 0) && (normalizedZipcode.length == (ZIPCODE_MINIMUM_LENGTH - 1))) {
+    normalizedZipcode = "0" + normalizedZipcode;
   }
 
   return normalizedZipcode;
@@ -709,12 +713,22 @@ function generateDonationAcks_(sheet, ackFolder) {
 
       if (doGenerateAck) {
         if (donationObject.emailAddress.length > 0) {
-          sendEmailAck_(donationObject, bodyTemplate, emailProperties);
-          numEmailAcks++;
+          try {
+            sendEmailAck_(donationObject, bodyTemplate, emailProperties);
+            numEmailAcks++;
+          }
+          catch (e) {
+            console.log(e);
+          }
         }
         else {
-          createDocumentAck_(donationObject, bodyTemplate, ackFolder);
-          numDocAcks++;
+          try {
+            createDocumentAck_(donationObject, bodyTemplate, ackFolder);
+            numDocAcks++;
+          }
+          catch (e) {
+            console.log(e);
+          }
         }
       }
 
