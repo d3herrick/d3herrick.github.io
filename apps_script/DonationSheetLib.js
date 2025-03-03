@@ -204,9 +204,22 @@ function onGenerateDonationAcks(displayResult = true, emailResult = true) {
       result += `<li style="${STYLE_MONOSPACED_FONT}">Email acknowledgements sent......: ${stats.ackStats[1]}</li>`;
       result += `<li style="${STYLE_MONOSPACED_FONT}">Document acknowledgements created: ${stats.ackStats[2]}</li>`;
       result += `<li style="${STYLE_MONOSPACED_FONT}">Recurring donations skipped......: ${stats.ackStats[3]}</li>`;
-      result += `<li style="${STYLE_MONOSPACED_FONT}">Number of errors encountered.....: ${stats.ackStats[4]}</li>`;
 
       result += "</ul>"
+
+      let execErrors = stats.ackStats[4];
+
+      if (execErrors.length > 0) {
+        result += `<p style="${STYLE_STANDARD_FONT}">The following errors were encountered:</p>`;
+        
+        result += "<ul>"
+
+        execErrors.forEach(function(e) {
+          result += `<li style="${STYLE_MONOSPACED_FONT}">${e}</li>`;
+        });
+
+        result += "</ul>"
+      }
 
       if (emailResult) {
         sendEmailProcessingResult_(sheet, sheet.getRange(ACK_RESULT_EMAIL_SUBJECT_RANGE).getValue(), result);
@@ -685,8 +698,8 @@ function generateDonationAcks_(sheet, ackFolder) {
     let numEmailAcks = 0;
     let numDocAcks   = 0;
     let numRecurring = 0;
-    let numErrors    = 0;
-
+    let execErrors   = [];
+    
     ackData.forEach(function (a) {
       let donationRange  = sheet.getRange(a[0], ntcFirstDataColumn, 1, numColumns);
       let donationObject = toDonationObject_(donationRange.getValues()[0]);
@@ -740,13 +753,15 @@ function generateDonationAcks_(sheet, ackFolder) {
           sheet.getRange(a[0], ntcFirstDataColumn).check();
         }
         catch (e) {
-          console.log(e);
-          numErrors++;
+          execErrors.push(`Row ${a[0]}: ${e}`);
         }
+      }
+      else {
+        sheet.getRange(a[0], ntcFirstDataColumn).check();
       }
     });
 
-    stats = [totalAcks, numEmailAcks, numDocAcks, numRecurring, numErrors]; 
+    stats = [totalAcks, numEmailAcks, numDocAcks, numRecurring, execErrors]; 
   }
 
   return {
