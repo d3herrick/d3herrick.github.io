@@ -89,7 +89,7 @@ function onOpen(e) {
       addToUi();
 }
 
-function onScheduledImport() {
+function onScheduledImportDonationData() {
   onImportDonationData(false, true);
 }
 
@@ -582,8 +582,10 @@ function normalizeDonationDate_(date) {
 function normalizeEmailAddress_(emailAddress) {
   let normalizedEmailAddress = normalizeString_(emailAddress);
 
-  if ((normalizedEmailAddress.length > 0) && (/[.!;?]$/.test(normalizedEmailAddress))) {
-    normalizedEmailAddress = normalizedEmailAddress.slice(0, -1).trim();
+  if (normalizedEmailAddress.length > 0) {
+    while (!/[0-9a-zA-Z]$/.test(normalizedEmailAddress)) {
+      normalizedEmailAddress = normalizedEmailAddress.slice(0, -1).trim();
+    }
   }
 
   return normalizedEmailAddress;
