@@ -734,14 +734,14 @@ function generateDonationAcks_(sheet, ackFolder) {
             createDocumentAck_(donationObject, bodyTemplate, ackFolder);
             numDocAcks++;
           }
+
+          sheet.getRange(a[0], ntcFirstDataColumn).check();
         }
         catch (e) {
           console.log(e);
           numErrors++;
         }
       }
-
-      sheet.getRange(a[0], ntcFirstDataColumn).check();
     });
 
     stats = [totalAcks, numEmailAcks, numDocAcks, numRecurring, numErrors]; 
