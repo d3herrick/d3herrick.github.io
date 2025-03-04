@@ -20,7 +20,7 @@
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
 const DEPLOYMENT_ID                         = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
-const DEPLOYMENT_VERSION                    = "4";
+const DEPLOYMENT_VERSION                    = "5";
 const DONATION_DATA_RANGE                   = "donation_data";
 const PENDING_FOLDER_RANGE                  = "pending_folder";
 const IMPORTED_FOLDER_RANGE                 = "imported_folder";
@@ -204,10 +204,11 @@ function onGenerateDonationAcks(displayResult = true, emailResult = true) {
       result += `<li style="${STYLE_MONOSPACED_FONT}">Email acknowledgements sent......: ${stats.ackStats[1]}</li>`;
       result += `<li style="${STYLE_MONOSPACED_FONT}">Document acknowledgements created: ${stats.ackStats[2]}</li>`;
       result += `<li style="${STYLE_MONOSPACED_FONT}">Recurring donations skipped......: ${stats.ackStats[3]}</li>`;
+      result += `<li style="${STYLE_MONOSPACED_FONT}">Unaddressed donations skipped....: ${stats.ackStats[4]}</li>`;
 
       result += "</ul>"
 
-      let execErrors = stats.ackStats[4];
+      let execErrors = stats.ackStats[5];
 
       if (execErrors.length > 0) {
         result += `<p style="${STYLE_STANDARD_FONT}">The following errors were encountered:</p>`;
@@ -694,74 +695,80 @@ function generateDonationAcks_(sheet, ackFolder) {
 
     let bodyTemplate = HtmlService.createTemplateFromFile(sheet.getRange(ACK_BODY_TEMPLATE_RANGE).getValue());
 
-    let totalAcks    = ackData.length;
-    let numEmailAcks = 0;
-    let numDocAcks   = 0;
-    let numRecurring = 0;
-    let execErrors   = [];
+    let totalAcks      = ackData.length;
+    let numEmailAcks   = 0;
+    let numDocAcks     = 0;
+    let numRecurring   = 0;
+    let numUnaddressed = 0;
+    let execErrors     = [];
     
     ackData.forEach(function (a) {
       let donationRange  = sheet.getRange(a[0], ntcFirstDataColumn, 1, numColumns);
       let donationObject = toDonationObject_(donationRange.getValues()[0]);
 
-      bodyTemplate.donationDate    = donationObject.donationDate;
-      bodyTemplate.lastName        = donationObject.lastName;
-      bodyTemplate.firstName       = donationObject.firstName;
-      bodyTemplate.salutation      = donationObject.salutation;
-      bodyTemplate.paymentType     = donationObject.paymentType;
-      bodyTemplate.paymentSource   = donationObject.paymentSource;
-      bodyTemplate.emailAddress    = donationObject.emailAddress;
-      bodyTemplate.streetAddress   = donationObject.streetAddress;
-      bodyTemplate.city            = donationObject.city;
-      bodyTemplate.state           = donationObject.state;
-      bodyTemplate.zipCode         = donationObject.zipCode;
+      if (isDonationAddressed_(donationObject)) {
+        bodyTemplate.donationDate    = donationObject.donationDate;
+        bodyTemplate.lastName        = donationObject.lastName;
+        bodyTemplate.firstName       = donationObject.firstName;
+        bodyTemplate.salutation      = donationObject.salutation;
+        bodyTemplate.paymentType     = donationObject.paymentType;
+        bodyTemplate.paymentSource   = donationObject.paymentSource;
+        bodyTemplate.emailAddress    = donationObject.emailAddress;
+        bodyTemplate.streetAddress   = donationObject.streetAddress;
+        bodyTemplate.city            = donationObject.city;
+        bodyTemplate.state           = donationObject.state;
+        bodyTemplate.zipCode         = donationObject.zipCode;
 
-      let doGenerateAck = true;
+        let doGenerateAck = true;
 
-      switch (donationObject.paymentType) {
-        case PAYMENT_TYPE_P1:
-        case PAYMENT_TYPE_P3:
-          bodyTemplate.paymentAmount = donationObject.gross;
-          break;
+        switch (donationObject.paymentType) {
+          case PAYMENT_TYPE_P1:
+          case PAYMENT_TYPE_P3:
+            bodyTemplate.paymentAmount = donationObject.gross;
+            break;
 
-        case PAYMENT_TYPE_P2:
-          doGenerateAck = false;
-          numRecurring++;
-          break;
+          case PAYMENT_TYPE_P2:
+            doGenerateAck = false;
+            numRecurring++;
+            break;
 
-        case PAYMENT_TYPE_C1:
-        case PAYMENT_TYPE_D1:
-        case PAYMENT_TYPE_I1:
-          bodyTemplate.paymentAmount = donationObject.net;
-          break;
+          case PAYMENT_TYPE_C1:
+          case PAYMENT_TYPE_D1:
+          case PAYMENT_TYPE_I1:
+            bodyTemplate.paymentAmount = donationObject.net;
+            break;
 
-        default:
-          break;
-      }
-
-      if (doGenerateAck) {
-        try {
-          if (donationObject.emailAddress.length > 0) {
-            sendEmailAck_(donationObject, bodyTemplate, emailProperties);
-            numEmailAcks++;
-          }
-          else {
-            createDocumentAck_(donationObject, bodyTemplate, ackFolder);
-            numDocAcks++;
-          }
-
-          sheet.getRange(a[0], ntcFirstDataColumn).check();
+          default:
+            break;
         }
-        catch (e) {
-          execErrors.push(`Row ${a[0]}: ${e}`);
+
+        if (doGenerateAck) {
+          try {
+            if (donationObject.emailAddress.length > 0) {
+              sendEmailAck_(donationObject, bodyTemplate, emailProperties);
+              numEmailAcks++;
+            }
+            else {
+              createDocumentAck_(donationObject, bodyTemplate, ackFolder);
+              numDocAcks++;
+            }
+
+            sheet.getRange(a[0], ntcFirstDataColumn).check();
+          }
+          catch (e) {
+            execErrors.push(`Row ${a[0]}: ${e}`);
+          }
+        }
+        else {
+          sheet.getRange(a[0], ntcFirstDataColumn).check();
         }
       }
       else {
-        sheet.getRange(a[0], ntcFirstDataColumn).check();
+        numUnaddressed++;
       }
     });
 
-    stats = [totalAcks, numEmailAcks, numDocAcks, numRecurring, execErrors]; 
+    stats = [totalAcks, numEmailAcks, numDocAcks, numRecurring, numUnaddressed, execErrors]; 
   }
 
   return {
@@ -851,6 +858,14 @@ function toDonationObject_(donationRow) {
   };
 
   return donationObject;
+}
+
+function isDonationAddressed_(donationObject) {
+  return (donationObject.emailAddress.length > 0) ||
+         ((donationObject.streetAddress.length > 0) &&
+          (donationObject.city.length > 0) &&
+          (donationObject.state.length > 0) &&
+          (donationObject.zipCode.length > 0));
 }
 
 function isPayPalDonation_(donationType) {
