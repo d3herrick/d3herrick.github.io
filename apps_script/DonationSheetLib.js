@@ -19,38 +19,40 @@
 //                 "https://www.googleapis.com/auth/script.container.ui",
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
-const DEPLOYMENT_ID                         = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
-const DEPLOYMENT_VERSION                    = "5";
-const DONATION_DATA_RANGE                   = "donation_data";
-const PENDING_FOLDER_RANGE                  = "pending_folder";
-const IMPORTED_FOLDER_RANGE                 = "imported_folder";
-const ACK_FOLDER_RANGE                      = "acknowledgement_folder";
-const ZIPCODE_MINIMUM_LENGTH                = 5;
-const PROCESSING_EMAIL_DIST_LIST_RANGE      = "processing_email_dist_list"
-const PROCESSING_EMAIL_SENDER_NAME_RANGE    = "processing_email_sender_name"
-const PROCESSING_EMAIL_REPLY_TO_RANGE       = "processing_email_reply_to";
-const PROCESSING_RESULT_BODY_TEMPLATE_RANGE = "processing_email_body_template";
-const IMPORT_RESULT_EMAIL_SUBJECT_RANGE     = "import_result_email_subject";
-const ACK_BODY_TEMPLATE_RANGE               = "acknowledgement_body_template";
-const ACK_SUBJECT_RANGE                     = "acknowledgement_subject";
-const ACK_RESULT_EMAIL_SUBJECT_RANGE        = "acknowledgement_result_email_subject";
-const NTC_FIRST_DATA_ROW_RANGE              = "ntc_first_data_row";
-const PAYPAL_FIRST_DATA_ROW_RANGE           = "paypal_first_data_row";
-const ADDRESS_JOIN_SEPARATOR                = ", ";
-const PAYPAL_FILE_PREFIX                    = "paypal";
-const PAYPAL_FILE_FIELD_COUNT               = 41;
-const PAYPAL_DONATION_PAYMENT               = "Donation Payment";
-const PAYPAL_SUBSCRIPTION_PAYMENT           = "Subscription Payment";
-const PAYPAL_MOBILE_PAYMENT                 = "Mobile Payment";
-const PAYPAL_MASS_PAYMENT                   = "Mass Pay Payment";
-const CHECK_FILE_PREFIX                     = "check";
-const NEWTON_TREE_CONSERVANCY_MENU          = "Newton Tree Conservancy";
-const ABOUT_MENU_ITEM                       = "About...";
-const IMPORT_DONATION_DATA_MENU_ITEM        = "Import donation data";
-const IMPORT_DONATION_DATA_TITLE            = "Import Donation Data";
-const GENERATE_DONATION_ACKS_MENU_ITEM      = "Generate donation acknowledgements";
-const GENERATE_DONATION_ACKS_DATA_TITLE     = "Generate Donation Acknowledgements";
-const ABOUT_TITLE                           = "About Donation Ledger Spreadsheet";
+const DEPLOYMENT_ID                          = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
+const DEPLOYMENT_VERSION                     = "6";
+const DONATION_DATA_RANGE                    = "donation_data";
+const PENDING_FOLDER_RANGE                   = "pending_folder";
+const IMPORTED_FOLDER_RANGE                  = "imported_folder";
+const ACK_FOLDER_RANGE                       = "acknowledgement_folder";
+const ZIPCODE_MINIMUM_LENGTH                 = 5;
+const PROCESSING_EMAIL_DIST_LIST_RANGE       = "processing_email_dist_list"
+const PROCESSING_EMAIL_SENDER_NAME_RANGE     = "processing_email_sender_name"
+const PROCESSING_EMAIL_REPLY_TO_RANGE        = "processing_email_reply_to";
+const PROCESSING_RESULT_BODY_TEMPLATE_RANGE  = "processing_email_body_template";
+const IMPORT_RESULT_EMAIL_SUBJECT_RANGE      = "import_result_email_subject";
+const ACK_BODY_TEMPLATE_RANGE                = "acknowledgement_body_template";
+const ACK_SUBJECT_RANGE                      = "acknowledgement_subject";
+const ACK_RESULT_EMAIL_SUBJECT_RANGE         = "acknowledgement_result_email_subject";
+const ANNUAL_DONATION_ROLLUPS_SUBJECT_RANGE  = "annual_donation_rollups_subject";
+const NTC_FIRST_DATA_ROW_RANGE               = "ntc_first_data_row";
+const PAYPAL_FIRST_DATA_ROW_RANGE            = "paypal_first_data_row";
+const ADDRESS_JOIN_SEPARATOR                 = ", ";
+const PAYPAL_FILE_PREFIX                     = "paypal";
+const PAYPAL_FILE_FIELD_COUNT                = 41;
+const PAYPAL_DONATION_PAYMENT                = "Donation Payment";
+const PAYPAL_SUBSCRIPTION_PAYMENT            = "Subscription Payment";
+const PAYPAL_MOBILE_PAYMENT                  = "Mobile Payment";
+const PAYPAL_MASS_PAYMENT                    = "Mass Pay Payment";
+const CHECK_FILE_PREFIX                      = "check";
+const NEWTON_TREE_CONSERVANCY_MENU           = "Newton Tree Conservancy";
+const ABOUT_MENU_ITEM                        = "About...";
+const IMPORT_DONATION_DATA_MENU_ITEM         = "Import donation data";
+const IMPORT_DONATION_DATA_TITLE             = "Import Donation Data";
+const GENERATE_DONATION_ACKS_MENU_ITEM       = "Generate donation acknowledgements";
+const GENERATE_DONATION_ACKS_DATA_TITLE      = "Generate Donation Acknowledgements";
+const GENERATE_ANNUAL_DONATION_ROLLUPS_TITLE = "Generate Annual Donation Rollups";
+const ABOUT_TITLE                            = "About Donation Ledger Spreadsheet";
 
 // HTML inline styles. The modeless dialog widget seems unable to process style elements, thus these inline styles
 const STYLE_STANDARD_FONT     = "font-family:arial;font-size:14px";
@@ -64,12 +66,14 @@ const STYLE_TABLE_ROW_CELL    = "border: 1px solid;text-align:left;vertical-alig
 // P1 Regular tax deductible one time gift from PayPal
 // P2 Monthly regular tax deductible from PayPal
 // P3 Tax deductible with Comment from PayPal
+// P4 Annual rollup of recurring donations from PayPal
 // C1 regular check tax deductible
 // D1 Donor Advised Fund check or EFT
 // I1 IRA Distribution check
 const PAYMENT_TYPE_P1 = "P1";
 const PAYMENT_TYPE_P2 = "P2";
 const PAYMENT_TYPE_P3 = "P3";
+const PAYMENT_TYPE_P4 = "P4";
 const PAYMENT_TYPE_C1 = "C1";
 const PAYMENT_TYPE_D1 = "D1";
 const PAYMENT_TYPE_I1 = "I1";
@@ -95,6 +99,10 @@ function onScheduledImportDonationData() {
 
 function onScheduledGenerateDonationAcks() {
   onGenerateDonationAcks(false, true);
+}
+
+function onScheduledGenerateRecurringDonationRollups() {
+  onGenerateRecurringDonationRollups(false, true);
 }
 
 function onImportDonationData(displayResult = true, emailResult = true) {
@@ -169,7 +177,7 @@ function onImportDonationData(displayResult = true, emailResult = true) {
       }
     }
     else {
-      result = `<p style="${STYLE_STANDARD_FONT}">No files were pending import</p>`;
+      result = `<p style="${STYLE_STANDARD_FONT}">No files were pending import.</p>`;
     }
 
     if (displayResult) {
@@ -227,12 +235,40 @@ function onGenerateDonationAcks(displayResult = true, emailResult = true) {
       }
     }
     else {
-      result = `<p style="${STYLE_STANDARD_FONT}">No donations were pending processing</p>`;
+      result = `<p style="${STYLE_STANDARD_FONT}">No donations were pending processing.</p>`;
     }
 
     if (displayResult) {
       displayProcessingResult_(GENERATE_DONATION_ACKS_DATA_TITLE, result);
     }
+  }
+}
+
+function onGenerateRecurringDonationRollups(displayResult = false, emailResult = true) {
+  let sheet = getDonationDataSheet_();
+  let stats = generateRecurringDonationRollups_(sheet);
+
+  let result = "";
+
+  if (stats.rollupStats.length > 0) {
+    result = `<p style="${STYLE_STANDARD_FONT}">The following counts were recorded while generating annual rollups for recurring donations:</p>`;
+
+    result += "<ul>"
+
+    result += `<li style="${STYLE_MONOSPACED_FONT}">Total rollups generated for ${stats.rollupStats[2]}: ${stats.rollupStats[1]}</li>`;
+
+    result += "</ul>"
+
+    if (emailResult) {
+      sendEmailProcessingResult_(sheet, sheet.getRange(ANNUAL_DONATION_ROLLUPS_SUBJECT_RANGE).getValue(), result);
+    }
+  }
+  else {
+    result = `<p style="${STYLE_STANDARD_FONT}">No annual donation rollups were generated for ${rollupStats[2]}.</p>`;
+  }
+
+  if (displayResult) {
+    displayProcessingResult_(GENERATE_ANNUAL_DONATION_ROLLUPS_TITLE, result);
   }
 }
 
@@ -277,9 +313,6 @@ function importPendingFiles_(sheet, pendingFolder, importedFolder) {
     throw Error(`${PAYPAL_FIRST_DATA_ROW_RANGE} named range is not defined`);
   }
 
-  let firstInsertionRow    = ntcFirstDataRow;
-  let firstInsertionColumn = ntcFirstDataColumn;
-
   let stats = [];
 
   let pendingFiles = sortPendingFiles_(pendingFolder.getFiles());
@@ -289,10 +322,10 @@ function importPendingFiles_(sheet, pendingFolder, importedFolder) {
     let stat     = null;
 
     if (fileName.startsWith(PAYPAL_FILE_PREFIX)) {
-      stat = importPayPalCsv_(sheet, f, paypalFirstDataRow, paypalFirstDataColumn, firstInsertionRow, firstInsertionColumn);
+      stat = importPayPalCsv_(sheet, f, paypalFirstDataRow, paypalFirstDataColumn, ntcFirstDataRow, ntcFirstDataColumn);
     }
     else if (fileName.startsWith(CHECK_FILE_PREFIX)) {
-      stat = importSpreadsheet_(sheet, f, ntcFirstDataRow, ntcFirstDataColumn, firstInsertionRow, firstInsertionColumn);
+      stat = importSpreadsheet_(sheet, f, ntcFirstDataRow, ntcFirstDataColumn, ntcFirstDataRow, ntcFirstDataColumn);
     }
     else {
       stat = {
@@ -319,12 +352,12 @@ function importPayPalCsv_(sheet, file, firstDataRow, firstDataColumn, firstInser
   let numColumns   = 0;
   let paymentNotes = [];
 
-  let data = Utilities.parseCsv(file.getBlob().getDataAsString());
+  let csvData = Utilities.parseCsv(file.getBlob().getDataAsString());
 
-  if (data[0].length == PAYPAL_FILE_FIELD_COUNT) {
-    totalRows = data.length;
+  if (csvData[0].length == PAYPAL_FILE_FIELD_COUNT) {
+    totalRows = csvData.length;
 
-    let donations = normalizePaypalData_(data, firstDataRow);
+    let donations = normalizePaypalData_(csvData, firstDataRow);
 
     numRows    = donations.length;
     numColumns = donations[0].length;
@@ -336,7 +369,7 @@ function importPayPalCsv_(sheet, file, firstDataRow, firstDataColumn, firstInser
   else {
     aOkay = false;
 
-    numRows = `${file.getName()} contains unexpected number of fields: expected ${PAYPAL_FILE_FIELD_COUNT} found ${data[0].length}`;
+    numRows = `${file.getName()} contains unexpected number of fields: expected ${PAYPAL_FILE_FIELD_COUNT} found ${csvData[0].length}`;
   }
 
   return {
@@ -485,7 +518,8 @@ function importSpreadsheet_(sheet, file, firstDataRow, firstDataColumn, firstIns
     range     = range.getSheet().getDataRange();
     totalRows = range.getNumRows();
 
-    let donations = normalizeCheckData_(range.getValues(), firstDataRow);
+    let checkData = range.getValues();
+    let donations = normalizeCheckData_(checkData, firstDataRow);
 
     numRows    = donations.length;
     numColumns = donations[0].length;
@@ -670,23 +704,13 @@ function generateDonationAcks_(sheet, ackFolder) {
   let ackRange      = sheet.getRange(ntcFirstDataRow, ntcFirstDataColumn, numRows, 1);
   let ackA1Notation = `'${sheet.getName()}'!${ackRange.getA1Notation()}`;
 
-  let query = `=arrayformula(query({${ackA1Notation}, ROW(${ackA1Notation})}, "SELECT Col2 WHERE Col1 = FALSE", 0))`;
-
-  let queryResults = spreadsheet.insertSheet().hideSheet();
-  let ackData      = null;
-
-  try {
-    queryResults.getRange(1,1).setFormula(query);
-
-    ackData = queryResults.getDataRange().getValues();
-  }
-  finally {
-    spreadsheet.deleteSheet(queryResults);
-  }
-
   let stats = [];
 
-  if ((ackData.length > 0) && (ackData[0] != "#N/A")) {
+  let query = `=arrayformula(query({${ackA1Notation}, ROW(${ackA1Notation})}, "SELECT Col2 WHERE Col1 = FALSE", 0))`;
+
+  let ackData = executeQuery_(spreadsheet, query);
+
+  if (ackData.length > 0) {
     let emailProperties = {
       senderName: sheet.getRange(PROCESSING_EMAIL_SENDER_NAME_RANGE).getValue(),
       replyTo:    sheet.getRange(PROCESSING_EMAIL_REPLY_TO_RANGE).getValue(),
@@ -724,6 +748,7 @@ function generateDonationAcks_(sheet, ackFolder) {
         switch (donationObject.paymentType) {
           case PAYMENT_TYPE_P1:
           case PAYMENT_TYPE_P3:
+          case PAYMENT_TYPE_P4:
             bodyTemplate.paymentAmount = donationObject.gross;
             break;
 
@@ -774,6 +799,113 @@ function generateDonationAcks_(sheet, ackFolder) {
   return {
     ackStats: stats
   };
+}
+
+function generateRecurringDonationRollups_(sheet) {
+  let aOkay = true;
+
+  let ntcFirstDataRow    = undefined;
+  let ntcFirstDataColumn = 1;
+  
+  let ntcFirstDataRowRange = sheet.getRange(NTC_FIRST_DATA_ROW_RANGE);
+
+  if (ntcFirstDataRowRange != undefined) {
+    ntcFirstDataRow = ntcFirstDataRowRange.getValue();
+  }
+  else {
+    throw Error(`${NTC_FIRST_DATA_ROW_RANGE} named range is not defined`);
+  }
+
+  let spreadsheet      = sheet.getParent();
+  let range            = sheet.getDataRange();
+  let numRows          = range.getLastRow() - ntcFirstDataRow + 1;
+  let numColumns       = range.getLastColumn();
+  let rollupRange      = sheet.getRange(ntcFirstDataRow, ntcFirstDataColumn, numRows, numColumns);
+  let rollupA1Notation = `'${sheet.getName()}'!${rollupRange.getA1Notation()}`;
+  let priorYear        = new Date().getFullYear() - 1;
+
+  let query = `=query(${rollupA1Notation}, "SELECT MAX(B), C, D, SUM(F), SUM(G), SUM(H), L WHERE I = 'P2' AND B >= DATE '${priorYear}-01-01' AND B <= DATE '${priorYear}-12-31' GROUP BY C, D, F, G, H, L ORDER BY C, D LABEL MAX(B) '', SUM(F) '', SUM(G) '', SUM(H) ''")`;
+
+  let rollupData = executeQuery_(spreadsheet, query);
+
+  if (rollupData.length > 0) {
+    totalRows = rollupData.length;
+
+    let donations = normalizeRollupData_(rollupData, ntcFirstDataRow);
+
+    numRows    = donations.length;
+    numColumns = donations[0].length;
+
+    insertDonationData_(sheet, donations, ntcFirstDataRow, ntcFirstDataColumn, numRows, numColumns);
+  }
+
+  return {
+    rollupStats: [aOkay, numRows, priorYear],
+  };
+}
+
+function normalizeRollupData_(data, firstDataRow) {
+  //out:Ack emailed or generated|Donation date|Last name|First name|Salutation/Other names|Gross|Fee|Net|Payment type|Payment source |Payment note|Email address|Street address|City|State|Zip code
+
+  let rows = [];
+
+  data.forEach(function(r) {
+    if (!isEmptyRow_(r)) {
+      let row = [];
+
+      // Ack emailed or generated
+      row.push("");
+      
+      // Donation date
+      row.push(normalizeDonationDate_(r[0]));
+
+      // Last name
+      row.push(normalizeString_(r[1]));
+
+      // First name
+      row.push(normalizeString_(r[2]));
+
+      // Salutation/Other names
+      row.push("");
+
+      // Gross
+      row.push(normalizeNumber_(r[3]));
+      
+      // Fee
+      row.push(normalizeNumber_(r[4]));
+      
+      // Net
+      row.push(normalizeNumber_(r[5]));
+
+      // Payment type
+      row.push(PAYMENT_TYPE_P4);
+
+      // Payment source
+      row.push(PAYMENT_SOURCE_PAYPAL);
+      
+      // Payment note
+      row.push("");
+      
+      // Email address
+      row.push(normalizeEmailAddress_(r[6]));
+      
+      // Street address
+      row.push("");
+      
+      // City
+      row.push("");
+      
+      // State
+      row.push("");
+
+      // Zip code
+      row.push("");
+
+      rows.push(row);
+    }
+  });
+
+  return rows;
 }
 
 function sendEmailAck_(donationObject, bodyTemplate, emailProperties) {
@@ -836,6 +968,22 @@ function sendEmailProcessingResult_(sheet, subject, result) {
       name    : senderName
     }
   );
+}
+
+function executeQuery_(spreadsheet, query) {
+  let queryResults = spreadsheet.insertSheet().hideSheet();
+  let resultData   = null;
+
+  try {
+    queryResults.getRange(1,1).setFormula(query);
+
+    resultData = queryResults.getDataRange().getValues();
+  }
+  finally {
+    spreadsheet.deleteSheet(queryResults);
+  }
+
+  return ((resultData.length > 0) && (resultData[0] != "#N/A")) ? resultData : [];
 }
 
 function toDonationObject_(donationRow) {

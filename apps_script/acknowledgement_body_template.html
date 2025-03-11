@@ -63,7 +63,7 @@ very generous
 generous
 <? } ?>
 contribution of <?!=Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(paymentAmount)?> that we received on <?!=Intl.DateTimeFormat("en-US").format(donationDate)?> from
-<? if ((paymentType == "P1") || (paymentType == "P2") || (paymentType == "P3")) { ?>
+<? if ((paymentType == "P1") || (paymentType == "P2") || (paymentType == "P3") || (paymentType == "P4")) { ?>
 a credit card.
 <? } else if (paymentType == "D1") { ?>
 a Donor Advised Fund.
