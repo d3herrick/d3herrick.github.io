@@ -30,7 +30,7 @@ function onSetDirectorFileName() {
 function onDuplicateRowForCornerLot() {
   DirectorSheetLib.onDuplicateRowForCornerLot();
 }
-  
+
 function onInsertEmptyRows() {
   DirectorSheetLib.onInsertEmptyRows();
 }
