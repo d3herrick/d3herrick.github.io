@@ -20,7 +20,7 @@
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
 const DEPLOYMENT_ID                          = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
-const DEPLOYMENT_VERSION                     = "6";
+const DEPLOYMENT_VERSION                     = "7";
 const DONATION_DATA_RANGE                    = "donation_data";
 const PENDING_FOLDER_RANGE                   = "pending_folder";
 const IMPORTED_FOLDER_RANGE                  = "imported_folder";
@@ -44,6 +44,7 @@ const PAYPAL_DONATION_PAYMENT                = "Donation Payment";
 const PAYPAL_SUBSCRIPTION_PAYMENT            = "Subscription Payment";
 const PAYPAL_MOBILE_PAYMENT                  = "Mobile Payment";
 const PAYPAL_MASS_PAYMENT                    = "Mass Pay Payment";
+const PAYPAL_MASS_PAYMENT_EMAIL              = "PPGFUSPay@paypalgivingfund.org";
 const CHECK_FILE_PREFIX                      = "check";
 const NEWTON_TREE_CONSERVANCY_MENU           = "Newton Tree Conservancy";
 const ABOUT_MENU_ITEM                        = "About...";
@@ -750,17 +751,30 @@ function generateDonationAcks_(sheet, ackFolder) {
           case PAYMENT_TYPE_P3:
           case PAYMENT_TYPE_P4:
             bodyTemplate.paymentAmount = donationObject.gross;
+
             break;
 
           case PAYMENT_TYPE_P2:
             doGenerateAck = false;
             numRecurring++;
+
+            break;
+
+          case PAYMENT_TYPE_D1:
+            if (isPayPalGivingFundAddress_(donationObject)) {
+              doGenerateAck = false;
+              totalAcks--;
+            }
+            else {
+              bodyTemplate.paymentAmount = donationObject.net;
+            }
+
             break;
 
           case PAYMENT_TYPE_C1:
-          case PAYMENT_TYPE_D1:
           case PAYMENT_TYPE_I1:
             bodyTemplate.paymentAmount = donationObject.net;
+
             break;
 
           default:
@@ -1008,19 +1022,23 @@ function toDonationObject_(donationRow) {
   return donationObject;
 }
 
+function isPayPalDonation_(donationType) {
+  return ((donationType == PAYPAL_DONATION_PAYMENT) || 
+          (donationType == PAYPAL_SUBSCRIPTION_PAYMENT) ||
+          (donationType == PAYPAL_MOBILE_PAYMENT) ||
+          (donationType == PAYPAL_MASS_PAYMENT))
+}
+
+function isPayPalGivingFundAddress_(donationObject) {
+  return ((donationObject.emailAddress.length > 0) && (donationObject.emailAddress == PAYPAL_MASS_PAYMENT_EMAIL));
+}
+
 function isDonationAddressed_(donationObject) {
   return (donationObject.emailAddress.length > 0) ||
          ((donationObject.streetAddress.length > 0) &&
           (donationObject.city.length > 0) &&
           (donationObject.state.length > 0) &&
           (donationObject.zipCode.length > 0));
-}
-
-function isPayPalDonation_(donationType) {
-  return ((donationType == PAYPAL_DONATION_PAYMENT) || 
-          (donationType == PAYPAL_SUBSCRIPTION_PAYMENT) ||
-          (donationType == PAYPAL_MOBILE_PAYMENT) ||
-          (donationType == PAYPAL_MASS_PAYMENT))
 }
 
 function sortPendingFiles_(unsortedFiles) {
