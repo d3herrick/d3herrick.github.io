@@ -249,11 +249,11 @@ function onArchiveDataForPlantingDate() {
 
 function onAbout() {
   let ui = SpreadsheetApp.getUi();
-  
+
   ui.alert(ABOUT_TITLE,
     `Deployment ID
     ${DEPLOYMENT_ID}
-    
+
     Version
     ${DEPLOYMENT_VERSION}
 

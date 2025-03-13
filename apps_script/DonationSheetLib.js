@@ -207,7 +207,7 @@ function onGenerateDonationAcks(displayResult = true, emailResult = true) {
       result = `<p style="${STYLE_STANDARD_FONT}">The following counts were recorded while processing donation acknowledgements:</p>`;
 
       result += "<ul>"
-  
+
       result += `<li style="${STYLE_MONOSPACED_FONT}">Total donations processed........: ${stats.ackStats[0]}</li>`;
       result += `<li style="${STYLE_MONOSPACED_FONT}">Email acknowledgements sent......: ${stats.ackStats[1]}</li>`;
       result += `<li style="${STYLE_MONOSPACED_FONT}">Document acknowledgements created: ${stats.ackStats[2]}</li>`;
@@ -220,7 +220,7 @@ function onGenerateDonationAcks(displayResult = true, emailResult = true) {
 
       if (execErrors.length > 0) {
         result += `<p style="${STYLE_STANDARD_FONT}">The following errors were encountered:</p>`;
-        
+
         result += "<ul>"
 
         execErrors.forEach(function(e) {
@@ -278,7 +278,7 @@ function onAbout() {
   ui.alert(ABOUT_TITLE,
     `Deployment ID
     ${DEPLOYMENT_ID}
-    
+
     Version
     ${DEPLOYMENT_VERSION}
 
@@ -443,13 +443,13 @@ function normalizePaypalData_(data, firstDataRow) {
 
         // Gross
         row.push(normalizeNumber_(r[7]));
-        
+
         // Fee
         row.push(normalizeNumber_(r[8]));
-        
+
         // Net
         row.push(normalizeNumber_(r[9]));
-        
+
         // Payment type
         let paymentType = PAYMENT_TYPE_P1;
         let paymentNote = normalizeString_(r[38]);
@@ -467,13 +467,13 @@ function normalizePaypalData_(data, firstDataRow) {
         }
 
         row.push(paymentType);
-        
+
         // Payment source 
         row.push(PAYMENT_SOURCE_PAYPAL);
-        
+
         // Payment note
         row.push(paymentNote);
-        
+
         // Email address
         row.push(normalizeEmailAddress_(r[10]));
 
@@ -486,13 +486,13 @@ function normalizePaypalData_(data, firstDataRow) {
 
         // Street address
         row.push(streetAddress1);
-        
+
         // City
         row.push(normalizeString_(r[32]));
-        
+
         // State
         row.push(normalizeString_(r[33]));
-        
+
         // Zip code
         row.push(normalizeDonationZipcode_(r[34].trim()));
 
@@ -553,7 +553,7 @@ function normalizeCheckData_(data, firstDataRow) {
 
       // Ack emailed or generated
       row.push("");
-      
+
       // Donation date
       row.push(normalizeDonationDate_(r[0]));
 
@@ -570,10 +570,10 @@ function normalizeCheckData_(data, firstDataRow) {
       let net = normalizeNumber_(r[6]);
 
       row.push(net);
-      
+
       // Fee
       row.push(normalizeNumber_(r[5]));
-      
+
       // Net
       row.push(net);
 
@@ -582,19 +582,19 @@ function normalizeCheckData_(data, firstDataRow) {
 
       // Payment source
       row.push(normalizeString_(r[8]));
-      
+
       // Payment note
       row.push(normalizeString_(r[9]));
-      
+
       // Email address
       row.push(normalizeEmailAddress_(r[10]));
-      
+
       // Street address
       row.push(normalizeString_(r[11]));
-      
+
       // City
       row.push(normalizeString_(r[12]));
-      
+
       // State
       row.push(normalizeString_(r[13]));
 
@@ -687,7 +687,7 @@ function tabulatePaymentNotes_(donations) {
 function generateDonationAcks_(sheet, ackFolder) {
   let ntcFirstDataRow    = undefined;
   let ntcFirstDataColumn = 1;
-  
+
   let ntcFirstDataRowRange = sheet.getRange(NTC_FIRST_DATA_ROW_RANGE);
 
   if (ntcFirstDataRowRange != undefined) {
@@ -725,7 +725,7 @@ function generateDonationAcks_(sheet, ackFolder) {
     let numRecurring   = 0;
     let numUnaddressed = 0;
     let execErrors     = [];
-    
+
     ackData.forEach(function (a) {
       let donationRange  = sheet.getRange(a[0], ntcFirstDataColumn, 1, numColumns);
       let donationObject = toDonationObject_(donationRange.getValues()[0]);
@@ -806,7 +806,7 @@ function generateRecurringDonationRollups_(sheet) {
 
   let ntcFirstDataRow    = undefined;
   let ntcFirstDataColumn = 1;
-  
+
   let ntcFirstDataRowRange = sheet.getRange(NTC_FIRST_DATA_ROW_RANGE);
 
   if (ntcFirstDataRowRange != undefined) {
@@ -855,7 +855,7 @@ function normalizeRollupData_(data, firstDataRow) {
 
       // Ack emailed or generated
       row.push("");
-      
+
       // Donation date
       row.push(normalizeDonationDate_(r[0]));
 
@@ -870,10 +870,10 @@ function normalizeRollupData_(data, firstDataRow) {
 
       // Gross
       row.push(normalizeNumber_(r[3]));
-      
+
       // Fee
       row.push(normalizeNumber_(r[4]));
-      
+
       // Net
       row.push(normalizeNumber_(r[5]));
 
@@ -882,19 +882,19 @@ function normalizeRollupData_(data, firstDataRow) {
 
       // Payment source
       row.push(PAYMENT_SOURCE_PAYPAL);
-      
+
       // Payment note
       row.push("");
-      
+
       // Email address
       row.push(normalizeEmailAddress_(r[6]));
-      
+
       // Street address
       row.push("");
-      
+
       // City
       row.push("");
-      
+
       // State
       row.push("");
 
@@ -933,7 +933,7 @@ function createDocumentAck_(donationObject, bodyTemplate, ackFolder) {
   let docName = `${donationObject.lastName}_${donationObject.firstName}_${Intl.DateTimeFormat("en-US").format(donationObject.donationDate)}.pdf`;
   let docBlob = Utilities.newBlob(body, MimeType.HTML).getAs(MimeType.PDF).setName(docName);
   let docFile = DriveApp.createFile(docBlob);
-  
+
   docFile.moveTo(ackFolder);
 }
 
@@ -943,7 +943,7 @@ function displayProcessingResult_(subject, result) {
 
     html.setHeight(400);
     html.setWidth(600);
-    
+
     ui.showModelessDialog(html, subject);
 }
 

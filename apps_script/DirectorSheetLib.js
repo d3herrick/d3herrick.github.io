@@ -144,7 +144,7 @@ function onEdit(e) {
 
     if ((dataRange.getRow() < e.range.rowStart) && (dataRange.getLastRow() > e.range.rowEnd)) {
       let isValidValue = true;
-      
+
       if (e.value != undefined) {
         let needle = e.value.trim();
 
@@ -153,7 +153,7 @@ function onEdit(e) {
 
           for (r of BOOLEAN_VALIDATION_FILTERS) {
             let range = sheet.getRange(r[0]);
-        
+
             if (range.getLastColumn() == e.range.columnEnd) {
               if ((needle == "y") || (needle == "yes")) {
                 e.range.setValue("Yes");
@@ -180,7 +180,7 @@ function onEdit(e) {
           if (isValidValue) {
             for (r of INTEGRER_VALIDATION_FILTERS) {
               let range = sheet.getRange(r[0]);
-              
+
               if (range.getLastColumn() == e.range.columnEnd) {
                 if (!Number.isInteger(Number(needle))) {
                   let ui         = SpreadsheetApp.getUi();
@@ -231,7 +231,7 @@ function onGetApplicationData(rows) {
   if (criteria.isComplete) {
     let range  = sheet.getRange(LAST_DATA_RETRIEVAL_RANGE);
     let format = range.getNumberFormat(); 
- 
+
     try {
       range.setValue(RETRIEVING_DATA_STATUS);
       insertApplicationData_(sheet, rows);
@@ -295,7 +295,7 @@ function onDuplicateRowForCornerLot() {
     sheet.insertRowsAfter(row, 1);
     range.copyTo(sheet.getRange(newRow, 1, 1, column));
     sheet.getRange(newRow, 1, 1, column).setFontColor(DUPLICATE_ROW_COLOR);
-        
+
     range = sheet.getRange(newRow, sheet.getRange(NUMBER_OF_TREES_REQUESTED_FILTER).getLastColumn());
     range.setValue(DUPLICATE_ROW_REQUESTED_VALUE).setFontSize(DUPLICATE_ROW_REQUESTED_FONT_SIZE).setFontColor(DUPLICATE_ROW_COLOR);
 
@@ -335,7 +335,7 @@ function onInsertEmptyRows() {
           if (rowCount-- > 0) {
             sheet.insertRowsBefore(rowIndex, 1);
             sheet.getRange(rowIndex, 1).setValue(rowTimestamp);
-            
+
             rowIndex++;
             rowTimestamp.setSeconds(rowTimestamp.getSeconds() + 1);
           }
@@ -434,7 +434,7 @@ function validateDataFilterCriteria_() {
 
     if (plantingDate == plantingDateFirstItem) {
       isComplete = false;
-      
+
       message += PLANTING_DATA_FILTER_LABEL;
     }
 
@@ -560,7 +560,7 @@ function listApplicationData_(sheet) {
       });
     }
   }
-  
+
   return rows;
 }
 
@@ -638,7 +638,7 @@ function mergePlanterContact_(row) {
     }
 
     residentNotes += "Designated planter is";
-    
+
     if (planterFirstName.length > 0) {
       residentNotes += " " + planterFirstName;
     }
