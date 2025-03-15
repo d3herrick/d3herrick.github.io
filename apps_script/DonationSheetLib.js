@@ -20,7 +20,7 @@
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
 const DEPLOYMENT_ID                          = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
-const DEPLOYMENT_VERSION                     = "7";
+const DEPLOYMENT_VERSION                     = "8";
 const DONATION_DATA_RANGE                    = "donation_data";
 const PENDING_FOLDER_RANGE                   = "pending_folder";
 const IMPORTED_FOLDER_RANGE                  = "imported_folder";
@@ -668,7 +668,7 @@ function isEmptyRow_(row) {
 function tabulatePaymentNotes_(donations) {
   let paymentNotes = [];
 
-  if (donations.length > 0) {
+  if (!isDonationDataEmpty_(donations)) {
     donations.forEach(function (d) {
       let donationObject = toDonationObject_(d);
 
@@ -711,7 +711,7 @@ function generateDonationAcks_(sheet, ackFolder) {
 
   let ackData = executeQuery_(spreadsheet, query);
 
-  if (ackData.length > 0) {
+  if (!isDonationDataEmpty_(ackData)) {
     let emailProperties = {
       senderName: sheet.getRange(PROCESSING_EMAIL_SENDER_NAME_RANGE).getValue(),
       replyTo:    sheet.getRange(PROCESSING_EMAIL_REPLY_TO_RANGE).getValue(),
@@ -842,7 +842,7 @@ function generateRecurringDonationRollups_(sheet) {
 
   let rollupData = executeQuery_(spreadsheet, query);
 
-  if (rollupData.length > 0) {
+  if (!isDonationDataEmpty_(rollupData)) {
     totalRows = rollupData.length;
 
     let donations = normalizeRollupData_(rollupData, ntcFirstDataRow);
@@ -923,20 +923,22 @@ function normalizeRollupData_(data, firstDataRow) {
 }
 
 function sendEmailAck_(donationObject, bodyTemplate, emailProperties) {
-  bodyTemplate.doInlineImage = false;
+  if (donationObject.emailAddress.length > 0) {
+    bodyTemplate.doInlineImage = false;
 
-  let body = bodyTemplate.evaluate().getContent();
+    let body = bodyTemplate.evaluate().getContent();
 
-  MailApp.sendEmail(
-    donationObject.emailAddress,
-    emailProperties.subject,
-    null,
-    {
-      htmlBody: body,
-      replyTo : emailProperties.replyTo,
-      name    : emailProperties.senderName
-    }
-  );
+    MailApp.sendEmail(
+      donationObject.emailAddress,
+      emailProperties.subject,
+      null,
+      {
+        htmlBody: body,
+        replyTo : emailProperties.replyTo,
+        name    : emailProperties.senderName
+      }
+    );
+  }
 }
 
 function createDocumentAck_(donationObject, bodyTemplate, ackFolder) {
@@ -962,26 +964,29 @@ function displayProcessingResult_(subject, result) {
 }
 
 function sendEmailProcessingResult_(sheet, subject, result) {
-  let senderName       = sheet.getRange(PROCESSING_EMAIL_SENDER_NAME_RANGE).getValue();
   let distributionList = sheet.getRange(PROCESSING_EMAIL_DIST_LIST_RANGE).getValue();
-  let replyTo          = sheet.getRange(PROCESSING_EMAIL_REPLY_TO_RANGE).getValue();
-  let bodyTemplate     = HtmlService.createTemplateFromFile(sheet.getRange(PROCESSING_RESULT_BODY_TEMPLATE_RANGE).getValue());
 
-  bodyTemplate.result = result +
-    `<p><p style="${STYLE_STANDARD_FONT}">View the donation ledger by clicking <a href="${sheet.getParent().getUrl()}">here</a>.</p></p>`;
+  if (distributionList.length > 0) {
+    let senderName       = sheet.getRange(PROCESSING_EMAIL_SENDER_NAME_RANGE).getValue();
+    let replyTo          = sheet.getRange(PROCESSING_EMAIL_REPLY_TO_RANGE).getValue();
+    let bodyTemplate     = HtmlService.createTemplateFromFile(sheet.getRange(PROCESSING_RESULT_BODY_TEMPLATE_RANGE).getValue());
 
-  let body = bodyTemplate.evaluate().getContent();
+    bodyTemplate.result = result +
+      `<p><p style="${STYLE_STANDARD_FONT}">View the donation ledger by clicking <a href="${sheet.getParent().getUrl()}">here</a>.</p></p>`;
 
-  MailApp.sendEmail(
-    distributionList,
-    subject,
-    null,
-    {
-      htmlBody: body,
-      replyTo : replyTo,
-      name    : senderName
-    }
-  );
+    let body = bodyTemplate.evaluate().getContent();
+
+    MailApp.sendEmail(
+      distributionList,
+      subject,
+      null,
+      {
+        htmlBody: body,
+        replyTo : replyTo,
+        name    : senderName
+      }
+    );
+  }
 }
 
 function executeQuery_(spreadsheet, query) {
@@ -997,7 +1002,11 @@ function executeQuery_(spreadsheet, query) {
     spreadsheet.deleteSheet(queryResults);
   }
 
-  return ((resultData.length > 0) && (resultData[0] != "#N/A")) ? resultData : [];
+  return !isDonationDataEmpty_(resultData) ? resultData : [];
+}
+
+function isDonationDataEmpty_(rows) {
+  return !((rows != null) && (rows.length > 0) && (rows[0] != "#N/A") && (rows[0] != "#VALUE!") && (rows[0] != "#ERROR!"));
 }
 
 function toDonationObject_(donationRow) {
@@ -1056,7 +1065,7 @@ function sortPendingFiles_(unsortedFiles) {
 }
 
 function insertDonationData_(sheet, donations, firstInsertionRow, firstInsertionColumn, numRows, numColumns) {
-  if (donations.length > 0) {
+  if (!isDonationDataEmpty_(donations)) {
     if (donations.length > 1) {
       donations.sort((a, b) => new Date(b[1]) - new Date(a[1]));
     }
