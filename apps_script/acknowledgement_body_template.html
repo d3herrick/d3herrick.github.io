@@ -1,10 +1,17 @@
 <!DOCTYPE html>
-<html style='margin-top:40px;margin-bottom:10px;margin-left:40px;margin-right:40px;'>
+<html>
 <head>
 <style>
-  *{
-  font-family: Arial;
-  font-size: 14px;
+  html {
+    margin-top: 40px;
+    margin-bottom: 10px;
+    margin-left: 40px;
+    margin-right: 40px;
+  }
+
+  * {
+    font-family: Arial;
+    font-size: 14px;
   }
 </style>
 </head>
@@ -14,9 +21,7 @@
 <? } else { ?>
 <img src="https://images.squarespace-cdn.com/content/v1/5ea86c823cbaca067695a6c9/1592434962146-Y2ZXU6QJR4F3A2R3ZT2Y/ntc+logo+tight-01.png?format=300w" alt="Newton Tree Conservancy" width="110" height="110"/>
 <? } ?>
-<p>
-<br>
-</p>
+<p><br></p>
 <p>
 P.O. Box 233
 <br>Newton, MA 02468
@@ -43,9 +48,7 @@ P.O. Box 233
 <br><?!=emailAddress?>
 <? } ?>
 </p>
-<p>
-<br>
-</p>
+<p><br></p>
 <p>
 Dear
 <? if (salutationTokens.length == 0) { ?>
@@ -70,7 +73,7 @@ generous
 <? } ?>
 contribution of <?!=Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(paymentAmount)?> that we received on <?!=Intl.DateTimeFormat("en-US").format(donationDate)?> from
 <? if ((paymentType == "P1") || (paymentType == "P2") || (paymentType == "P3") || (paymentType == "P4")) { ?>
-a credit card.
+an electronic payment.
 <? } else if (paymentType == "D1") { ?>
 a Donor Advised Fund.
 <? } else if (paymentType == "I1") { ?>
@@ -89,25 +92,15 @@ All of this is made possible by the generous support of the community, specifica
 <p>
 With best wishes,
 </p>
-<p>
-<br>
-</p>
+<p><br></p>
 <p>
 Aline C. Sammut
 <br>Membership Director
 </p>
-<p>
-<br>
-</p>
-<p>
-<br>
-</p>
-<p>
-<br>
-</p>
-<p>
-<br>
-</p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
 <p style="text-align: center;">
 <strong>
 Visit us at www.newtontreeconservancy.org
