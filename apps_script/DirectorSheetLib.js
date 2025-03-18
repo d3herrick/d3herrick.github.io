@@ -14,12 +14,11 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                          = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const DEPLOYMENT_VERSION                     = "33";
+const DEPLOYMENT_VERSION                     = "34";
 const FORM_DATA_SHEET_ID_RANGE               = "form_data_spreadsheet_id";
 const FORM_DATA_SHEET_RANGE                  = "form_data";
 const PLANTING_DATE_RANGE                    = "planting_date";
 const GROUP_NAME_RANGE                       = "group_name";
-const QUERY_RESULTS_RANGE                    = "query_results"
 const GROUP_LEADER_DATA_FILTER               = "group_leader_data_filter";
 const PHONE_DATA_FILTER                      = "phone_data_filter";
 const NUMBER_OF_TREES_REQUESTED_FILTER       = "number_of_trees_requested";
