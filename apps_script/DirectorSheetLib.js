@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                          = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const DEPLOYMENT_VERSION                     = "34";
+const DEPLOYMENT_VERSION                     = "35";
 const FORM_DATA_SHEET_ID_RANGE               = "form_data_spreadsheet_id";
 const FORM_DATA_SHEET_RANGE                  = "form_data";
 const PLANTING_DATE_RANGE                    = "planting_date";
@@ -77,7 +77,7 @@ const INTEGRER_VALIDATION_FILTERS = [
   [MEDIUM_TREE_COUNT_FILTER, ""],
   [SMALL_TREE_COUNT_FILTER,  ""],
   [TBD_TREE_COUNT_FILTER,    ""],
-  [BERM_DATA_FILTER,        "If there is no berm, specify a width of zero."]
+  [BERM_DATA_FILTER,         "If there is no berm, specify a width of zero."]
 ];
 
 function onOpen(e) {
@@ -108,7 +108,7 @@ function onOpen(e) {
 
       if (!isApplicationDataEmpty_(rows)) {
         let response = ui.alert(ADDITIONAL_DATA_AVAILABLE_TITLE, 
-          "There " + ((rows.length > 1) ? "are" : "is") + " " + rows.length + " additional " + ((rows.length > 1) ? "applications" : "application") + " available for the " + PLANTING_DATA_FILTER_LABEL + " and " + GROUP_NAME_FILTER_LABEL + " you selected. Do you want to refresh your applicaton data now? If not, you may do so later by clicking menu item " + GET_APPLICATION_DATA_MENU_ITEM + ".",
+          `There ${((rows.length > 1) ? "are" : "is")} ${rows.length} additional ${((rows.length > 1) ? "applications" : "application")} available for the ${PLANTING_DATA_FILTER_LABEL} and  ${GROUP_NAME_FILTER_LABEL} you selected. Do you want to refresh your applicaton data now? If not, you may do so later by clicking menu item ${GET_APPLICATION_DATA_MENU_ITEM}.`,
           ui.ButtonSet.YES_NO);
 
         if (response == ui.Button.YES) {
@@ -165,7 +165,7 @@ function onEdit(e) {
                 let columnName = sheet.getRange(dataRange.getRow(), range.getLastColumn()).getValue();
 
                 ui.alert(SPECIFIED_INVALID_COLUMN_VALUE_TITLE + columnName,
-                  "Value \"" + e.value + "\" is invalid. Please specify either \"Yes\", or the letter \"Y\", or \"No\", or the letter \"N\". " + r[1],
+                  `Value "${e.value}" is invalid. Please specify either "Yes", or the letter "Y", or "No", or the letter "N". ${r[1]}`,
                   ui.ButtonSet.OK);
 
                 e.range.setValue("");    
@@ -186,7 +186,7 @@ function onEdit(e) {
                   let columnName = sheet.getRange(dataRange.getRow(), range.getLastColumn()).getValue();
 
                   ui.alert(SPECIFIED_INVALID_COLUMN_VALUE_TITLE + columnName,
-                    "Value \"" + e.value + "\" is invalid. Please specify an integer greater than or equal to zero. " + r[1],
+                    `Value "${e.value}" is invalid. Please specify an integer greater than or equal to zero. ${r[1]}`,
                     ui.ButtonSet.OK);
 
                   e.range.setValue("");    
@@ -241,7 +241,7 @@ function onGetApplicationData(rows) {
   }
   else {
     ui.alert(SPECIFY_DATA_FILTER_TITLE, 
-      "Please select " + criteria.message + " and then click menu item " + GET_APPLICATION_DATA_MENU_ITEM + " again.",
+      `Please select ${criteria.message} and then click menu item ${GET_APPLICATION_DATA_MENU_ITEM} again.`,
       ui.ButtonSet.OK);
   }
 }
@@ -253,7 +253,7 @@ function onSetDirectorFileName() {
 
   if (criteria.isComplete) {
     let response = ui.prompt(SET_DIRECTOR_FILE_NAME_TITLE,
-      "Enter the first name of the director assigned to this planting group. If multiple directors are assigned, separate their first names with \"and\":",
+      `Enter the first name of the director assigned to this planting group. If multiple directors are assigned, separate their first names with "and":`,
       ui.ButtonSet.OK_CANCEL);
 
     let directorName = response.getResponseText();
@@ -268,14 +268,14 @@ function onSetDirectorFileName() {
         PropertiesService.getDocumentProperties().deleteProperty(DIRECTOR_NAME_PROP);
 
         ui.alert(SET_DIRECTOR_FILE_NAME_TITLE,
-          "You did not specify the name of a director. Consequently, automatic update of the spreadsheet file name will be disabled.",
+          `You did not specify the name of a director. Consequently, automatic update of the spreadsheet file name will be disabled.`,
           ui.ButtonSet.OK);
       }
     }
   }
   else {
     ui.alert(SET_DIRECTOR_FILE_NAME_TITLE, 
-      "Please select " + criteria.message + " and then click menu item " + SET_DIRECTOR_FILE_NAME_MENU_ITEM + " again.",
+      `Please select ${criteria.message} and then click menu item ${SET_DIRECTOR_FILE_NAME_MENU_ITEM} again.`,
       ui.ButtonSet.OK);
   }
 }
@@ -309,7 +309,7 @@ function onDuplicateRowForCornerLot() {
   }
   else {
     ui.alert(DUPLICATE_ROW_FOR_CORNER_LOT_TITLE, 
-      "Please select one of the applications located in rows " + (dataRange.getRow() + 1) + " through " + (dataRange.getLastRow() - 1) + ".",
+      `Please select one of the applications located in rows ${(dataRange.getRow() + 1)} through  ${(dataRange.getLastRow() - 1)}.`,
       ui.ButtonSet.OK);
   }
 }
@@ -320,7 +320,7 @@ function onInsertEmptyRows() {
   let rowIndex = sheet.getRange(GROUP_DATA_RANGE).getLastRow();
 
   let response = ui.prompt(INSERT_EMPTY_ROWS_TITLE,
-    "Enter the number of empty rows to insert. You may specify up to " + INSERT_EMPTRY_ROWS_MAX + " rows. The empty rows will be inserted starting at row " + rowIndex + ":",
+    `Enter the number of empty rows to insert. You may specify up to ${INSERT_EMPTRY_ROWS_MAX} rows. The empty rows will be inserted starting at row ${rowIndex}:`,
     ui.ButtonSet.OK_CANCEL);
 
   if (response.getSelectedButton() == ui.Button.OK) {
@@ -345,13 +345,13 @@ function onInsertEmptyRows() {
       }
       else {
         ui.alert(INSERT_EMPTY_ROWS_TITLE,
-          "You may not specify more than " + INSERT_EMPTRY_ROWS_MAX + " rows.",
+          `You may not specify more than ${INSERT_EMPTRY_ROWS_MAX} rows.`,
           ui.ButtonSet.OK);
       }
     }
     else {
       ui.alert(INSERT_EMPTY_ROWS_TITLE,
-        response.getResponseText() + " is not a valid number.",
+        `${response.getResponseText()} is not a valid number.`,
         ui.ButtonSet.OK);
     }
   }
@@ -388,11 +388,18 @@ function onAbout() {
   let directorName = PropertiesService.getDocumentProperties().getProperty(DIRECTOR_NAME_PROP) ?? DIRECTOR_NAME_NOT_SPECIFIED;
 
   ui.alert(ABOUT_TITLE,
-    "Deployment ID\n " + DEPLOYMENT_ID + "\n\n" +
-    "Version\n" + DEPLOYMENT_VERSION + "\n\n" +
-    "Director name\n" + directorName + "\n\n\n" +
-    "Newton Tree Conservancy\n" +
-    "www.newtontreeconservancy.org",
+    `Deployment ID
+    ${DEPLOYMENT_ID}
+
+    Version
+    ${DEPLOYMENT_VERSION}
+
+    Director name
+    ${directorName}
+
+
+    Newton Tree Conservancy
+    www.newtontreeconservancy.org`,
     ui.ButtonSet.OK);
 }
 
@@ -410,8 +417,11 @@ function setSpreadsheetFileName_() {
     let totalTreeCount = sheet.getRange(TOTAL_RECOMMENDED_TREE_COUNT_RANGE).getValue() ?? 0;
     let directorName   = PropertiesService.getDocumentProperties().getProperty(DIRECTOR_NAME_PROP);
 
-    if (!isEmpty_(plantingDate) && !isEmpty_(groupName) && !isEmpty_(directorName)) {
-      let spreadSheetName = plantingDate + "-" + groupName + " (" + directorName + ") (" + totalTreeCount + ")";
+    if (((plantingDate != null) && (plantingDate.trim().length > 0)) &&
+        ((groupName != null)    && (groupName.trim().length > 0)) &&
+        ((directorName != null) && (directorName.trim().length > 0)))
+    {
+      let spreadSheetName = `${plantingDate}-${groupName} (${directorName}) (${totalTreeCount})`;
 
       SpreadsheetApp.getActiveSpreadsheet().rename(spreadSheetName);
     }
@@ -498,11 +508,11 @@ function insertApplicationData_(sheet, rows = listApplicationData_(sheet)) {
 }
 
 function listApplicationData_(sheet) {
-  let file            = sheet.getParent();
+  let spreadsheet     = sheet.getParent();
   let plantingDate    = sheet.getRange(PLANTING_DATE_RANGE).getValue();
   let groupName       = sheet.getRange(GROUP_NAME_RANGE).getValue();
   let dataRange       = sheet.getRange(GROUP_DATA_RANGE);
-  let formDataSheetId = file.getRange(FORM_DATA_SHEET_ID_RANGE).getValue();
+  let formDataSheetId = spreadsheet.getRange(FORM_DATA_SHEET_ID_RANGE).getValue();
   let firstRow        = dataRange.getRow();
   let lastRow         = dataRange.getLastRow();
   let currentRowKeys  = new Set();
@@ -524,19 +534,9 @@ function listApplicationData_(sheet) {
   // a zero-length string, for any number of consecutive columns that have no value on the end of a row's
   // array of values. To circumvent this, we include a constant ('$') as the last column in the query. We then
   // remove that slice of the array (and others, as necessary) before returning results from this function.
-  let query = "=query(importrange(\"" + formDataSheetId + "\", \"" + FORM_DATA_SHEET_RANGE + "\"), \"SELECT Col1, Col6, Col7, Col4, Col5, Col8, Col9, Col10, Col14, Col15, Col16, Col17, Col18, Col19, Col20, Col21, '$' WHERE Col1 IS NOT NULL AND lower(Col2) = lower(\'" + plantingDate + "\') AND lower(Col3) = lower(\'" + groupName + "\') label '$' ''\", 0)";
+  let query = `=query(importrange("${formDataSheetId}", "${FORM_DATA_SHEET_RANGE}"), "SELECT Col1, Col6, Col7, Col4, Col5, Col8, Col9, Col10, Col14, Col15, Col16, Col17, Col18, Col19, Col20, Col21, '$' WHERE Col1 IS NOT NULL AND lower(Col2) = lower('${plantingDate}') AND lower(Col3) = lower('${groupName}') label '$' ''", 0)`;
 
-  let queryResults = file.insertSheet().hideSheet();
-  let newData      = null;
-
-  try {
-    queryResults.getRange(1,1).setFormula(query);
-
-    newData = queryResults.getDataRange().getValues();
-  }
-  finally {
-    file.deleteSheet(queryResults);
-  }
+  let newData = executeQuery_(spreadsheet, query);
 
   if (!isApplicationDataEmpty_(newData)) {
     if (currentRowKeys.size > 0) {
@@ -567,7 +567,7 @@ function mergeZipcode_(row) {
   let streetAddress = row[1].trim();
   let zipcode       = row[2].trim();
 
-  row[1] = streetAddress + "\n" + zipcode;
+  row[1] = `${streetAddress}\n${zipcode}`;
   row.splice(2, 1);
 }
 
@@ -575,7 +575,7 @@ function mergeResidentName_(row) {
   let residentFirstName = row[2].trim();
   let residentLastName  = row[3].trim();
 
-  row[2] = residentFirstName + " " + residentLastName;
+  row[2] = `${residentFirstName} ${residentLastName}`;
   row.splice(3, 1);
 }
 
@@ -605,21 +605,7 @@ function mergeInfrastructureIssues_(row) {
       issueList.push("natural gas leaks");
     }
 
-    switch (issueList.length) {
-      case 1:
-        residentNotes += " " + issueList[0];
-        break;
-
-      case 2:
-        residentNotes += " " + issueList[0] + " and " + issueList[1];
-        break;
-
-      case 3:
-        residentNotes += " " + issueList[0] + ", " + issueList[1] + " and " + issueList[2];
-        default:
-    }
-
-    row[7] = residentNotes + ".";
+    row[7] = `${residentNotes} ${new Intl.ListFormat('en-GB', {style: 'long', type: 'conjunction'}).format(issueList)}.`;
   }
 
   row.splice(8, 3);
@@ -639,18 +625,18 @@ function mergePlanterContact_(row) {
     residentNotes += "Designated planter is";
 
     if (planterFirstName.length > 0) {
-      residentNotes += " " + planterFirstName;
+      residentNotes += ` ${planterFirstName}`;
     }
 
     if (planterLastName.length > 0) {
-      residentNotes += " " + planterLastName;
+      residentNotes += ` ${planterLastName}`;
     }
 
     if (planterEmailAddress.length > 0) {
-      residentNotes += " at " + planterEmailAddress;
+      residentNotes += ` at ${planterEmailAddress}`;
     }
 
-    row[7] = residentNotes + ".";
+    row[7] = `${residentNotes}.`;
   }
 
   row.splice(8, 4);
@@ -878,8 +864,20 @@ function hasDataFilterValidators_() {
   return hasValidators;
 }
 
-function isEmpty_(object) {
-  return ((object == null) || (object.length == 0));
+function executeQuery_(spreadsheet, query) {
+  let queryResults = spreadsheet.insertSheet().hideSheet();
+  let resultData   = null;
+
+  try {
+    queryResults.getRange(1,1).setFormula(query);
+
+    resultData = queryResults.getDataRange().getValues();
+  }
+  finally {
+    spreadsheet.deleteSheet(queryResults);
+  }
+
+  return !isApplicationDataEmpty_(resultData) ? resultData : [];
 }
 
 function isApplicationDataEmpty_(rows) {
