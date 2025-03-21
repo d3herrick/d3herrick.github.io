@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                          = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const DEPLOYMENT_VERSION                     = "35";
+const DEPLOYMENT_VERSION                     = "36";
 const FORM_DATA_SHEET_ID_RANGE               = "form_data_spreadsheet_id";
 const FORM_DATA_SHEET_RANGE                  = "form_data";
 const PLANTING_DATE_RANGE                    = "planting_date";
@@ -58,7 +58,7 @@ const SET_DIRECTOR_FILE_NAME_TITLE           = "Set Director for Spreadsheet Fil
 const DUPLICATE_ROW_FOR_CORNER_LOT_TITLE     = "Duplicate Application Row for Corner Lot"
 const INSERT_EMPTY_ROWS_TITLE                = "Insert Empty Rows";
 const SPECIFY_DATA_FILTER_TITLE              = "Specify Application Data Filter Criteria";
-const SPECIFIED_INVALID_COLUMN_VALUE_TITLE   = "Invalid Value Specified for ";
+const SPECIFIED_INVALID_COLUMN_VALUE_TITLE   = "Invalid Value Specified";
 const ABOUT_TITLE                            = "About Community Tree Planting Spreadsheet";
 const PLANTING_DATA_FILTER_LABEL             = "Planting date";
 const GROUP_NAME_FILTER_LABEL                = "Group name";
@@ -164,7 +164,7 @@ function onEdit(e) {
                 let ui         = SpreadsheetApp.getUi();
                 let columnName = sheet.getRange(dataRange.getRow(), range.getLastColumn()).getValue();
 
-                ui.alert(SPECIFIED_INVALID_COLUMN_VALUE_TITLE + columnName,
+                ui.alert(`${SPECIFIED_INVALID_COLUMN_VALUE_TITLE} for ${columnName}`,
                   `Value "${e.value}" is invalid. Please specify either "Yes", or the letter "Y", or "No", or the letter "N". ${r[1]}`,
                   ui.ButtonSet.OK);
 
@@ -185,7 +185,7 @@ function onEdit(e) {
                   let ui         = SpreadsheetApp.getUi();
                   let columnName = sheet.getRange(dataRange.getRow(), range.getLastColumn()).getValue();
 
-                  ui.alert(SPECIFIED_INVALID_COLUMN_VALUE_TITLE + columnName,
+                  ui.alert(`${SPECIFIED_INVALID_COLUMN_VALUE_TITLE} for ${columnName}`,
                     `Value "${e.value}" is invalid. Please specify an integer greater than or equal to zero. ${r[1]}`,
                     ui.ButtonSet.OK);
 
