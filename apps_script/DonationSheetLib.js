@@ -20,7 +20,7 @@
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
 const DEPLOYMENT_ID                          = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
-const DEPLOYMENT_VERSION                     = "8";
+const DEPLOYMENT_VERSION                     = "9";
 const DONATION_DATA_RANGE                    = "donation_data";
 const PENDING_FOLDER_RANGE                   = "pending_folder";
 const IMPORTED_FOLDER_RANGE                  = "imported_folder";
@@ -425,19 +425,11 @@ function normalizePaypalData_(data, firstDataRow) {
           }
         }
 
-        if (lastName.search(/\s+/) == -1) {
-          lastName = lastName.toLocaleLowerCase();
-        }
-
-        if (firstName.search(/\s+/) == -1) {
-          firstName = firstName.toLocaleLowerCase();
-        }
-
         // Last name
-        row.push(lastName.charAt(0).toUpperCase() + lastName.slice(1));
+        row.push(normalizeName_(lastName));
 
         // First name
-        row.push(firstName.charAt(0).toUpperCase() + firstName.slice(1));
+        row.push(normalizeName_(firstName));
 
         // Salutation/Other names
         row.push("");
@@ -626,6 +618,24 @@ function normalizeDonationDate_(date) {
   }
 
   return normalizedDate;
+}
+
+function normalizeName_(name) {
+  let normalizedName = normalizeString_(name);
+
+  if (normalizedName.search(/\s+/) != -1) {
+    let tokens = normalizedName.trim().split(/\s+/);
+  
+    tokens[0] = tokens[0].trim().toLocaleLowerCase();
+    normalizedName = tokens.join(" ");
+  }
+  else {
+    normalizedName = normalizedName.toLocaleLowerCase();
+  }
+
+  normalizedName = normalizedName.charAt(0).toUpperCase() + normalizedName.slice(1);
+
+  return normalizedName;
 }
 
 function normalizeEmailAddress_(emailAddress) {
