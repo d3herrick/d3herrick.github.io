@@ -14,13 +14,14 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                            = "1DeKSwHUU3ECgFmC-odP_rpwQ6_Ba_Y_Oq5Ly4kNt-IUpHOctGIG1wRAS";
-const DEPLOYMENT_VERSION                       = "20";
+const DEPLOYMENT_VERSION                       = "21";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
 const GROUP_NAME_RANGE                         = "group_name";
 const FIRST_NAME_RANGE                         = "first_name";
 const LAST_NAME_RANGE                          = "last_name";
 const FORM_DATA_RANGE                          = "form_data";
+const FORM_HEADINGS_RANGE                      = "form_headings"
 const APPL_ACK_EMAIL_SENDER_NAME_RANGE         = "application_ack_email_sender_name"
 const APPL_ACK_EMAIL_REPLY_TO_RANGE            = "application_ack_email_reply_to";
 const APPL_ACK_EMAIL_SUBJECT_RANGE             = "application_ack_email_subject";
@@ -35,6 +36,7 @@ const ABOUT_MENU_ITEM                          = "About...";
 const ARCHIVE_DATA_FOR_PLANTING_DATE_MENU_ITEM = "Archive data for planting date";
 const ARCHIVE_DATA_FOR_PLANTING_DATE_TITLE     = "Archive Data for Planting Date";
 const COUNT_OF_ROW_ARCHIVED_TITLE              = "Count of Rows Archived";
+const SPECIFIED_INVALID_COLUMN_VALUE_TITLE     = "Invalid Value Specified";
 const ABOUT_TITLE                              = "About Tree Application Spreadsheet";
 
 const STREET_SUFFIXES = [ 
@@ -68,46 +70,22 @@ function onEdit(e) {
   let range = sheet.getRange(PLANTING_DATE_RANGE);
 
   if (sheet.getSheetId() == range.getSheet().getSheetId()) {
-    let isLegalValue = true;
-
     if ((e.value != undefined) && (e.range.rowEnd > 1) && (range.getLastColumn() == e.range.columnEnd)) {
-      let parts = e.value.trim().split(/\s+/);
+      let resolvedValue = resolvePlantingDate_(e.value);
 
-      if (parts.length == 2) {
-        if (!Number.isNaN(Number.parseInt(parts[0])) && (parts[0].length == 4)) {
-          if ((parts[1] == "Spring") || (parts[1] == "Fall")) {
-            e.range.setValue(parts[0] + " " + parts[1]);
-          }
-          else {
-            isLegalValue = false;
-          }
-        }
-        else if (!Number.isNaN(Number.parseInt(parts[1])) && (parts[1].length == 4)) {
-          if ((parts[0] == "Spring") || (parts[0] == "Fall")) {
-            e.range.setValue(parts[1] + " " + parts[0]);
-          }
-          else {
-            isLegalValue = false;
-          }
-        }
-        else {
-          isLegalValue = false;
-        }
+      if (resolvedValue == undefined) {
+        let ui         = SpreadsheetApp.getUi();
+        let columnName = sheet.getRange(sheet.getRange(FORM_HEADINGS_RANGE).getLastRow(), range.getLastColumn()).getValue();
+
+        ui.alert(`${SPECIFIED_INVALID_COLUMN_VALUE_TITLE} for ${columnName}`,
+          `Value "${e.value}" is invalid. Please specify "YYYY" followed by "Spring" or "Fall" with one space between the year and season, and the first letter of the season capitalized.\n\nExample: 2024 Spring`,
+          ui.ButtonSet.OK);
+
+        e.range.setValue("");    
       }
       else {
-        isLegalValue = false;
+        e.range.setValue(resolvedValue);    
       }
-    }
-
-    if (!isLegalValue) {
-      let ui         = SpreadsheetApp.getUi();
-      let columnName = sheet.getRange(1, range.getLastColumn()).getValue();
-
-      ui.alert(`Invalid Value Specified for ${columnName}`,
-        `Value "${e.value}" is invalid. Please specify "YYYY" followed by "Spring" or "Fall" with one space between the year and season, and the first letter of the season capitalized.\n\nExample: 2024 Spring`,
-        ui.ButtonSet.OK);
-
-      e.range.setValue("");    
     }
   }
 }
@@ -262,4 +240,27 @@ function onAbout() {
     Newton Tree Conservancy
     www.newtontreeconservancy.org`,
     ui.ButtonSet.OK);
+}
+
+function resolvePlantingDate_(value) {
+  let resolvedValue = undefined;
+
+  if ((value != undefined) && (value != null)) {
+    let parts = value.trim().split(/\s+/);
+
+    if (parts.length == 2) {
+      if (/^\d{4}$/.test(parts[0])) {
+        if ((parts[1] == "Spring") || (parts[1] == "Fall")) {
+          resolvedValue = parts[0] + " " + parts[1];
+        }
+      }
+      else if (/^\d{4}$/.test(parts[1])) {
+        if ((parts[0] == "Spring") || (parts[0] == "Fall")) {
+          resolvedValue = parts[1] + " " + parts[0];
+        }
+      }
+    }
+  }
+
+  return resolvedValue
 }
