@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                            = "1DeKSwHUU3ECgFmC-odP_rpwQ6_Ba_Y_Oq5Ly4kNt-IUpHOctGIG1wRAS";
-const DEPLOYMENT_VERSION                       = "21";
+const DEPLOYMENT_VERSION                       = "22";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
 const GROUP_NAME_RANGE                         = "group_name";
@@ -31,12 +31,16 @@ const PLANTER_FIRST_NAME_RANGE                 = "planter_first_name";
 const PLANTER_LAST_NAME_RANGE                  = "planter_last_name";
 const PLANTER_EMAIL_ADDRESS_RANGE              = "planter_email_address";
 const NUMBER_OF_TREES_REQUESTED_RANGE          = "number_of_trees_requested";
+const DEFAULT_PLANTING_DATE_NOT_SPECIFIED      = "Not specified";
+const DEFAULT_PLANTING_DATE_NAME_PROP          = "default_planting_date_prop";
 const NEWTON_TREE_CONSERVANCY_MENU             = "Newton Tree Conservancy";
 const ABOUT_MENU_ITEM                          = "About...";
 const ARCHIVE_DATA_FOR_PLANTING_DATE_MENU_ITEM = "Archive data for planting date";
 const ARCHIVE_DATA_FOR_PLANTING_DATE_TITLE     = "Archive Data for Planting Date";
-const COUNT_OF_ROW_ARCHIVED_TITLE              = "Count of Rows Archived";
+const COUNT_OF_ROWS_ARCHIVED_TITLE             = "Count of Rows Archived";
 const SPECIFIED_INVALID_COLUMN_VALUE_TITLE     = "Invalid Value Specified";
+const SET_DEFAULT_PLANTING_MENU_ITEM           = "Set default planting date";
+const SET_DEFAULT_PLANTING_DATE_TITLE          = "Set Default Planting Date";
 const ABOUT_TITLE                              = "About Tree Application Spreadsheet";
 
 const STREET_SUFFIXES = [ 
@@ -59,6 +63,8 @@ function onOpen(e) {
 
   ui.
     createMenu(NEWTON_TREE_CONSERVANCY_MENU).
+      addItem(SET_DEFAULT_PLANTING_MENU_ITEM, "onSetDefaultPlantingDate").
+      addSeparator().
       addItem(ARCHIVE_DATA_FOR_PLANTING_DATE_MENU_ITEM, "onArchiveDataForPlantingDate").
       addSeparator().
       addItem(ABOUT_MENU_ITEM, "onAbout").
@@ -75,7 +81,7 @@ function onEdit(e) {
 
       if (resolvedValue == undefined) {
         let ui         = SpreadsheetApp.getUi();
-        let columnName = sheet.getRange(sheet.getRange(FORM_HEADINGS_RANGE).getLastRow(), range.getLastColumn()).getValue();
+        let columnName = sheet.getRange(sheet.getRange(FORM_HEADINGS_RANGE).getLastRow(), range.getColumn()).getValue();
 
         ui.alert(`${SPECIFIED_INVALID_COLUMN_VALUE_TITLE} for ${columnName}`,
           `Value "${e.value}" is invalid. Please specify "YYYY" followed by "Spring" or "Fall" with one space between the year and season, and the first letter of the season capitalized.\n\nExample: 2024 Spring`,
@@ -129,6 +135,13 @@ function onSubmit(e) {
   });
 
   cellRange.setValue(cellValue);
+
+  let defaultPlantingDate = PropertiesService.getDocumentProperties().getProperty(DEFAULT_PLANTING_DATE_NAME_PROP);
+
+  if ((defaultPlantingDate != null) && (defaultPlantingDate.trim().length > 0)) {
+    cellRange = sheet.getRange(rowIndex, sheet.getRange(PLANTING_DATE_RANGE).getColumn());
+    cellRange.setValue(defaultPlantingDate);
+  }
 
   cellRange = sheet.getRange(rowIndex, sheet.getRange(NUMBER_OF_TREES_REQUESTED_RANGE).getColumn());
   cellValue = cellRange.getValue();
@@ -185,6 +198,40 @@ function onSubmit(e) {
   }
 }
 
+function onSetDefaultPlantingDate() {
+  let range = SpreadsheetApp.getActiveSpreadsheet().getRange(PLANTING_DATE_RANGE);
+  let sheet = range.getSheet();
+  let ui    = SpreadsheetApp.getUi();
+
+  let response = ui.prompt(SET_DEFAULT_PLANTING_DATE_TITLE,
+    `Enter the default planting date that will be assigned to incoming applications. Please specify \"YYYY\" followed by \"Spring\" or \"Fall\" with one space between the year and season, and the first letter of the season capitalized.\n\nExample: 2024 Spring":`,
+    ui.ButtonSet.OK_CANCEL);
+
+  let defaultPlantingDate = response.getResponseText();
+
+  if (response.getSelectedButton() == ui.Button.OK) {
+    if (defaultPlantingDate.length > 0) {
+      let resolvedValue = resolvePlantingDate_(defaultPlantingDate);
+
+      if (resolvedValue == undefined) {
+        ui.alert(`${SET_DEFAULT_PLANTING_DATE_TITLE}`,
+          `Value "${defaultPlantingDate}" is invalid. Please specify "YYYY" followed by "Spring" or "Fall" with one space between the year and season, and the first letter of the season capitalized.\n\nExample: 2024 Spring`,
+          ui.ButtonSet.OK);
+      }
+      else {
+        PropertiesService.getDocumentProperties().setProperty(DEFAULT_PLANTING_DATE_NAME_PROP, resolvedValue);
+      }
+    }
+    else {
+      PropertiesService.getDocumentProperties().deleteProperty(DEFAULT_PLANTING_DATE_NAME_PROP);
+
+      ui.alert(SET_DEFAULT_PLANTING_DATE_TITLE,
+        `You did not specify a default planting date. Consequently, automatic assignment of planting date for incoming applications will be disabled.`,
+        ui.ButtonSet.OK);
+    }
+  }
+}
+
 function onArchiveDataForPlantingDate() {
   let ui = SpreadsheetApp.getUi();
 
@@ -195,39 +242,42 @@ function onArchiveDataForPlantingDate() {
   if (response.getSelectedButton() == ui.Button.OK) {
     let plantingDate = response.getResponseText();
 
-    let file  = SpreadsheetApp.getActiveSpreadsheet();
-    let range = file.getRange(PLANTING_DATE_RANGE);
-    let sheet = range.getSheet();
-    let hits  = range.createTextFinder(plantingDate).matchEntireCell(true).findAll();
+    if ((plantingDate != null) && (plantingDate.trim().length > 0)) {
+      let file  = SpreadsheetApp.getActiveSpreadsheet();
+      let range = file.getRange(PLANTING_DATE_RANGE);
+      let sheet = range.getSheet();
+      let hits  = range.createTextFinder(plantingDate).matchEntireCell(true).findAll();
 
-    if (hits.length > 0) {
-      let deletions = [];
-      let archive   = file.insertSheet(`${plantingDate} Archive`, file.getSheets().length);
-      let srcRow    = sheet.getRange(HEADER_ROW_RANGE).getRow();
+      if (hits.length > 0) {
+        let deletions = [];
+        let archive   = file.insertSheet(`${plantingDate} Archive`, file.getSheets().length);
+        let srcRow    = sheet.getRange(HEADER_ROW_RANGE).getRow();
 
-      sheet.getRange(srcRow, 1, 1, sheet.getLastColumn()).copyTo(archive.getRange("A1"));
+        sheet.getRange(srcRow, 1, 1, sheet.getLastColumn()).copyTo(archive.getRange("A1"));
 
-      let dstRow = 2;
+        let dstRow = 2;
 
-      hits.forEach(function(h) {
-        srcRow = h.getRow();
+        hits.forEach(function(h) {
+          srcRow = h.getRow();
 
-        sheet.getRange(srcRow, 1, 1, sheet.getLastColumn()).copyTo(archive.getRange(dstRow, 1));
-        deletions.push(srcRow);
-        dstRow++;
-      });
+          sheet.getRange(srcRow, 1, 1, sheet.getLastColumn()).copyTo(archive.getRange(dstRow, 1));
+          deletions.push(srcRow);
+          dstRow++;
+        });
 
-      deletions.reverse().forEach(d => sheet.deleteRow(d));
+        deletions.reverse().forEach(d => sheet.deleteRow(d));
+      }
+
+      ui.alert(COUNT_OF_ROWS_ARCHIVED_TITLE,
+        `Number of rows archived for ${plantingDate} is ${hits.length}.`,
+        ui.ButtonSet.OK);
     }
-
-    ui.alert(COUNT_OF_ROW_ARCHIVED_TITLE,
-      `Number of rows archived is ${hits.length}.`,
-      ui.ButtonSet.OK);
   }
 }
 
 function onAbout() {
-  let ui = SpreadsheetApp.getUi();
+  let ui                  = SpreadsheetApp.getUi();
+  let defaultPlantingDate = PropertiesService.getDocumentProperties().getProperty(DEFAULT_PLANTING_DATE_NAME_PROP) ?? DEFAULT_PLANTING_DATE_NOT_SPECIFIED;
 
   ui.alert(ABOUT_TITLE,
     `Deployment ID
@@ -236,7 +286,10 @@ function onAbout() {
     Version
     ${DEPLOYMENT_VERSION}
 
+    Default planting date
+    ${defaultPlantingDate}
 
+  
     Newton Tree Conservancy
     www.newtontreeconservancy.org`,
     ui.ButtonSet.OK);
