@@ -14,12 +14,13 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                            = "1DeKSwHUU3ECgFmC-odP_rpwQ6_Ba_Y_Oq5Ly4kNt-IUpHOctGIG1wRAS";
-const DEPLOYMENT_VERSION                       = "22";
+const DEPLOYMENT_VERSION                       = "23";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
 const GROUP_NAME_RANGE                         = "group_name";
 const FIRST_NAME_RANGE                         = "first_name";
 const LAST_NAME_RANGE                          = "last_name";
+const STREET_ADDRESS_RANGE                     = "street_address";
 const FORM_DATA_RANGE                          = "form_data";
 const FORM_HEADINGS_RANGE                      = "form_headings"
 const APPL_ACK_EMAIL_SENDER_NAME_RANGE         = "application_ack_email_sender_name"
@@ -142,6 +143,10 @@ function onSubmit(e) {
     cellRange = sheet.getRange(rowIndex, sheet.getRange(PLANTING_DATE_RANGE).getColumn());
     cellRange.setValue(defaultPlantingDate);
   }
+
+  cellRange = sheet.getRange(rowIndex, sheet.getRange(STREET_ADDRESS_RANGE).getColumn());
+  cellValue = cellRange.getValue();
+  cellRange.setValue(cellValue.replaceAll("\n", " ").trim());
 
   cellRange = sheet.getRange(rowIndex, sheet.getRange(NUMBER_OF_TREES_REQUESTED_RANGE).getColumn());
   cellValue = cellRange.getValue();
