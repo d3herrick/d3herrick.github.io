@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                            = "1DeKSwHUU3ECgFmC-odP_rpwQ6_Ba_Y_Oq5Ly4kNt-IUpHOctGIG1wRAS";
-const DEPLOYMENT_VERSION                       = "23";
+const DEPLOYMENT_VERSION                       = "24";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
 const GROUP_NAME_RANGE                         = "group_name";
@@ -32,6 +32,7 @@ const PLANTER_FIRST_NAME_RANGE                 = "planter_first_name";
 const PLANTER_LAST_NAME_RANGE                  = "planter_last_name";
 const PLANTER_EMAIL_ADDRESS_RANGE              = "planter_email_address";
 const NUMBER_OF_TREES_REQUESTED_RANGE          = "number_of_trees_requested";
+const DEFAULT_GROUP_NAME                       = "Miscellaneous";
 const DEFAULT_PLANTING_DATE_NOT_SPECIFIED      = "Not specified";
 const DEFAULT_PLANTING_DATE_NAME_PROP          = "default_planting_date_prop";
 const NEWTON_TREE_CONSERVANCY_MENU             = "Newton Tree Conservancy";
@@ -101,42 +102,47 @@ function onSubmit(e) {
   let sheet     = e.range.getSheet();
   let rowIndex  = e.range.getRow();
   let cellRange = sheet.getRange(rowIndex, sheet.getRange(GROUP_NAME_RANGE).getColumn());
-  let cellValue = cellRange.getValue();
+  let cellValue = cellRange.getValue().trim();
 
-  cellValue = cellValue.toLowerCase().
-    replaceAll("group", "").
-    trim();
+  if (cellValue != "") {
+    cellValue = cellValue.toLowerCase().
+      replaceAll("group", "").
+      trim();
 
-  let cellParts = cellValue.split(/\s+/);
-  let cellIndex = 0;
-  let cellToken = "";
+    let cellParts = cellValue.split(/\s+/);
+    let cellIndex = 0;
+    let cellToken = "";
 
-  cellValue = "";
+    cellValue = "";
 
-  cellParts.forEach(function(e) {
-    if (cellIndex > 0) {
-      cellValue += " ";  
-    }
-
-    cellToken = e.charAt(0).toUpperCase() + e.slice(1);
-
-    cellIndex++;
-
-    if (cellIndex == cellParts.length) {
-      cellToken = cellToken.replaceAll(".", "");
-
-      let cellSuffix = STREET_SUFFIXES.find((s) => (s[0] == cellToken));
-
-      if (cellSuffix != undefined) {
-        cellToken = cellSuffix[1];
+    cellParts.forEach(function(e) {
+      if (cellIndex > 0) {
+        cellValue += " ";  
       }
-    }
 
-    cellValue += cellToken;
-  });
+      cellToken = e.charAt(0).toUpperCase() + e.slice(1);
+
+      cellIndex++;
+
+      if (cellIndex == cellParts.length) {
+        cellToken = cellToken.replaceAll(".", "");
+
+        let cellSuffix = STREET_SUFFIXES.find((s) => (s[0] == cellToken));
+
+        if (cellSuffix != undefined) {
+          cellToken = cellSuffix[1];
+        }
+      }
+
+      cellValue += cellToken;
+    });
+  }
+  else {
+    cellValue = DEFAULT_GROUP_NAME;
+  }
 
   cellRange.setValue(cellValue);
-
+  
   let defaultPlantingDate = PropertiesService.getDocumentProperties().getProperty(DEFAULT_PLANTING_DATE_NAME_PROP);
 
   if ((defaultPlantingDate != null) && (defaultPlantingDate.trim().length > 0)) {
