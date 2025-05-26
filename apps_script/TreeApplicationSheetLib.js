@@ -104,7 +104,7 @@ function onSubmit(e) {
   let cellRange = sheet.getRange(rowIndex, sheet.getRange(GROUP_NAME_RANGE).getColumn());
   let cellValue = cellRange.getValue().trim();
 
-  if (cellValue != "") {
+  if (cellValue.length > 0) {
     cellValue = cellValue.toLowerCase().
       replaceAll("group", "").
       trim();
@@ -157,7 +157,7 @@ function onSubmit(e) {
   cellRange = sheet.getRange(rowIndex, sheet.getRange(NUMBER_OF_TREES_REQUESTED_RANGE).getColumn());
   cellValue = cellRange.getValue();
 
-  if (cellValue == "") {
+  if (cellValue.length == 0) {
     cellRange.setValue(0);
   }
 
