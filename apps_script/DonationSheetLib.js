@@ -20,7 +20,7 @@
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
 const DEPLOYMENT_ID                          = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
-const DEPLOYMENT_VERSION                     = "9";
+const DEPLOYMENT_VERSION                     = "10";
 const DONATION_DATA_RANGE                    = "donation_data";
 const PENDING_FOLDER_RANGE                   = "pending_folder";
 const IMPORTED_FOLDER_RANGE                  = "imported_folder";
@@ -38,6 +38,7 @@ const ANNUAL_DONATION_ROLLUPS_SUBJECT_RANGE  = "annual_donation_rollups_subject"
 const NTC_FIRST_DATA_ROW_RANGE               = "ntc_first_data_row";
 const PAYPAL_FIRST_DATA_ROW_RANGE            = "paypal_first_data_row";
 const ADDRESS_JOIN_SEPARATOR                 = ", ";
+const ANONYMOUS_DONATION_TAG                 = "anonymous";
 const PAYPAL_FILE_PREFIX                     = "paypal";
 const PAYPAL_FILE_FIELD_COUNT                = 41;
 const PAYPAL_DONATION_PAYMENT                = "Donation Payment";
@@ -214,10 +215,11 @@ function onGenerateDonationAcks(displayResult = true, emailResult = true) {
       result += `<li style="${STYLE_MONOSPACED_FONT}">Document acknowledgements created: ${stats.ackStats[2]}</li>`;
       result += `<li style="${STYLE_MONOSPACED_FONT}">Recurring donations skipped......: ${stats.ackStats[3]}</li>`;
       result += `<li style="${STYLE_MONOSPACED_FONT}">Unaddressed donations skipped....: ${stats.ackStats[4]}</li>`;
+      result += `<li style="${STYLE_MONOSPACED_FONT}">Anonymous donations skipped......: ${stats.ackStats[5]}</li>`;
 
       result += "</ul>"
 
-      let execErrors = stats.ackStats[5];
+      let execErrors = stats.ackStats[6];
 
       if (execErrors.length > 0) {
         result += `<p style="${STYLE_STANDARD_FONT}">The following errors were encountered:</p>`;
@@ -626,11 +628,11 @@ function normalizeName_(name) {
   if (normalizedName.search(/\s+/) != -1) {
     let tokens = normalizedName.trim().split(/\s+/);
   
-    tokens[0] = tokens[0].trim().toLocaleLowerCase();
+    tokens[0] = tokens[0].trim().toLowerCase();
     normalizedName = tokens.join(" ");
   }
   else {
-    normalizedName = normalizedName.toLocaleLowerCase();
+    normalizedName = normalizedName.toLowerCase();
   }
 
   normalizedName = normalizedName.charAt(0).toUpperCase() + normalizedName.slice(1);
@@ -735,6 +737,7 @@ function generateDonationAcks_(sheet, ackFolder) {
     let numDocAcks     = 0;
     let numRecurring   = 0;
     let numUnaddressed = 0;
+    let numAnonymous   = 0;
     let execErrors     = [];
 
     ackData.forEach(function (a) {
@@ -813,11 +816,18 @@ function generateDonationAcks_(sheet, ackFolder) {
         }
       }
       else {
-        numUnaddressed++;
+        if (isDonationAnonymous_(donationObject)) {
+          numAnonymous++;
+
+          sheet.getRange(a[0], ntcFirstDataColumn).check();
+        }
+        else {
+          numUnaddressed++;
+        }
       }
     });
 
-    stats = [totalAcks, numEmailAcks, numDocAcks, numRecurring, numUnaddressed, execErrors]; 
+    stats = [totalAcks, numEmailAcks, numDocAcks, numRecurring, numUnaddressed, numAnonymous, execErrors]; 
   }
 
   return {
@@ -1058,6 +1068,10 @@ function isDonationAddressed_(donationObject) {
           (donationObject.city.length > 0) &&
           (donationObject.state.length > 0) &&
           (donationObject.zipCode.length > 0));
+}
+
+function isDonationAnonymous_(donationObject) {
+  return (donationObject.lastName.toLowerCase() == ANONYMOUS_DONATION_TAG);
 }
 
 function sortPendingFiles_(unsortedFiles) {
