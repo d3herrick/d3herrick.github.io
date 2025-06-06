@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                            = "1DeKSwHUU3ECgFmC-odP_rpwQ6_Ba_Y_Oq5Ly4kNt-IUpHOctGIG1wRAS";
-const DEPLOYMENT_VERSION                       = "24";
+const DEPLOYMENT_VERSION                       = "25";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
 const GROUP_NAME_RANGE                         = "group_name";
@@ -162,14 +162,12 @@ function onSubmit(e) {
   }
 
   let applicantContactDataRanges = [
-    sheet.getRange(rowIndex, sheet.getRange(FIRST_NAME_RANGE).getColumn()),
-    sheet.getRange(rowIndex, sheet.getRange(LAST_NAME_RANGE).getColumn()),
     sheet.getRange(rowIndex, sheet.getRange(EMAIL_ADDRESS_RANGE).getColumn())
   ];
   let planterContactDataRanges = [
+    sheet.getRange(rowIndex, sheet.getRange(PLANTER_EMAIL_ADDRESS_RANGE).getColumn()),
     sheet.getRange(rowIndex, sheet.getRange(PLANTER_FIRST_NAME_RANGE).getColumn()),
-    sheet.getRange(rowIndex, sheet.getRange(PLANTER_LAST_NAME_RANGE).getColumn()),
-    sheet.getRange(rowIndex, sheet.getRange(PLANTER_EMAIL_ADDRESS_RANGE).getColumn())
+    sheet.getRange(rowIndex, sheet.getRange(PLANTER_LAST_NAME_RANGE).getColumn())
   ];
 
   if (applicantContactDataRanges.every((e, i) => e.getValue().toLowerCase().trim() == planterContactDataRanges[i].getValue().toLowerCase().trim())) {
@@ -178,14 +176,17 @@ function onSubmit(e) {
 
   sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn()).setVerticalAlignment("top");
 
-  let emailAddress = sheet.getRange(rowIndex, sheet.getRange(EMAIL_ADDRESS_RANGE).getColumn()).getValue();
+  let emailAddressColumn = sheet.getRange(EMAIL_ADDRESS_RANGE).getColumn();
+  let emailAddress       = sheet.getRange(rowIndex, emailAddressColumn).getValue();
 
   if (emailAddress != undefined) {
     let hits = sheet.getDataRange().createTextFinder(emailAddress).matchEntireCell(true).findAll();
 
     if (hits.length > 1) {
       hits.forEach(function(h) {
-        sheet.getRange(h.getRow(), 1, 1, sheet.getLastColumn()).setFontWeight("bold");
+        if (emailAddressColumn == h.getColumn()) {
+          sheet.getRange(h.getRow(), 1, 1, sheet.getLastColumn()).setFontWeight("bold");
+        }
       });
     }
 
