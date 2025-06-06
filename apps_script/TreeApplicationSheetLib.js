@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                            = "1DeKSwHUU3ECgFmC-odP_rpwQ6_Ba_Y_Oq5Ly4kNt-IUpHOctGIG1wRAS";
-const DEPLOYMENT_VERSION                       = "25";
+const DEPLOYMENT_VERSION                       = "26";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
 const GROUP_NAME_RANGE                         = "group_name";
@@ -99,10 +99,11 @@ function onEdit(e) {
 }
 
 function onSubmit(e) {
-  let sheet     = e.range.getSheet();
-  let rowIndex  = e.range.getRow();
-  let cellRange = sheet.getRange(rowIndex, sheet.getRange(GROUP_NAME_RANGE).getColumn());
-  let cellValue = cellRange.getValue().trim();
+  let sheet       = e.range.getSheet();
+  let rowIndex    = e.range.getRow();
+  let columnIndex = sheet.getRange(GROUP_NAME_RANGE).getColumn();
+  let cellRange   = sheet.getRange(rowIndex, columnIndex);
+  let cellValue   = cellRange.getValue().trim();
 
   if (cellValue.length > 0) {
     cellValue = cellValue.toLowerCase().
@@ -162,12 +163,14 @@ function onSubmit(e) {
   }
 
   let applicantContactDataRanges = [
+    sheet.getRange(rowIndex, sheet.getRange(FIRST_NAME_RANGE).getColumn()),
+    sheet.getRange(rowIndex, sheet.getRange(LAST_NAME_RANGE).getColumn()),
     sheet.getRange(rowIndex, sheet.getRange(EMAIL_ADDRESS_RANGE).getColumn())
   ];
   let planterContactDataRanges = [
-    sheet.getRange(rowIndex, sheet.getRange(PLANTER_EMAIL_ADDRESS_RANGE).getColumn()),
     sheet.getRange(rowIndex, sheet.getRange(PLANTER_FIRST_NAME_RANGE).getColumn()),
-    sheet.getRange(rowIndex, sheet.getRange(PLANTER_LAST_NAME_RANGE).getColumn())
+    sheet.getRange(rowIndex, sheet.getRange(PLANTER_LAST_NAME_RANGE).getColumn()),
+    sheet.getRange(rowIndex, sheet.getRange(PLANTER_EMAIL_ADDRESS_RANGE).getColumn())
   ];
 
   if (applicantContactDataRanges.every((e, i) => e.getValue().toLowerCase().trim() == planterContactDataRanges[i].getValue().toLowerCase().trim())) {
@@ -176,18 +179,26 @@ function onSubmit(e) {
 
   sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn()).setVerticalAlignment("top");
 
-  let emailAddressColumn = sheet.getRange(EMAIL_ADDRESS_RANGE).getColumn();
-  let emailAddress       = sheet.getRange(rowIndex, emailAddressColumn).getValue();
+  columnIndex = sheet.getRange(EMAIL_ADDRESS_RANGE).getColumn();
+  cellValue   = sheet.getRange(rowIndex, columnIndex).getValue();
 
-  if (emailAddress != undefined) {
-    let hits = sheet.getDataRange().createTextFinder(emailAddress).matchEntireCell(true).findAll();
+  if (cellValue != undefined) {
+    let hits = sheet.getDataRange().createTextFinder(cellValue).matchEntireCell(true).findAll();
 
     if (hits.length > 1) {
+      let markSet = [];
+
       hits.forEach(function(h) {
-        if (emailAddressColumn == h.getColumn()) {
-          sheet.getRange(h.getRow(), 1, 1, sheet.getLastColumn()).setFontWeight("bold");
+        if (h.getColumn() == columnIndex) {
+          markSet.push(h.getRow());
         }
       });
+
+      if (markSet.length > 1) {
+        markSet.forEach(function(r) {
+          sheet.getRange(r, 1, 1, sheet.getLastColumn()).setFontWeight("bold");
+        }
+      )};
     }
 
     let senderName   = sheet.getRange(APPL_ACK_EMAIL_SENDER_NAME_RANGE).getValue();
@@ -198,7 +209,7 @@ function onSubmit(e) {
     let body = bodyTemplate.evaluate().getContent();
 
     MailApp.sendEmail(
-      emailAddress,
+      cellValue,
       subject,
       null,
       {
