@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                            = "1DeKSwHUU3ECgFmC-odP_rpwQ6_Ba_Y_Oq5Ly4kNt-IUpHOctGIG1wRAS";
-const DEPLOYMENT_VERSION                       = "26";
+const DEPLOYMENT_VERSION                       = "27";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
 const GROUP_NAME_RANGE                         = "group_name";
@@ -32,7 +32,9 @@ const PLANTER_FIRST_NAME_RANGE                 = "planter_first_name";
 const PLANTER_LAST_NAME_RANGE                  = "planter_last_name";
 const PLANTER_EMAIL_ADDRESS_RANGE              = "planter_email_address";
 const NUMBER_OF_TREES_REQUESTED_RANGE          = "number_of_trees_requested";
-const DEFAULT_GROUP_NAME                       = "Miscellaneous";
+const GROUP_LEADER_RANGE                             = "group_leader";
+const GROUP_LEADER_TREE_RECIPIENT_RANGE        = "group_leader_tree_recipient";
+const DEFAULT_GROUP_NAME_RANGE                 = "default_group_name";
 const DEFAULT_PLANTING_DATE_NOT_SPECIFIED      = "Not specified";
 const DEFAULT_PLANTING_DATE_NAME_PROP          = "default_planting_date_prop";
 const NEWTON_TREE_CONSERVANCY_MENU             = "Newton Tree Conservancy";
@@ -139,7 +141,18 @@ function onSubmit(e) {
     });
   }
   else {
-    cellValue = DEFAULT_GROUP_NAME;
+    cellValue = sheet.getRange(DEFAULT_GROUP_NAME_RANGE).getValue();
+
+    let groupLeaderRange              = sheet.getRange(rowIndex, sheet.getRange(GROUP_LEADER_RANGE).getColumn());
+    let groupLeaderTreeRecipientRange = sheet.getRange(rowIndex, sheet.getRange(GROUP_LEADER_TREE_RECIPIENT_RANGE).getColumn());
+
+    if (!((groupLeaderRange.getValue() == "Yes") && (groupLeaderTreeRecipientRange.getValue() == "No"))) {
+      groupLeaderRange.setValue("No");
+      groupLeaderTreeRecipientRange.setValue("");
+    }
+    else {
+      sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn()).setFontWeight("bold").setFontStyle("italic");
+    }
   }
 
   cellRange.setValue(cellValue);
