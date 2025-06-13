@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                            = "1DeKSwHUU3ECgFmC-odP_rpwQ6_Ba_Y_Oq5Ly4kNt-IUpHOctGIG1wRAS";
-const DEPLOYMENT_VERSION                       = "27";
+const DEPLOYMENT_VERSION                       = "28";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
 const GROUP_NAME_RANGE                         = "group_name";
@@ -141,12 +141,12 @@ function onSubmit(e) {
     });
   }
   else {
-    cellValue = sheet.getRange(DEFAULT_GROUP_NAME_RANGE).getValue();
-
     let groupLeaderRange              = sheet.getRange(rowIndex, sheet.getRange(GROUP_LEADER_RANGE).getColumn());
     let groupLeaderTreeRecipientRange = sheet.getRange(rowIndex, sheet.getRange(GROUP_LEADER_TREE_RECIPIENT_RANGE).getColumn());
 
     if (!((groupLeaderRange.getValue() == "Yes") && (groupLeaderTreeRecipientRange.getValue() == "No"))) {
+      cellValue = sheet.getRange(DEFAULT_GROUP_NAME_RANGE).getValue();
+      
       groupLeaderRange.setValue("No");
       groupLeaderTreeRecipientRange.setValue("");
     }
