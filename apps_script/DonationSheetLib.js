@@ -20,7 +20,7 @@
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
 const DEPLOYMENT_ID                          = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
-const DEPLOYMENT_VERSION                     = "10";
+const DEPLOYMENT_VERSION                     = "11";
 const DONATION_DATA_RANGE                    = "donation_data";
 const PENDING_FOLDER_RANGE                   = "pending_folder";
 const IMPORTED_FOLDER_RANGE                  = "imported_folder";
@@ -561,13 +561,26 @@ function normalizeCheckData_(data, firstDataRow) {
       // Salutation/Other names
       row.push(normalizeString_(r[3]));
 
-      // Gross: copy net to gross
-      let net = normalizeNumber_(r[6]);
+      // Gross
+      let gross = normalizeNumber_(r[4])
+      let net   = normalizeNumber_(r[6]);
 
-      row.push(net);
+      if (Number.isFinite(gross)) {
+        row.push(gross);
+      }
+      else {
+        row.push(net);
+      }
 
       // Fee
-      row.push(normalizeNumber_(r[5]));
+      let fee = normalizeNumber_(r[5]);
+
+      if (Number.isFinite(fee)) {
+        row.push(fee);
+      }
+      else {
+        row.push(0);
+      }
 
       // Net
       row.push(net);
