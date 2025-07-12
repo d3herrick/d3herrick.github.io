@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                          = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const DEPLOYMENT_VERSION                     = "36";
+const DEPLOYMENT_VERSION                     = "37";
 const FORM_DATA_SHEET_ID_RANGE               = "form_data_spreadsheet_id";
 const FORM_DATA_SHEET_RANGE                  = "form_data";
 const PLANTING_DATE_RANGE                    = "planting_date";
@@ -25,14 +25,15 @@ const NUMBER_OF_TREES_REQUESTED_FILTER       = "number_of_trees_requested";
 const RESIDENT_NOTES_RANGE                   = "resident_notes"
 const GROUP_DATA_RANGE                       = "group_data";
 const RECOMMENDED_TREE_COUNT_DATA_RANGE      = "recommended_tree_count_data"
-const WIRES_DATA_FILTER                      = "wires_data_filter";
-const CURB_DATA_FILTER                       = "curb_data_filter";
 const LARGE_TREE_COUNT_FILTER                = "large_tree_count_filter";
 const MEDIUM_TREE_COUNT_FILTER               = "medium_tree_count_filter";
 const SMALL_TREE_COUNT_FILTER                = "small_tree_count_filter";
 const TBD_TREE_COUNT_FILTER                  = "tbd_tree_count_filter";
+const WIRES_DATA_FILTER                      = "wires_data_filter";
+const CURB_DATA_FILTER                       = "curb_data_filter";
 const BERM_DATA_FILTER                       = "berm_data_filter";
-const NTC_NOTES_RANGE                        = "ntc_notes"
+const NTC_NOTES_RANGE                        = "ntc_notes";
+const GAS_LEAK_TESTING_NOTES_FILTER          = "gas_leak_testing_notes";
 const PLANTING_DATA_FILTER                   = "planting_data_filter";
 const TIMESTAMP_DATA_FILTER                  = "timestamp_data_filter";
 const LAST_DATA_RETRIEVAL_RANGE              = "last_data_retrieval";
@@ -368,6 +369,7 @@ function onToggleDataFilterVisibility() {
     sheet.hideColumn(sheet.getRange(TIMESTAMP_DATA_FILTER));
     sheet.hideColumn(sheet.getRange(GROUP_LEADER_DATA_FILTER));
     sheet.hideColumn(sheet.getRange(PHONE_DATA_FILTER));
+    sheet.hideColumn(sheet.getRange(GAS_LEAK_TESTING_NOTES_FILTER));
 
     properties.setProperty(PLANTING_DATA_FILTER_VISIBILITY, "false");
   }
@@ -376,6 +378,7 @@ function onToggleDataFilterVisibility() {
     sheet.unhideColumn(sheet.getRange(TIMESTAMP_DATA_FILTER));
     sheet.unhideColumn(sheet.getRange(GROUP_LEADER_DATA_FILTER));
     sheet.unhideColumn(sheet.getRange(PHONE_DATA_FILTER));
+    sheet.unhideColumn(sheet.getRange(GAS_LEAK_TESTING_NOTES_FILTER));
 
     properties.setProperty(PLANTING_DATA_FILTER_VISIBILITY, "true");
   }
