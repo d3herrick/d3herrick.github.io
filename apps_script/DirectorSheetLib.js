@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                          = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const DEPLOYMENT_VERSION                     = "37";
+const DEPLOYMENT_VERSION                     = "41";
 const FORM_DATA_SHEET_ID_RANGE               = "form_data_spreadsheet_id";
 const FORM_DATA_SHEET_RANGE                  = "form_data";
 const PLANTING_DATE_RANGE                    = "planting_date";
@@ -35,7 +35,6 @@ const BERM_DATA_FILTER                       = "berm_data_filter";
 const NTC_NOTES_RANGE                        = "ntc_notes";
 const GAS_LEAK_TESTING_NOTES_FILTER          = "gas_leak_testing_notes";
 const PLANTING_DATA_FILTER                   = "planting_data_filter";
-const TIMESTAMP_DATA_FILTER                  = "timestamp_data_filter";
 const LAST_DATA_RETRIEVAL_RANGE              = "last_data_retrieval";
 const TOTAL_REQUESTED_TREE_COUNT_RANGE       = "total_requested_tree_count";
 const TOTAL_RECOMMENDED_TREE_COUNT_RANGE     = "total_recommended_tree_count";
@@ -366,7 +365,6 @@ function onToggleDataFilterVisibility() {
 
   if ((isPlantingDataFilterVisible == null) || (isPlantingDataFilterVisible == "true")) {
     sheet.hideRow(sheet.getRange(PLANTING_DATA_FILTER));
-    sheet.hideColumn(sheet.getRange(TIMESTAMP_DATA_FILTER));
     sheet.hideColumn(sheet.getRange(GROUP_LEADER_DATA_FILTER));
     sheet.hideColumn(sheet.getRange(PHONE_DATA_FILTER));
     sheet.hideColumn(sheet.getRange(GAS_LEAK_TESTING_NOTES_FILTER));
@@ -375,7 +373,6 @@ function onToggleDataFilterVisibility() {
   }
   else {
     sheet.unhideRow(sheet.getRange(PLANTING_DATA_FILTER));
-    sheet.unhideColumn(sheet.getRange(TIMESTAMP_DATA_FILTER));
     sheet.unhideColumn(sheet.getRange(GROUP_LEADER_DATA_FILTER));
     sheet.unhideColumn(sheet.getRange(PHONE_DATA_FILTER));
     sheet.unhideColumn(sheet.getRange(GAS_LEAK_TESTING_NOTES_FILTER));
@@ -407,7 +404,18 @@ function onAbout() {
 }
 
 function onApplyUpdates() {
-  // insert any code-driven updates here
+  // move the planting group data selector one column to the right
+  let sheet    = getGroupDataSheet_();
+  let srcRange = sheet.getRange("A1:C4");
+  let dstRange = sheet.getRange("B1");
+
+  srcRange.moveTo(dstRange);
+
+  // hide the Timestamp column
+  sheet.hideColumn(sheet.getRange("timestamp_data_filter")); 
+
+  // remove timestamp_data_filter named range
+  SpreadsheetApp.getActiveSpreadsheet().removeNamedRange("timestamp_data_filter");
 }
 
 function setSpreadsheetFileName_() {
