@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                            = "1DeKSwHUU3ECgFmC-odP_rpwQ6_Ba_Y_Oq5Ly4kNt-IUpHOctGIG1wRAS";
-const DEPLOYMENT_VERSION                       = "28";
+const DEPLOYMENT_VERSION                       = "29";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
 const GROUP_NAME_RANGE                         = "group_name";
@@ -32,7 +32,8 @@ const PLANTER_FIRST_NAME_RANGE                 = "planter_first_name";
 const PLANTER_LAST_NAME_RANGE                  = "planter_last_name";
 const PLANTER_EMAIL_ADDRESS_RANGE              = "planter_email_address";
 const NUMBER_OF_TREES_REQUESTED_RANGE          = "number_of_trees_requested";
-const GROUP_LEADER_RANGE                             = "group_leader";
+const TREE_LOCATIONS_RANGE                     = "tree_locations";
+const GROUP_LEADER_RANGE                       = "group_leader";
 const GROUP_LEADER_TREE_RECIPIENT_RANGE        = "group_leader_tree_recipient";
 const DEFAULT_GROUP_NAME_RANGE                 = "default_group_name";
 const DEFAULT_PLANTING_DATE_NOT_SPECIFIED      = "Not specified";
@@ -105,7 +106,7 @@ function onSubmit(e) {
   let rowIndex    = e.range.getRow();
   let columnIndex = sheet.getRange(GROUP_NAME_RANGE).getColumn();
   let cellRange   = sheet.getRange(rowIndex, columnIndex);
-  let cellValue   = cellRange.getValue().trim();
+  let cellValue   = cellRange.getValue().toString().trim();
 
   if (cellValue.length > 0) {
     cellValue = cellValue.toLowerCase().
@@ -156,23 +157,13 @@ function onSubmit(e) {
   }
 
   cellRange.setValue(cellValue);
+  cellRange.setHorizontalAlignment("left");
   
   let defaultPlantingDate = PropertiesService.getDocumentProperties().getProperty(DEFAULT_PLANTING_DATE_NAME_PROP);
 
   if ((defaultPlantingDate != null) && (defaultPlantingDate.trim().length > 0)) {
     cellRange = sheet.getRange(rowIndex, sheet.getRange(PLANTING_DATE_RANGE).getColumn());
     cellRange.setValue(defaultPlantingDate);
-  }
-
-  cellRange = sheet.getRange(rowIndex, sheet.getRange(STREET_ADDRESS_RANGE).getColumn());
-  cellValue = cellRange.getValue();
-  cellRange.setValue(cellValue.replaceAll("\n", " ").trim());
-
-  cellRange = sheet.getRange(rowIndex, sheet.getRange(NUMBER_OF_TREES_REQUESTED_RANGE).getColumn());
-  cellValue = cellRange.getValue();
-
-  if (cellValue.length == 0) {
-    cellRange.setValue(0);
   }
 
   let applicantContactDataRanges = [
@@ -186,9 +177,33 @@ function onSubmit(e) {
     sheet.getRange(rowIndex, sheet.getRange(PLANTER_EMAIL_ADDRESS_RANGE).getColumn())
   ];
 
-  if (applicantContactDataRanges.every((e, i) => e.getValue().toLowerCase().trim() == planterContactDataRanges[i].getValue().toLowerCase().trim())) {
+  applicantContactDataRanges.forEach(function(r) {
+    r.setValue(r.getValue().toString().trim());
+    r.setHorizontalAlignment("left");
+  });
+  planterContactDataRanges.forEach(function(r) {
+    r.setValue(r.getValue().toString().trim());
+    r.setHorizontalAlignment("left");
+  });
+
+  if (applicantContactDataRanges.every((e, i) => e.getValue().toString().toLowerCase() == planterContactDataRanges[i].getValue().toString().toLowerCase())) {
     planterContactDataRanges.forEach((r) => r.setValue(""));
   }
+
+  cellRange = sheet.getRange(rowIndex, sheet.getRange(STREET_ADDRESS_RANGE).getColumn());
+  cellRange.setValue(cellRange.getValue().toString().replaceAll("\n", " ").trim());
+  cellRange.setHorizontalAlignment("left");
+
+  cellRange = sheet.getRange(rowIndex, sheet.getRange(NUMBER_OF_TREES_REQUESTED_RANGE).getColumn());
+  cellValue = cellRange.getValue();
+
+  if (cellValue.length == 0) {
+    cellRange.setValue(0);
+  }
+
+  cellRange = sheet.getRange(rowIndex, sheet.getRange(TREE_LOCATIONS_RANGE).getColumn());
+  cellRange.setValue(cellRange.getValue().toString().trim());
+  cellRange.setHorizontalAlignment("left");
 
   sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn()).setVerticalAlignment("top");
 
