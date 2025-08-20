@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                            = "1DeKSwHUU3ECgFmC-odP_rpwQ6_Ba_Y_Oq5Ly4kNt-IUpHOctGIG1wRAS";
-const DEPLOYMENT_VERSION                       = "29";
+const DEPLOYMENT_VERSION                       = "30";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
 const GROUP_NAME_RANGE                         = "group_name";
@@ -156,8 +156,8 @@ function onSubmit(e) {
     }
   }
 
+  cellRange.setNumberFormat('@');
   cellRange.setValue(cellValue);
-  cellRange.setHorizontalAlignment("left");
   
   let defaultPlantingDate = PropertiesService.getDocumentProperties().getProperty(DEFAULT_PLANTING_DATE_NAME_PROP);
 
@@ -178,12 +178,12 @@ function onSubmit(e) {
   ];
 
   applicantContactDataRanges.forEach(function(r) {
+    r.setNumberFormat('@');
     r.setValue(r.getValue().toString().trim());
-    r.setHorizontalAlignment("left");
   });
   planterContactDataRanges.forEach(function(r) {
+    r.setNumberFormat('@');
     r.setValue(r.getValue().toString().trim());
-    r.setHorizontalAlignment("left");
   });
 
   if (applicantContactDataRanges.every((e, i) => e.getValue().toString().toLowerCase() == planterContactDataRanges[i].getValue().toString().toLowerCase())) {
@@ -191,8 +191,8 @@ function onSubmit(e) {
   }
 
   cellRange = sheet.getRange(rowIndex, sheet.getRange(STREET_ADDRESS_RANGE).getColumn());
+  cellRange.setNumberFormat('@');
   cellRange.setValue(cellRange.getValue().toString().replaceAll("\n", " ").trim());
-  cellRange.setHorizontalAlignment("left");
 
   cellRange = sheet.getRange(rowIndex, sheet.getRange(NUMBER_OF_TREES_REQUESTED_RANGE).getColumn());
   cellValue = cellRange.getValue();
@@ -202,8 +202,8 @@ function onSubmit(e) {
   }
 
   cellRange = sheet.getRange(rowIndex, sheet.getRange(TREE_LOCATIONS_RANGE).getColumn());
+  cellRange.setNumberFormat('@');
   cellRange.setValue(cellRange.getValue().toString().trim());
-  cellRange.setHorizontalAlignment("left");
 
   sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn()).setVerticalAlignment("top");
 
