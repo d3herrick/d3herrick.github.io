@@ -22,12 +22,11 @@ const RES_ACK_EMAIL_BODY_TEMPLATE =
   <html>
   <body>
   <p>
-  Thank you for submitting a reservation to receive tree saplings during the Newton Tree Conservancy's giveaway at Nahanton Park's Community Gardens on October 18, 2025. Your reservation specified a time slot at <strong><?!=timeSlot?></strong> to receive your saplings. To view information about the giveaway, please visit <a href="https://www.newtontreeconservancy.org/news-content/2025-tree-sapling-giveaway">2025 Tree Sapling Giveaway</a>.
+  Thank you for submitting a reservation to receive tree saplings during the Newton Tree Conservancy's giveaway at Nahanton Park's Community Gardens on October 18, 2025. <strong>Your reservation specified a time slot at <?!=timeSlot?></strong> to receive your saplings.
+  To view information about the giveaway, please visit
+  <a href="https://www.newtontreeconservancy.org/news-content/2025-tree-sapling-giveaway">2025 Tree Sapling Giveaway</a>.
   </p>
   <p>
-  <p>
-  www.newtontreeconservancy.org
-  </p>
   </p>
   </body>
   </html>`;
