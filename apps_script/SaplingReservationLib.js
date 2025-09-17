@@ -26,7 +26,11 @@ const RES_ACK_EMAIL_BODY_TEMPLATE =
   To view information about the giveaway, please visit
   <a href="https://www.newtontreeconservancy.org/news-content/2025-tree-sapling-giveaway">2025 Tree Sapling Giveaway</a>.
   </p>
+  <p><br></p>
   <p>
+  Newton Tree Conservancy
+  <br>
+  www.newtontreeconservancy.org
   </p>
   </body>
   </html>`;
