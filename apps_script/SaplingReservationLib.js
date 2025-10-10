@@ -36,12 +36,15 @@ const RES_ACK_EMAIL_BODY_TEMPLATE =
   </html>`;
 
 function onSubmit(e) {
-  let sheet        = e.range.getSheet();
-  let rowIndex     = e.range.getRow();
-  let emailAddress = sheet.getRange(rowIndex, sheet.getRange(EMAIL_ADDRESS_RANGE).getColumn()).getValue();
-  let timeSlot     = sheet.getRange(rowIndex, sheet.getRange(TIME_SLOT_RANGE).getColumn()).getValue();
+  let sheet         = e.range.getSheet();
+  let rowIndex      = e.range.getRow();
+  let emailAddress  = sheet.getRange(rowIndex, sheet.getRange(EMAIL_ADDRESS_RANGE).getColumn()).getValue();
+  let timeSlotRange = sheet.getRange(rowIndex, sheet.getRange(TIME_SLOT_RANGE).getColumn());
+  let timeSlot      = timeSlotRange.getValue();
 
   if ((emailAddress != undefined) && (timeSlot != undefined)) {
+    timeSlotRange.setHorizontalAlignment("right");
+
     let senderName   = RES_ACK_EMAIL_SENDER_NAME;
     let replyTo      = RES_ACK_EMAIL_REPLY_TO;
     let subject      = RES_ACK_EMAIL_SUBJECT;
