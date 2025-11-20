@@ -58,7 +58,7 @@ Dear
 <? } ?>
 </p>
 <p>
-Thank you for supporting the Newton Tree Conservancy with
+Thank you for supporting Newton Tree Conservancy with
 <? if ((paymentType == "D1") || (paymentType == "I1")) { ?>
 the
 <? } else { ?>
@@ -73,7 +73,7 @@ generous
 <? } ?>
 contribution of <?!=Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(paymentAmount)?> that we received on <?!=Intl.DateTimeFormat("en-US").format(donationDate)?> from
 <? if ((paymentType == "P1") || (paymentType == "P2") || (paymentType == "P3") || (paymentType == "P4")) { ?>
-an electronic payment.
+an online payment.
 <? } else if (paymentType == "D1") { ?>
 a Donor Advised Fund.
 <? } else if (paymentType == "I1") { ?>
@@ -84,18 +84,24 @@ a check.
 </p>
 </p>
 <p>
-Newton Tree Conservancy has had a productive 2024, with 175 trees planted in neighborhoods across Newton. Since our start in 2008 we've planted over 2,400 trees, helping to restore the 20,000 trees the city has lost since the 1970s. We also continued our new tree seedling give-away program for homeowners to plant on their own property, giving away 177 seedlings in 2024. 
+With your support, in 2026, Newton Tree Conservancy will be able to:
+<p/>
+<ul>
+<li>Purchase and plant trees at no cost to homeowners through its Community Tree Planting program
+<li>Acquire seedlings of native tree species to grow into saplings to be given away at its Seedling Nursery
+<li>Continue its Champion Trees program to inventory and showcase Newton's most spectacular trees
+<li>Foster an orchard of Chestnut trees developed in partnership with The American Chestnut Foundation
+<li>Equip additional volunteers to help Newton Tree Conservancy prune trees it has planted.
+</ul>
 </p>
 <p>
-All of this is made possible by the generous support of the community, specifically, generous people like you, in helping to plant and care for the trees and to pay for the direct cost of the trees and supplies. The Newton Tree Conservancy will continue to beautify more neighborhoods, and improve Newton's climate resilience.
+Thanks to your generosity, Newton Tree Conservancy is able to continue its mission to sow the seeds of community, beautify its neighborhoods, and improve Newton's climate resilience.
 </p>
 <p>
-With best wishes,
+With gratitude,
 </p>
-<p><br></p>
 <p>
-Aline C. Sammut
-<br>Membership Director
+Your friends at Newton Tree Conservancy
 </p>
 <p><br></p>
 <p><br></p>
@@ -103,14 +109,13 @@ Aline C. Sammut
 <p><br></p>
 <p style="text-align: center;">
 <strong>
-Visit us at www.newtontreeconservancy.org
-<br>Follow us on Instagram @newtontrees and Facebook
+Visit us at <a href="https://www.newtontreeconservancy.org/">www.newtontreeconservancy.org</a>
+<br>Follow us on <a href="https://www.instagram.com/newtontrees/">Instagram (@newtontrees)</a> and <a href="https://www.facebook.com/NewtonTreeConservancy">Facebook (NewtonTreeConservancy)</a>
 </strong>
 </p>
 <? if ((paymentType != "D1") && (paymentType != "I1")) { ?>
 <p style="text-align: center;">
-For tax purposes, we certify as a 501(c)(3) organization that no goods or services were provided 
-in return for your donation—it is tax deductible to the full extent allowable by law.
+For tax purposes, this letter is an acknowledgement of your donation to Newton Tree Conservancy, a registered 501(c)(3) nonprofit. Our tax ID is 26-0738711. No goods or services were received in exchange for your contribution. Donations are tax deductible as allowed by law.
 </p>
 <? } ?>
 </body>
