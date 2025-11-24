@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                          = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const DEPLOYMENT_VERSION                     = "41";
+const DEPLOYMENT_VERSION                     = "43";
 const FORM_DATA_SHEET_ID_RANGE               = "form_data_spreadsheet_id";
 const FORM_DATA_SHEET_RANGE                  = "form_data";
 const PLANTING_DATE_RANGE                    = "planting_date";
@@ -80,6 +80,26 @@ const INTEGRER_VALIDATION_FILTERS = [
   [BERM_DATA_FILTER,         "If there is no berm, specify a width of zero."]
 ];
 
+const DEFAULT_COLUMN_WIDTHS = [
+  130,
+  175,
+  180,
+  180,
+  105,
+  40,
+  50,
+  175,
+  35,
+  35,
+  35,
+  35,
+  40,
+  40,
+  50,
+  175,
+  175
+];
+
 function onOpen(e) {
   let sheet = getGroupDataSheet_();
   let ui    = SpreadsheetApp.getUi();
@@ -119,6 +139,10 @@ function onOpen(e) {
       isDataArchived = false;
     }
     else {
+      for (let i = 0; i < DEFAULT_COLUMN_WIDTHS.length; i++) {
+        sheet.setColumnWidth((i + 1), DEFAULT_COLUMN_WIDTHS[i]);
+      }
+
       plantingDate.setDataValidation(null);
       plantingDate.protect().setWarningOnly(true);
       groupName.setDataValidation(null);
