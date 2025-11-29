@@ -20,7 +20,7 @@
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
 const DEPLOYMENT_ID                          = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
-const DEPLOYMENT_VERSION                     = "11";
+const DEPLOYMENT_VERSION                     = "12";
 const DONATION_DATA_RANGE                    = "donation_data";
 const PENDING_FOLDER_RANGE                   = "pending_folder";
 const IMPORTED_FOLDER_RANGE                  = "imported_folder";
@@ -67,15 +67,13 @@ const STYLE_TABLE_ROW_CELL    = "border: 1px solid;text-align:left;vertical-alig
 // Payment types
 // P1 Regular tax deductible one time gift from PayPal
 // P2 Monthly regular tax deductible from PayPal
-// P3 Tax deductible with Comment from PayPal
-// P4 Annual rollup of recurring donations from PayPal
+// P3 Annual rollup of recurring donations from PayPal
 // C1 regular check tax deductible
 // D1 Donor Advised Fund check or EFT
 // I1 IRA Distribution check
 const PAYMENT_TYPE_P1 = "P1";
 const PAYMENT_TYPE_P2 = "P2";
 const PAYMENT_TYPE_P3 = "P3";
-const PAYMENT_TYPE_P4 = "P4";
 const PAYMENT_TYPE_C1 = "C1";
 const PAYMENT_TYPE_D1 = "D1";
 const PAYMENT_TYPE_I1 = "I1";
@@ -447,14 +445,8 @@ function normalizePaypalData_(data, firstDataRow) {
 
         // Payment type
         let paymentType = PAYMENT_TYPE_P1;
-        let paymentNote = normalizeString_(r[38]);
 
-        if (donationType == PAYPAL_DONATION_PAYMENT) {
-          if (paymentNote.length > 0) {
-            paymentType = PAYMENT_TYPE_P3;
-          }
-        }
-        else if (donationType == PAYPAL_SUBSCRIPTION_PAYMENT) {
+        if (donationType == PAYPAL_SUBSCRIPTION_PAYMENT) {
           paymentType = PAYMENT_TYPE_P2;
         }
         else if (donationType == PAYPAL_MASS_PAYMENT) {
@@ -467,7 +459,7 @@ function normalizePaypalData_(data, firstDataRow) {
         row.push(PAYMENT_SOURCE_PAYPAL);
 
         // Payment note
-        row.push(paymentNote);
+        row.push(normalizeString_(r[38]));
 
         // Email address
         row.push(normalizeEmailAddress_(r[10]));
@@ -775,7 +767,6 @@ function generateDonationAcks_(sheet, ackFolder) {
         switch (donationObject.paymentType) {
           case PAYMENT_TYPE_P1:
           case PAYMENT_TYPE_P3:
-          case PAYMENT_TYPE_P4:
             bodyTemplate.paymentAmount = donationObject.gross;
 
             break;
@@ -925,7 +916,7 @@ function normalizeRollupData_(data, firstDataRow) {
       row.push(normalizeNumber_(r[5]));
 
       // Payment type
-      row.push(PAYMENT_TYPE_P4);
+      row.push(PAYMENT_TYPE_P3);
 
       // Payment source
       row.push(PAYMENT_SOURCE_PAYPAL);
