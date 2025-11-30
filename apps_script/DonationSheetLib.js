@@ -20,7 +20,7 @@
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
 const DEPLOYMENT_ID                          = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
-const DEPLOYMENT_VERSION                     = "12";
+const DEPLOYMENT_VERSION                     = "13";
 const DONATION_DATA_RANGE                    = "donation_data";
 const PENDING_FOLDER_RANGE                   = "pending_folder";
 const IMPORTED_FOLDER_RANGE                  = "imported_folder";
@@ -137,40 +137,46 @@ function onImportDonationData(displayResult = true, emailResult = true) {
 
       result += "<ul>"
 
+      let paymentNoteCount = 0;
+
       stats.forEach(function(s) {
         result += `<li style="${STYLE_MONOSPACED_FONT}">${s.fileStats[1]} (${s.fileStats[2]}/${s.fileStats[3]})</li>`;
+
+        paymentNoteCount += s.paymentNotes.length;
       });
 
       result += "</ul>"
 
-      stats.forEach(function(s) {
-        if (s.paymentNotes.length > 0) {
-          result += `<p><p style="${STYLE_STANDARD_FONT}">The following donations included a payment note:</p></p>`;
-          result += 
-            `<p>
-            <table style="${STYLE_STANDARD_FONT};${STYLE_TABLE}">
-            <tr>
-            <th style="${STYLE_TABLE_HEADER_CELL};${STYLE_NO_WRAP}">Donation date
-            <th style="${STYLE_TABLE_HEADER_CELL};">Last name
-            <th style="${STYLE_TABLE_HEADER_CELL};">First name
-            <th style="${STYLE_TABLE_HEADER_CELL};">Payment note
-            </tr>`;
+      if (paymentNoteCount > 0) {
+        result += 
+          `<p><p style="${STYLE_STANDARD_FONT}">The following donations included a payment note:</p></p>
+          <p>
+          <table style="${STYLE_STANDARD_FONT};${STYLE_TABLE}">
+          <tr>
+          <th style="${STYLE_TABLE_HEADER_CELL};${STYLE_NO_WRAP}">Donation date
+          <th style="${STYLE_TABLE_HEADER_CELL};">Last name
+          <th style="${STYLE_TABLE_HEADER_CELL};">First name
+          <th style="${STYLE_TABLE_HEADER_CELL};">Payment note
+          </tr>`;
 
-          s.paymentNotes.forEach(function (n) {
-            result +=
-              `<tr>
-              <td style="${STYLE_TABLE_ROW_CELL}">${n[0]}</td>
-              <td style="${STYLE_TABLE_ROW_CELL}">${n[1]}</td>
-              <td style="${STYLE_TABLE_ROW_CELL}">${n[2]}</td>
-              <td style="${STYLE_TABLE_ROW_CELL}">${n[3]}</td>
-              </tr>`;
-          });
+        stats.forEach(function(s) {
+          if (s.paymentNotes.length > 0) {
+            s.paymentNotes.forEach(function (n) {
+              result +=
+                `<tr>
+                <td style="${STYLE_TABLE_ROW_CELL}">${n[0]}</td>
+                <td style="${STYLE_TABLE_ROW_CELL}">${n[1]}</td>
+                <td style="${STYLE_TABLE_ROW_CELL}">${n[2]}</td>
+                <td style="${STYLE_TABLE_ROW_CELL}">${n[3]}</td>
+                </tr>`;
+            });
+          }
+        });
 
-          result += 
-            `</table>
-            </p>`;
-        }
-      });
+        result += 
+          `</table>
+          </p>`;
+      }
 
       if (emailResult) {
         sendEmailProcessingResult_(sheet, sheet.getRange(IMPORT_RESULT_EMAIL_SUBJECT_RANGE).getValue(), result);
