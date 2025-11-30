@@ -20,7 +20,7 @@
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
 const DEPLOYMENT_ID                          = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
-const DEPLOYMENT_VERSION                     = "13";
+const DEPLOYMENT_VERSION                     = "15";
 const DONATION_DATA_RANGE                    = "donation_data";
 const PENDING_FOLDER_RANGE                   = "pending_folder";
 const IMPORTED_FOLDER_RANGE                  = "imported_folder";
@@ -954,7 +954,7 @@ function normalizeRollupData_(data, firstDataRow) {
 
 function sendEmailAck_(donationObject, bodyTemplate, emailProperties) {
   if (donationObject.emailAddress.length > 0) {
-    bodyTemplate.doInlineImage = false;
+    bodyTemplate.isDocumentAck = false;
 
     let body = bodyTemplate.evaluate().getContent();
 
@@ -972,7 +972,7 @@ function sendEmailAck_(donationObject, bodyTemplate, emailProperties) {
 }
 
 function createDocumentAck_(donationObject, bodyTemplate, ackFolder) {
-  bodyTemplate.doInlineImage = true;
+  bodyTemplate.isDocumentAck = true;
 
   let body = bodyTemplate.evaluate().getContent();
 
