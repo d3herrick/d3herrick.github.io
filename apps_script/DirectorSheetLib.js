@@ -14,14 +14,14 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                          = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const DEPLOYMENT_VERSION                     = "43";
+const DEPLOYMENT_VERSION                     = "45";
 const FORM_DATA_SHEET_ID_RANGE               = "form_data_spreadsheet_id";
 const FORM_DATA_SHEET_RANGE                  = "form_data";
 const PLANTING_DATE_RANGE                    = "planting_date";
 const GROUP_NAME_RANGE                       = "group_name";
 const GROUP_LEADER_DATA_FILTER               = "group_leader_data_filter";
-const PHONE_DATA_FILTER                      = "phone_data_filter";
 const NUMBER_OF_TREES_REQUESTED_FILTER       = "number_of_trees_requested";
+const OPENING_CELL_RANGE                     = "opening_cell_range";
 const RESIDENT_NOTES_RANGE                   = "resident_notes"
 const GROUP_DATA_RANGE                       = "group_data";
 const RECOMMENDED_TREE_COUNT_DATA_RANGE      = "recommended_tree_count_data"
@@ -157,6 +157,8 @@ function onOpen(e) {
   else {
     setSpreadsheetFileName_();
   }
+  
+  sheet.setActiveSelection(sheet.getRange(OPENING_CELL_RANGE));
 }
 
 function onEdit(e) {
@@ -390,7 +392,6 @@ function onToggleDataFilterVisibility() {
   if ((isPlantingDataFilterVisible == null) || (isPlantingDataFilterVisible == "true")) {
     sheet.hideRow(sheet.getRange(PLANTING_DATA_FILTER));
     sheet.hideColumn(sheet.getRange(GROUP_LEADER_DATA_FILTER));
-    sheet.hideColumn(sheet.getRange(PHONE_DATA_FILTER));
     sheet.hideColumn(sheet.getRange(GAS_LEAK_TESTING_NOTES_FILTER));
 
     properties.setProperty(PLANTING_DATA_FILTER_VISIBILITY, "false");
@@ -398,13 +399,10 @@ function onToggleDataFilterVisibility() {
   else {
     sheet.unhideRow(sheet.getRange(PLANTING_DATA_FILTER));
     sheet.unhideColumn(sheet.getRange(GROUP_LEADER_DATA_FILTER));
-    sheet.unhideColumn(sheet.getRange(PHONE_DATA_FILTER));
     sheet.unhideColumn(sheet.getRange(GAS_LEAK_TESTING_NOTES_FILTER));
 
     properties.setProperty(PLANTING_DATA_FILTER_VISIBILITY, "true");
   }
-
-  sheet.setActiveSelection(sheet.getRange("A1"));
 }
 
 function onAbout() {
@@ -428,18 +426,6 @@ function onAbout() {
 }
 
 function onApplyUpdates() {
-  // move the planting group data selector one column to the right
-  let sheet    = getGroupDataSheet_();
-  let srcRange = sheet.getRange("A1:C4");
-  let dstRange = sheet.getRange("B1");
-
-  srcRange.moveTo(dstRange);
-
-  // hide the Timestamp column
-  sheet.hideColumn(sheet.getRange("timestamp_data_filter")); 
-
-  // remove timestamp_data_filter named range
-  SpreadsheetApp.getActiveSpreadsheet().removeNamedRange("timestamp_data_filter");
 }
 
 function setSpreadsheetFileName_() {
