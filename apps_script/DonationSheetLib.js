@@ -20,7 +20,7 @@
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
 const DEPLOYMENT_ID                          = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
-const DEPLOYMENT_VERSION                     = "15";
+const DEPLOYMENT_VERSION                     = "16";
 const DONATION_DATA_RANGE                    = "donation_data";
 const PENDING_FOLDER_RANGE                   = "pending_folder";
 const IMPORTED_FOLDER_RANGE                  = "imported_folder";
@@ -329,10 +329,10 @@ function importPendingFiles_(sheet, pendingFolder, importedFolder) {
     let stat     = null;
 
     if (fileName.startsWith(PAYPAL_FILE_PREFIX)) {
-      stat = importPayPalCsv_(sheet, f, paypalFirstDataRow, paypalFirstDataColumn, ntcFirstDataRow, ntcFirstDataColumn);
+      stat = importPayPalFile_(sheet, f, paypalFirstDataRow, paypalFirstDataColumn, ntcFirstDataRow, ntcFirstDataColumn);
     }
     else if (fileName.startsWith(CHECK_FILE_PREFIX)) {
-      stat = importSpreadsheet_(sheet, f, ntcFirstDataRow, ntcFirstDataColumn, ntcFirstDataRow, ntcFirstDataColumn);
+      stat = importCheckFile_(sheet, f, ntcFirstDataRow, ntcFirstDataColumn, ntcFirstDataRow, ntcFirstDataColumn);
     }
     else {
       stat = {
@@ -351,7 +351,7 @@ function importPendingFiles_(sheet, pendingFolder, importedFolder) {
   return stats;
 }
 
-function importPayPalCsv_(sheet, file, firstDataRow, firstDataColumn, firstInsertionRow, firstInsertionColumn) {
+function importPayPalFile_(sheet, file, firstDataRow, firstDataColumn, firstInsertionRow, firstInsertionColumn) {
   let aOkay = true;
 
   let totalRows    = 0;
@@ -497,7 +497,7 @@ function normalizePaypalData_(data, firstDataRow) {
   return rows;
 }
 
-function importSpreadsheet_(sheet, file, firstDataRow, firstDataColumn, firstInsertionRow, firstInsertionColumn) {
+function importCheckFile_(sheet, file, firstDataRow, firstDataColumn, firstInsertionRow, firstInsertionColumn) {
   let aOkay = true;
 
   let totalRows    = 0;
