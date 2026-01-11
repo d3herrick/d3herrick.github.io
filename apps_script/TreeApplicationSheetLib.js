@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                            = "1DeKSwHUU3ECgFmC-odP_rpwQ6_Ba_Y_Oq5Ly4kNt-IUpHOctGIG1wRAS";
-const DEPLOYMENT_VERSION                       = "30";
+const DEPLOYMENT_VERSION                       = "31";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
 const GROUP_NAME_RANGE                         = "group_name";
@@ -192,7 +192,7 @@ function onSubmit(e) {
 
   cellRange = sheet.getRange(rowIndex, sheet.getRange(STREET_ADDRESS_RANGE).getColumn());
   cellRange.setNumberFormat('@');
-  cellRange.setValue(cellRange.getValue().toString().replaceAll("\n", " ").trim());
+  cellRange.setValue(cellRange.getValue().toString().replaceAll("\n", " ").trim().replace(/\.$/, ""));
 
   cellRange = sheet.getRange(rowIndex, sheet.getRange(NUMBER_OF_TREES_REQUESTED_RANGE).getColumn());
   cellValue = cellRange.getValue();
