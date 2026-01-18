@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                          = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const DEPLOYMENT_VERSION                     = "45";
+const DEPLOYMENT_VERSION                     = "46";
 const FORM_DATA_SHEET_ID_RANGE               = "form_data_spreadsheet_id";
 const FORM_DATA_SHEET_RANGE                  = "form_data";
 const PLANTING_DATE_RANGE                    = "planting_date";
@@ -586,9 +586,9 @@ function listApplicationData_(sheet) {
 
 function mergeZipcode_(row) {
   let streetAddress = row[1].trim();
-  let zipcode       = row[2].trim();
+  let zipCode       = row[2].trim();
 
-  row[1] = `${streetAddress}\n${zipcode}`;
+  row[1] = `${streetAddress}\n${zipCode}`;
   row.splice(2, 1);
 }
 
