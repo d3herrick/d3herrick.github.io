@@ -20,8 +20,12 @@
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
 const DEPLOYMENT_ID                          = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
-const DEPLOYMENT_VERSION                     = "16";
+const DEPLOYMENT_VERSION                     = "17";
 const DONATION_DATA_RANGE                    = "donation_data";
+const LAST_NAME_RANGE                        = "last_name";
+const EMAIL_ADDRESS_RANGE                    = "email_address";
+const STREET_ADDRESS_RANGE                   = "street_address";
+const ZIP_CODE_RANGE                         = "zip_code";
 const PENDING_FOLDER_RANGE                   = "pending_folder";
 const IMPORTED_FOLDER_RANGE                  = "imported_folder";
 const ACK_FOLDER_RANGE                       = "acknowledgement_folder";
@@ -544,6 +548,12 @@ function normalizeCheckData_(data, firstDataRow) {
     if (!isEmptyRow_(r)) {
       let row = [];
 
+      // gather search keys for possible email address lookup
+      let lastName      = normalizeString_(r[1]);
+      let emailAddress  = normalizeEmailAddress_(r[10]);
+      let streetAddress = normalizeString_(r[11]);
+      let zipCode       = normalizeDonationZipcode_(r[14]);
+
       // Ack emailed or generated
       row.push("");
 
@@ -551,7 +561,7 @@ function normalizeCheckData_(data, firstDataRow) {
       row.push(normalizeDonationDate_(r[0]));
 
       // Last name
-      row.push(normalizeString_(r[1]));
+      row.push(lastName);
 
       // First name
       row.push(normalizeString_(r[2]));
@@ -592,11 +602,47 @@ function normalizeCheckData_(data, firstDataRow) {
       // Payment note
       row.push(normalizeString_(r[9]));
 
+      if (emailAddress.length == 0) {
+        let tokens = streetAddress.split(/\s+/);
+
+        if (tokens.length > 1) {
+          let sheet = getDonationDataSheet_();
+          let key   = tokens[0] + " " + tokens[1];
+
+          let hits = sheet.getDataRange().createTextFinder(key).findAll();
+
+          if (hits.length > 1) {
+            let emailAddressColumn  = sheet.getRange(EMAIL_ADDRESS_RANGE).getColumn();
+            let streetAddressColumn = sheet.getRange(STREET_ADDRESS_RANGE).getColumn();
+            let zipCodeColumn       = sheet.getRange(ZIP_CODE_RANGE).getColumn();
+            let lastNameColumn      = sheet.getRange(LAST_NAME_RANGE).getColumn();
+
+            for (const h of hits) {
+              if (h.getColumn() == streetAddressColumn) {
+                let op1 = sheet.getRange(h.getRow(), zipCodeColumn).getValue().slice(0, 5);
+                let op2 = zipCode.slice(0, 5);
+
+                if (op1 == op2) {
+                  op1 = sheet.getRange(h.getRow(), lastNameColumn).getValue();
+                  op2 = lastName;
+
+                  if (op1 == op2) {
+                    emailAddress = sheet.getRange(h.getRow(), emailAddressColumn).getValue();
+
+                    break;
+                  }
+                }
+              }
+            }
+          }
+        }        
+      }
+
       // Email address
-      row.push(normalizeEmailAddress_(r[10]));
+      row.push(emailAddress);
 
       // Street address
-      row.push(normalizeString_(r[11]));
+      row.push(streetAddress);
 
       // City
       row.push(normalizeString_(r[12]));
@@ -605,7 +651,7 @@ function normalizeCheckData_(data, firstDataRow) {
       row.push(normalizeString_(r[13]));
 
       // Zip code
-      row.push(normalizeDonationZipcode_(r[14]));
+      row.push(zipCode);
 
       rows.push(row);
     }
