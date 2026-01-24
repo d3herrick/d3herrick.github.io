@@ -14,14 +14,14 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                          = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const DEPLOYMENT_VERSION                     = "46";
+const DEPLOYMENT_VERSION                     = "48";
 const FORM_DATA_SHEET_ID_RANGE               = "form_data_spreadsheet_id";
 const FORM_DATA_SHEET_RANGE                  = "form_data";
 const PLANTING_DATE_RANGE                    = "planting_date";
 const GROUP_NAME_RANGE                       = "group_name";
 const GROUP_LEADER_DATA_FILTER               = "group_leader_data_filter";
 const NUMBER_OF_TREES_REQUESTED_FILTER       = "number_of_trees_requested";
-const OPENING_CELL_RANGE                     = "opening_cell_range";
+const DATA_SELECTION_LABELS_RANGE            = "data_selection_labels";
 const RESIDENT_NOTES_RANGE                   = "resident_notes"
 const GROUP_DATA_RANGE                       = "group_data";
 const RECOMMENDED_TREE_COUNT_DATA_RANGE      = "recommended_tree_count_data"
@@ -60,8 +60,10 @@ const INSERT_EMPTY_ROWS_TITLE                = "Insert Empty Rows";
 const SPECIFY_DATA_FILTER_TITLE              = "Specify Application Data Filter Criteria";
 const SPECIFIED_INVALID_COLUMN_VALUE_TITLE   = "Invalid Value Specified";
 const ABOUT_TITLE                            = "About Community Tree Planting Spreadsheet";
-const PLANTING_DATA_FILTER_LABEL             = "Planting date";
+const DATA_FILTER_TITLE_LABEL                = "Select Planting date and Group name and click menu item Get application data";
+const PLANTING_DATE_FILTER_LABEL             = "Planting date";
 const GROUP_NAME_FILTER_LABEL                = "Group name";
+const LAST_DATA_RETRIEVAL_LABEL              = "Last data retrieval";
 const ARCHIVED_DATA_NOTE                     = "Because it has concluded, data associated with the planting date has been archived.";
 const CORNER_LOT_STREET_TAG                  = "replace-with-street-name: "
 const CORNER_LOT_RESIDENT_NOTE_TAG           = "Application row above was duplicated to accommodate planting on multiple streets that border the corner lot.";
@@ -78,6 +80,13 @@ const INTEGRER_VALIDATION_FILTERS = [
   [SMALL_TREE_COUNT_FILTER,  ""],
   [TBD_TREE_COUNT_FILTER,    ""],
   [BERM_DATA_FILTER,         "If there is no berm, specify a width of zero."]
+];
+
+const DATA_FILTER_LABELS = [
+  [DATA_FILTER_TITLE_LABEL],
+  [PLANTING_DATE_FILTER_LABEL],
+  [GROUP_NAME_FILTER_LABEL],
+  [LAST_DATA_RETRIEVAL_LABEL]
 ];
 
 const DEFAULT_COLUMN_WIDTHS = [
@@ -101,6 +110,8 @@ const DEFAULT_COLUMN_WIDTHS = [
 ];
 
 function onOpen(e) {
+  SpreadsheetApp.getActiveSpreadsheet().toast("Loading...")
+
   let sheet = getGroupDataSheet_();
   let ui    = SpreadsheetApp.getUi();
 
@@ -128,7 +139,7 @@ function onOpen(e) {
 
       if (!isApplicationDataEmpty_(rows)) {
         let response = ui.alert(ADDITIONAL_DATA_AVAILABLE_TITLE, 
-          `There ${((rows.length > 1) ? "are" : "is")} ${rows.length} additional ${((rows.length > 1) ? "applications" : "application")} available for the ${PLANTING_DATA_FILTER_LABEL} and  ${GROUP_NAME_FILTER_LABEL} you selected. Do you want to refresh your applicaton data now? If not, you may do so later by clicking menu item ${GET_APPLICATION_DATA_MENU_ITEM}.`,
+          `There ${((rows.length > 1) ? "are" : "is")} ${rows.length} additional ${((rows.length > 1) ? "applications" : "application")} available for the ${PLANTING_DATE_FILTER_LABEL} and  ${GROUP_NAME_FILTER_LABEL} you selected. Do you want to refresh your applicaton data now? If not, you may do so later by clicking menu item ${GET_APPLICATION_DATA_MENU_ITEM}.`,
           ui.ButtonSet.YES_NO);
 
         if (response == ui.Button.YES) {
@@ -157,8 +168,6 @@ function onOpen(e) {
   else {
     setSpreadsheetFileName_();
   }
-  
-  sheet.setActiveSelection(sheet.getRange(OPENING_CELL_RANGE));
 }
 
 function onEdit(e) {
@@ -235,6 +244,15 @@ function onEdit(e) {
         if ((dataRange.getRow() < e.range.rowStart) && (dataRange.getLastRow() > e.range.rowEnd)) {
           setSpreadsheetFileName_();
         }
+      }
+    }
+    else {
+      let range = sheet.getRange(DATA_SELECTION_LABELS_RANGE);
+    
+      if ((range.getLastColumn() == e.range.columnEnd) && 
+          (range.getRow() <= e.range.rowStart) &&
+          (range.getLastRow() >= e.range.rowEnd)) {
+        range.setValues(DATA_FILTER_LABELS);
       }
     }
   }
@@ -426,6 +444,13 @@ function onAbout() {
 }
 
 function onApplyUpdates() {
+  let spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  
+  spreadsheet.removeNamedRange("opening_cell_range");
+  spreadsheet.setNamedRange("data_selection_labels", spreadsheet.getRange("'Group data'!B1:B4"));
+  spreadsheet.setNamedRange("planting_group_criteria", spreadsheet.getRange("Parameters!A3:B102"));
+  spreadsheet.getSheetByName("Parameters").deleteColumns(7, 22);
+  spreadsheet.getSheetByName("Parameters").deleteRows(103, 50398)
 }
 
 function setSpreadsheetFileName_() {
@@ -465,7 +490,7 @@ function validateDataFilterCriteria_() {
     if (plantingDate == plantingDateFirstItem) {
       isComplete = false;
 
-      message += PLANTING_DATA_FILTER_LABEL;
+      message += PLANTING_DATE_FILTER_LABEL;
     }
 
     if (groupName == groupNameFirstItem) {
