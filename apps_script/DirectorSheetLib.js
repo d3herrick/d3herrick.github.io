@@ -14,7 +14,7 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_ID                          = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const DEPLOYMENT_VERSION                     = "48";
+const DEPLOYMENT_VERSION                     = "49";
 const FORM_DATA_SHEET_ID_RANGE               = "form_data_spreadsheet_id";
 const FORM_DATA_SHEET_RANGE                  = "form_data";
 const PLANTING_DATE_RANGE                    = "planting_date";
@@ -38,6 +38,7 @@ const PLANTING_DATA_FILTER                   = "planting_data_filter";
 const LAST_DATA_RETRIEVAL_RANGE              = "last_data_retrieval";
 const TOTAL_REQUESTED_TREE_COUNT_RANGE       = "total_requested_tree_count";
 const TOTAL_RECOMMENDED_TREE_COUNT_RANGE     = "total_recommended_tree_count";
+const VIEW_DOCUMENTATION_RANGE               = "view_documentation";
 const PLANTING_DATA_FILTER_VISIBILITY        = "is_planting_data_filter_visible";
 const INSERT_EMPTRY_ROWS_MAX                 = 30;
 const DIRECTOR_NAME_PROP                     = "director_name_prop";
@@ -64,6 +65,7 @@ const DATA_FILTER_TITLE_LABEL                = "Select Planting date and Group n
 const PLANTING_DATE_FILTER_LABEL             = "Planting date";
 const GROUP_NAME_FILTER_LABEL                = "Group name";
 const LAST_DATA_RETRIEVAL_LABEL              = "Last data retrieval";
+const VIEW_DOCUMENTATION_REF                 = '=' + VIEW_DOCUMENTATION_RANGE;
 const ARCHIVED_DATA_NOTE                     = "Because it has concluded, data associated with the planting date has been archived.";
 const CORNER_LOT_STREET_TAG                  = "replace-with-street-name: "
 const CORNER_LOT_RESIDENT_NOTE_TAG           = "Application row above was duplicated to accommodate planting on multiple streets that border the corner lot.";
@@ -86,7 +88,8 @@ const DATA_FILTER_LABELS = [
   [DATA_FILTER_TITLE_LABEL],
   [PLANTING_DATE_FILTER_LABEL],
   [GROUP_NAME_FILTER_LABEL],
-  [LAST_DATA_RETRIEVAL_LABEL]
+  [LAST_DATA_RETRIEVAL_LABEL],
+  [VIEW_DOCUMENTATION_REF]
 ];
 
 const DEFAULT_COLUMN_WIDTHS = [
@@ -446,11 +449,17 @@ function onAbout() {
 function onApplyUpdates() {
   let spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   
-  spreadsheet.removeNamedRange("opening_cell_range");
-  spreadsheet.setNamedRange("data_selection_labels", spreadsheet.getRange("'Group data'!B1:B4"));
-  spreadsheet.setNamedRange("planting_group_criteria", spreadsheet.getRange("Parameters!A3:B102"));
-  spreadsheet.getSheetByName("Parameters").deleteColumns(7, 22);
-  spreadsheet.getSheetByName("Parameters").deleteRows(103, 50398)
+  spreadsheet.setNamedRange("data_selection_labels", spreadsheet.getRange("'Group data'!B1:B5"));
+  spreadsheet.setNamedRange("view_documentation", spreadsheet.getRange("Parameters!F5"));
+
+  let sheet = spreadsheet.getSheetByName('Parameters');
+  
+  sheet.getRange("F4").setValue("Link to view documentation").setFontWeight("bold")
+  sheet.getRange("F5").setValue('=hyperlink("https://docs.google.com/document/d/12IL4QHY1qkSKXp7HHyPVlNKBYSJn-4aSdrRW0AoePQk/preview", "Click to view documentation")');
+
+  sheet = spreadsheet.getSheetByName('Group data');
+
+  sheet.getRange("B5").setValue(VIEW_DOCUMENTATION_REF);
 }
 
 function setSpreadsheetFileName_() {
