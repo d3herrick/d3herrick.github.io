@@ -13,8 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_ID                            = "1DeKSwHUU3ECgFmC-odP_rpwQ6_Ba_Y_Oq5Ly4kNt-IUpHOctGIG1wRAS";
-const DEPLOYMENT_VERSION                       = "31";
+const DEPLOYMENT_VERSION                       = "32";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
 const GROUP_NAME_RANGE                         = "group_name";
@@ -331,10 +330,7 @@ function onAbout() {
   let defaultPlantingDate = PropertiesService.getDocumentProperties().getProperty(DEFAULT_PLANTING_DATE_NAME_PROP) ?? DEFAULT_PLANTING_DATE_NOT_SPECIFIED;
 
   ui.alert(ABOUT_TITLE,
-    `Deployment ID
-    ${DEPLOYMENT_ID}
-
-    Version
+    `Version
     ${DEPLOYMENT_VERSION}
 
     Default planting date

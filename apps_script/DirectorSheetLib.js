@@ -13,8 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_ID                          = "14PvqcKWB7ipcH6WytZZS4rMlmap7bnVOnGD30TgD_FIHzojPALwEzXJN";
-const DEPLOYMENT_VERSION                     = "49";
+const DEPLOYMENT_VERSION                     = "50";
 const FORM_DATA_SHEET_ID_RANGE               = "form_data_spreadsheet_id";
 const FORM_DATA_SHEET_RANGE                  = "form_data";
 const PLANTING_DATE_RANGE                    = "planting_date";
@@ -431,10 +430,7 @@ function onAbout() {
   let directorName = PropertiesService.getDocumentProperties().getProperty(DIRECTOR_NAME_PROP) ?? DIRECTOR_NAME_NOT_SPECIFIED;
 
   ui.alert(ABOUT_TITLE,
-    `Deployment ID
-    ${DEPLOYMENT_ID}
-
-    Version
+    `Version
     ${DEPLOYMENT_VERSION}
 
     Director name

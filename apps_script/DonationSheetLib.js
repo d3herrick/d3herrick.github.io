@@ -19,7 +19,6 @@
 //                 "https://www.googleapis.com/auth/script.container.ui",
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
-const DEPLOYMENT_ID                          = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
 const DEPLOYMENT_VERSION                     = "18";
 const DONATION_DATA_RANGE                    = "donation_data";
 const LAST_NAME_RANGE                        = "last_name";
@@ -289,10 +288,7 @@ function onAbout() {
   let ui = SpreadsheetApp.getUi();
 
   ui.alert(ABOUT_TITLE,
-    `Deployment ID
-    ${DEPLOYMENT_ID}
-
-    Version
+    `Version
     ${DEPLOYMENT_VERSION}
 
 
