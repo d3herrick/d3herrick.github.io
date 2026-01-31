@@ -800,8 +800,10 @@ function generateDonationAcks_(sheet, ackFolder) {
     let execErrors     = [];
 
     ackData.forEach(function (a) {
-      let donationRange  = sheet.getRange(a[0], ntcFirstDataColumn, 1, numColumns);
-      let donationObject = toDonationObject_(donationRange.getValues()[0]);
+      let donationRange     = sheet.getRange(a[0], ntcFirstDataColumn, 1, numColumns);
+      let donationObject    = toDonationObject_(donationRange.getValues()[0]);
+      let ackProcessedRange = sheet.getRange(a[0], ntcFirstDataColumn);
+
 
       if (isDonationAddressed_(donationObject)) {
         bodyTemplate.donationDate    = donationObject.donationDate;
@@ -868,24 +870,24 @@ function generateDonationAcks_(sheet, ackFolder) {
               numDocAcks++;
             }
 
-            sheet.getRange(a[0], ntcFirstDataColumn).check();
+            ackProcessedRange.check();
           }
           catch (e) {
             execErrors.push(`Row ${a[0]}: ${e}`);
           }
         }
         else {
-          sheet.getRange(a[0], ntcFirstDataColumn).check();
+          ackProcessedRange.check();
         }
       }
       else {
         if (isMatchingDonation_(donationObject)) {
-          sheet.getRange(a[0], ntcFirstDataColumn).check();
+          ackProcessedRange.check();
         }
-        else if (isDonationAnonymous_(donationObject)) {
+        else if (isAnonymousDonation_(donationObject)) {
           numAnonymous++;
 
-          sheet.getRange(a[0], ntcFirstDataColumn).check();
+          ackProcessedRange.check();
         }
         else {
           numUnaddressed++;
@@ -1140,7 +1142,7 @@ function isMatchingDonation_(donationObject) {
   return (donationObject.paymentType == PAYMENT_TYPE_M1);
 }
 
-function isDonationAnonymous_(donationObject) {
+function isAnonymousDonation_(donationObject) {
   return (donationObject.lastName.toLowerCase() == ANONYMOUS_DONATION_TAG);
 }
 
