@@ -20,7 +20,7 @@
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
 const DEPLOYMENT_ID                          = "1cXoHvwTUh5pTV3_0YHl9jZsL4YZ7Ie6juG307YwOBxGLjeF81khFYHcy";
-const DEPLOYMENT_VERSION                     = "17";
+const DEPLOYMENT_VERSION                     = "18";
 const DONATION_DATA_RANGE                    = "donation_data";
 const LAST_NAME_RANGE                        = "last_name";
 const EMAIL_ADDRESS_RANGE                    = "email_address";
@@ -73,12 +73,14 @@ const STYLE_TABLE_ROW_CELL    = "border: 1px solid;text-align:left;vertical-alig
 // P2 Monthly regular tax deductible from PayPal
 // P3 Annual rollup of recurring donations from PayPal
 // C1 regular check tax deductible
+// M1 matching donation not tax deductible
 // D1 Donor Advised Fund check or EFT
 // I1 IRA Distribution check
 const PAYMENT_TYPE_P1 = "P1";
 const PAYMENT_TYPE_P2 = "P2";
 const PAYMENT_TYPE_P3 = "P3";
 const PAYMENT_TYPE_C1 = "C1";
+const PAYMENT_TYPE_M1 = "M1";
 const PAYMENT_TYPE_D1 = "D1";
 const PAYMENT_TYPE_I1 = "I1";
 
@@ -846,6 +848,11 @@ function generateDonationAcks_(sheet, ackFolder) {
 
             break;
 
+          case PAYMENT_TYPE_M1:
+            doGenerateAck = false;
+
+            break;
+
           default:
             break;
         }
@@ -872,7 +879,10 @@ function generateDonationAcks_(sheet, ackFolder) {
         }
       }
       else {
-        if (isDonationAnonymous_(donationObject)) {
+        if (isMatchingDonation_(donationObject)) {
+          sheet.getRange(a[0], ntcFirstDataColumn).check();
+        }
+        else if (isDonationAnonymous_(donationObject)) {
           numAnonymous++;
 
           sheet.getRange(a[0], ntcFirstDataColumn).check();
@@ -1124,6 +1134,10 @@ function isDonationAddressed_(donationObject) {
           (donationObject.city.length > 0) &&
           (donationObject.state.length > 0) &&
           (donationObject.zipCode.length > 0));
+}
+
+function isMatchingDonation_(donationObject) {
+  return (donationObject.paymentType == PAYMENT_TYPE_M1);
 }
 
 function isDonationAnonymous_(donationObject) {
