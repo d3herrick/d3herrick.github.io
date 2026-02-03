@@ -19,7 +19,7 @@
 //                 "https://www.googleapis.com/auth/script.container.ui",
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
-const DEPLOYMENT_VERSION                     = "18";
+const DEPLOYMENT_VERSION                     = "19";
 const DONATION_DATA_RANGE                    = "donation_data";
 const LAST_NAME_RANGE                        = "last_name";
 const EMAIL_ADDRESS_RANGE                    = "email_address";
@@ -42,6 +42,7 @@ const NTC_FIRST_DATA_ROW_RANGE               = "ntc_first_data_row";
 const PAYPAL_FIRST_DATA_ROW_RANGE            = "paypal_first_data_row";
 const ADDRESS_JOIN_SEPARATOR                 = ", ";
 const ANONYMOUS_DONATION_TAG                 = "anonymous";
+const RECURRING_ROLLUP_TRIGGER_DATE_TEMPLATE = new Date(1970, 0, 15, 9, 0, 0);
 const PAYPAL_FILE_PREFIX                     = "paypal";
 const PAYPAL_FILE_FIELD_COUNT                = 41;
 const PAYPAL_DONATION_PAYMENT                = "Donation Payment";
@@ -98,16 +99,29 @@ function onOpen(e) {
       addToUi();
 }
 
-function onScheduledImportDonationData() {
+function onScheduledImportDonationData(e) {
   onImportDonationData(false, true);
 }
 
-function onScheduledGenerateDonationAcks() {
+function onScheduledGenerateDonationAcks(e) {
   onGenerateDonationAcks(false, true);
 }
 
-function onScheduledGenerateRecurringDonationRollups() {
+function onScheduledGenerateRecurringDonationRollups(e) {
   onGenerateRecurringDonationRollups(false, true);
+
+  let trigger = ScriptApp.getProjectTriggers().find(function(t) {return t.getUniqueId() == e.triggerUid});
+
+  ScriptApp.deleteTrigger(trigger);
+  
+  let runAt = new Date(RECURRING_ROLLUP_TRIGGER_DATE_TEMPLATE);
+
+  runAt.setFullYear(new Date().getFullYear() + 1);
+
+  ScriptApp.newTrigger(trigger.getHandlerFunction())
+    .timeBased()
+    .at(runAt)
+    .create();
 }
 
 function onImportDonationData(displayResult = true, emailResult = true) {
