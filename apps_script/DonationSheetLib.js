@@ -816,19 +816,18 @@ function generateDonationAcks_(sheet, ackFolder) {
       let donationObject    = toDonationObject_(donationRange.getValues()[0]);
       let ackProcessedRange = sheet.getRange(a[0], ntcFirstDataColumn);
 
-
       if (isDonationAddressed_(donationObject)) {
-        bodyTemplate.donationDate    = donationObject.donationDate;
-        bodyTemplate.lastName        = donationObject.lastName;
-        bodyTemplate.firstName       = donationObject.firstName;
-        bodyTemplate.salutation      = donationObject.salutation;
-        bodyTemplate.paymentType     = donationObject.paymentType;
-        bodyTemplate.paymentSource   = donationObject.paymentSource;
-        bodyTemplate.emailAddress    = donationObject.emailAddress;
-        bodyTemplate.streetAddress   = donationObject.streetAddress;
-        bodyTemplate.city            = donationObject.city;
-        bodyTemplate.state           = donationObject.state;
-        bodyTemplate.zipCode         = donationObject.zipCode;
+        bodyTemplate.donationDate  = donationObject.donationDate;
+        bodyTemplate.lastName      = donationObject.lastName;
+        bodyTemplate.firstName     = donationObject.firstName;
+        bodyTemplate.salutation    = donationObject.salutation;
+        bodyTemplate.paymentType   = donationObject.paymentType;
+        bodyTemplate.paymentSource = donationObject.paymentSource;
+        bodyTemplate.emailAddress  = donationObject.emailAddress;
+        bodyTemplate.streetAddress = donationObject.streetAddress;
+        bodyTemplate.city          = donationObject.city;
+        bodyTemplate.state         = donationObject.state;
+        bodyTemplate.zipCode       = donationObject.zipCode;
 
         let doGenerateAck = true;
 
@@ -938,7 +937,7 @@ function generateRecurringDonationRollups_(sheet) {
   let rollupA1Notation = `'${sheet.getName()}'!${rollupRange.getA1Notation()}`;
   let priorYear        = new Date().getFullYear() - 1;
 
-  let query = `=query(${rollupA1Notation}, "SELECT MAX(B), C, D, SUM(F), SUM(G), SUM(H), L WHERE I = 'P2' AND B >= DATE '${priorYear}-01-01' AND B <= DATE '${priorYear}-12-31' GROUP BY C, D, F, G, H, L ORDER BY C, D LABEL MAX(B) '', SUM(F) '', SUM(G) '', SUM(H) ''")`;
+  let query = `=query(${rollupA1Notation}, "SELECT MAX(B), C, D, SUM(F), SUM(G), SUM(H), L WHERE I = '${PAYMENT_TYPE_P2}' AND B >= DATE '${priorYear}-01-01' AND B <= DATE '${priorYear}-12-31' GROUP BY C, D, F, G, H, L ORDER BY C, D LABEL MAX(B) '', SUM(F) '', SUM(G) '', SUM(H) ''")`;
 
   let rollupData = executeQuery_(spreadsheet, query);
 
