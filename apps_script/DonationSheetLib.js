@@ -19,7 +19,7 @@
 //                 "https://www.googleapis.com/auth/script.container.ui",
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
-const DEPLOYMENT_VERSION                     = "19";
+const DEPLOYMENT_VERSION                     = "20";
 const DONATION_DATA_RANGE                    = "donation_data";
 const LAST_NAME_RANGE                        = "last_name";
 const EMAIL_ADDRESS_RANGE                    = "email_address";
@@ -623,7 +623,7 @@ function normalizeCheckData_(data, firstDataRow) {
 
           let hits = sheet.getDataRange().createTextFinder(key).findAll();
 
-          if (hits.length > 1) {
+          if (hits.length > 0) {
             let emailAddressColumn  = sheet.getRange(EMAIL_ADDRESS_RANGE).getColumn();
             let streetAddressColumn = sheet.getRange(STREET_ADDRESS_RANGE).getColumn();
             let zipCodeColumn       = sheet.getRange(ZIP_CODE_RANGE).getColumn();
@@ -641,7 +641,9 @@ function normalizeCheckData_(data, firstDataRow) {
                   if (op1 == op2) {
                     emailAddress = sheet.getRange(h.getRow(), emailAddressColumn).getValue();
 
-                    break;
+                    if (emailAddress.length > 0) {
+                      break;
+                    }
                   }
                 }
               }
@@ -1068,9 +1070,10 @@ function sendEmailProcessingResult_(sheet, subject, result) {
     let senderName       = sheet.getRange(PROCESSING_EMAIL_SENDER_NAME_RANGE).getValue();
     let replyTo          = sheet.getRange(PROCESSING_EMAIL_REPLY_TO_RANGE).getValue();
     let bodyTemplate     = HtmlService.createTemplateFromFile(sheet.getRange(PROCESSING_RESULT_BODY_TEMPLATE_RANGE).getValue());
+    let ledgerPreviewUrl = sheet.getParent().getUrl().replace("edit", "preview");
 
     bodyTemplate.result = result +
-      `<p><p style="${STYLE_STANDARD_FONT}">View the donation ledger by clicking <a href="${sheet.getParent().getUrl()}">here</a>.</p></p>`;
+      `<p><p style="${STYLE_STANDARD_FONT}">View the donation ledger by clicking <a href="${ledgerPreviewUrl}">here</a>.</p></p>`;
 
     let body = bodyTemplate.evaluate().getContent();
 
