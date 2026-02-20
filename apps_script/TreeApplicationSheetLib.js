@@ -13,7 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                       = "32";
+const DEPLOYMENT_VERSION                       = "33";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
 const GROUP_NAME_RANGE                         = "group_name";
@@ -191,8 +191,8 @@ function onSubmit(e) {
 
   cellRange = sheet.getRange(rowIndex, sheet.getRange(STREET_ADDRESS_RANGE).getColumn());
   cellRange.setNumberFormat('@');
-  cellRange.setValue(cellRange.getValue().toString().replaceAll("\n", " ").trim().replace(/\.$/, ""));
-
+  cellRange.setValue(normalizeStreetAddress_(cellRange.getValue().toString()));
+  
   cellRange = sheet.getRange(rowIndex, sheet.getRange(NUMBER_OF_TREES_REQUESTED_RANGE).getColumn());
   cellValue = cellRange.getValue();
 
@@ -207,9 +207,14 @@ function onSubmit(e) {
   sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn()).setVerticalAlignment("top");
 
   columnIndex = sheet.getRange(EMAIL_ADDRESS_RANGE).getColumn();
-  cellValue   = sheet.getRange(rowIndex, columnIndex).getValue();
+  cellRange   = sheet.getRange(rowIndex, columnIndex);
+  cellValue   = cellRange.getValue();
 
   if (cellValue != undefined) {
+    cellRange.setNumberFormat('@');
+    cellValue = normalizeEmailAddress_(cellValue);
+    cellRange.setValue(cellValue);
+
     let hits = sheet.getDataRange().createTextFinder(cellValue).matchEntireCell(true).findAll();
 
     if (hits.length > 1) {
@@ -340,6 +345,40 @@ function onAbout() {
     Newton Tree Conservancy
     www.newtontreeconservancy.org`,
     ui.ButtonSet.OK);
+}
+
+function normalizeEmailAddress_(emailAddress) {
+  let normalizedEmailAddress = emailAddress;
+
+  if (normalizedEmailAddress.length > 0) {
+    while (!/[0-9a-zA-Z]$/.test(normalizedEmailAddress)) {
+      normalizedEmailAddress = normalizedEmailAddress.slice(0, -1).trim();
+    }
+
+    normalizedEmailAddress = normalizedEmailAddress.toLowerCase();
+  }
+
+  return normalizedEmailAddress;
+}
+
+function normalizeStreetAddress_(streetAddress) {
+  let normalizedValue = streetAddress.replaceAll("\n", " ").trim().toLowerCase().replaceAll(/[.,]/g, "");
+  let valueParts      = normalizedValue.split(/\s+/);
+  let valueIndex      = 0;
+
+  normalizedValue = "";
+
+  valueParts.forEach(function(e) {
+    if (valueIndex > 0) {
+      normalizedValue += " ";  
+    }
+
+    normalizedValue += e.charAt(0).toUpperCase() + e.slice(1);
+
+    valueIndex++;
+  });
+
+  return normalizedValue;
 }
 
 function resolvePlantingDate_(value) {
