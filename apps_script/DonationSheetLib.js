@@ -19,7 +19,7 @@
 //                 "https://www.googleapis.com/auth/script.container.ui",
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
-const DEPLOYMENT_VERSION                     = "20";
+const DEPLOYMENT_VERSION                     = "21";
 const DONATION_DATA_RANGE                    = "donation_data";
 const LAST_NAME_RANGE                        = "last_name";
 const EMAIL_ADDRESS_RANGE                    = "email_address";
@@ -494,13 +494,13 @@ function normalizePaypalData_(data, firstDataRow) {
         } 
 
         // Street address
-        row.push(streetAddress1);
+        row.push(normalizeStreetAddress_(streetAddress1));
 
         // City
-        row.push(normalizeString_(r[32]));
+        row.push(normalizeCity_(normalizeString_(r[32])));
 
         // State
-        row.push(normalizeString_(r[33]));
+        row.push(normalizeState_(normalizeString_(r[33])));
 
         // Zip code
         row.push(normalizeDonationZipcode_(r[34].trim()));
@@ -656,13 +656,13 @@ function normalizeCheckData_(data, firstDataRow) {
       row.push(emailAddress);
 
       // Street address
-      row.push(streetAddress);
+      row.push(normalizeStreetAddress_(streetAddress));
 
       // City
-      row.push(normalizeString_(r[12]));
+      row.push(normalizeCity_(normalizeString_(r[12])));
 
       // State
-      row.push(normalizeString_(r[13]));
+      row.push(normalizeState_(normalizeString_(r[13])));
 
       // Zip code
       row.push(zipCode);
@@ -718,9 +718,43 @@ function normalizeEmailAddress_(emailAddress) {
     while (!/[0-9a-zA-Z]$/.test(normalizedEmailAddress)) {
       normalizedEmailAddress = normalizedEmailAddress.slice(0, -1).trim();
     }
+
+    normalizedEmailAddress = normalizedEmailAddress.toLowerCase();
   }
 
   return normalizedEmailAddress;
+}
+
+function normalizeStreetAddress_(streetAddress) {
+  return normalizeAddressValue_(streetAddress);
+}
+
+function normalizeCity_(city) {
+  return normalizeAddressValue_(city);
+}
+
+function normalizeAddressValue_(value) {
+  let normalizedValue = value.toLowerCase().replaceAll(/[.,]/g, "").trim();
+  let valueParts      = normalizedValue.split(/\s+/);
+  let valueIndex      = 0;
+
+  normalizedValue = "";
+
+  valueParts.forEach(function(e) {
+    if (valueIndex > 0) {
+      normalizedValue += " ";  
+    }
+
+    normalizedValue += e.charAt(0).toUpperCase() + e.slice(1);
+
+    valueIndex++;
+  });
+
+  return normalizedValue;
+}
+
+function normalizeState_(state) {
+  return normalizeString_(state).toUpperCase();
 }
 
 function normalizeDonationZipcode_(zipCode) {
