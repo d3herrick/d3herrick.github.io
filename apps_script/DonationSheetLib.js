@@ -734,7 +734,7 @@ function normalizeCity_(city) {
 }
 
 function normalizeAddressValue_(value) {
-  let normalizedValue = value.toLowerCase().replaceAll(/[.,]/g, "").trim();
+  let normalizedValue = value.trim().toLowerCase().replaceAll(/[.,]/g, "");
   let valueParts      = normalizedValue.split(/\s+/);
   let valueIndex      = 0;
 
