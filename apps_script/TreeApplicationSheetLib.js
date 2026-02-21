@@ -105,7 +105,7 @@ function onSubmit(e) {
   let rowIndex    = e.range.getRow();
   let columnIndex = sheet.getRange(GROUP_NAME_RANGE).getColumn();
   let cellRange   = sheet.getRange(rowIndex, columnIndex);
-  let cellValue   = cellRange.getValue().toString().trim();
+  let cellValue   = normalizeString_(cellRange.getValue());
 
   if (cellValue.length > 0) {
     cellValue = cellValue.toLowerCase().
@@ -166,32 +166,32 @@ function onSubmit(e) {
   }
 
   let applicantContactDataRanges = [
-    sheet.getRange(rowIndex, sheet.getRange(FIRST_NAME_RANGE).getColumn()),
-    sheet.getRange(rowIndex, sheet.getRange(LAST_NAME_RANGE).getColumn()),
-    sheet.getRange(rowIndex, sheet.getRange(EMAIL_ADDRESS_RANGE).getColumn())
+    [sheet.getRange(rowIndex, sheet.getRange(FIRST_NAME_RANGE).getColumn()),    normalizeName_],
+    [sheet.getRange(rowIndex, sheet.getRange(LAST_NAME_RANGE).getColumn()),     normalizeName_],
+    [sheet.getRange(rowIndex, sheet.getRange(EMAIL_ADDRESS_RANGE).getColumn()), normalizeEmailAddress_]
   ];
   let planterContactDataRanges = [
-    sheet.getRange(rowIndex, sheet.getRange(PLANTER_FIRST_NAME_RANGE).getColumn()),
-    sheet.getRange(rowIndex, sheet.getRange(PLANTER_LAST_NAME_RANGE).getColumn()),
-    sheet.getRange(rowIndex, sheet.getRange(PLANTER_EMAIL_ADDRESS_RANGE).getColumn())
+    [sheet.getRange(rowIndex, sheet.getRange(PLANTER_FIRST_NAME_RANGE).getColumn()),    normalizeName_],
+    [sheet.getRange(rowIndex, sheet.getRange(PLANTER_LAST_NAME_RANGE).getColumn()),     normalizeName_],
+    [sheet.getRange(rowIndex, sheet.getRange(PLANTER_EMAIL_ADDRESS_RANGE).getColumn()), normalizeEmailAddress_]
   ];
 
   applicantContactDataRanges.forEach(function(r) {
-    r.setNumberFormat('@');
-    r.setValue(r.getValue().toString().trim());
+    r[0].setNumberFormat('@');
+    r[0].setValue(r[1](r[0].getValue()));
   });
   planterContactDataRanges.forEach(function(r) {
-    r.setNumberFormat('@');
-    r.setValue(r.getValue().toString().trim());
+    r[0].setNumberFormat('@');
+    r[0].setValue(r[1](r[0].getValue()));
   });
 
-  if (applicantContactDataRanges.every((e, i) => e.getValue().toString().toLowerCase() == planterContactDataRanges[i].getValue().toString().toLowerCase())) {
-    planterContactDataRanges.forEach((r) => r.setValue(""));
+  if (applicantContactDataRanges.every((e, i) => e[0].getValue().toString().toLowerCase() == planterContactDataRanges[i][0].getValue().toString().toLowerCase())) {
+    planterContactDataRanges.forEach((r) => r[0].setValue(""));
   }
 
   cellRange = sheet.getRange(rowIndex, sheet.getRange(STREET_ADDRESS_RANGE).getColumn());
   cellRange.setNumberFormat('@');
-  cellRange.setValue(normalizeStreetAddress_(cellRange.getValue().toString()));
+  cellRange.setValue(normalizeStreetAddress_(cellRange.getValue()));
   
   cellRange = sheet.getRange(rowIndex, sheet.getRange(NUMBER_OF_TREES_REQUESTED_RANGE).getColumn());
   cellValue = cellRange.getValue();
@@ -202,55 +202,51 @@ function onSubmit(e) {
 
   cellRange = sheet.getRange(rowIndex, sheet.getRange(TREE_LOCATIONS_RANGE).getColumn());
   cellRange.setNumberFormat('@');
-  cellRange.setValue(cellRange.getValue().toString().trim());
+  cellRange.setValue(normalizeString_(cellRange.getValue()));
 
   sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn()).setVerticalAlignment("top");
 
   columnIndex = sheet.getRange(EMAIL_ADDRESS_RANGE).getColumn();
   cellRange   = sheet.getRange(rowIndex, columnIndex);
-  cellValue   = cellRange.getValue();
+  cellRange.setNumberFormat('@');
+  cellValue = normalizeEmailAddress_(cellRange.getValue());
+  cellRange.setValue(cellValue);
 
-  if (cellValue != undefined) {
-    cellRange.setNumberFormat('@');
-    cellValue = normalizeEmailAddress_(cellValue);
-    cellRange.setValue(cellValue);
+  let hits = sheet.getDataRange().createTextFinder(cellValue).matchEntireCell(true).findAll();
 
-    let hits = sheet.getDataRange().createTextFinder(cellValue).matchEntireCell(true).findAll();
+  if (hits.length > 1) {
+    let markSet = [];
 
-    if (hits.length > 1) {
-      let markSet = [];
-
-      hits.forEach(function(h) {
-        if (h.getColumn() == columnIndex) {
-          markSet.push(h.getRow());
-        }
-      });
-
-      if (markSet.length > 1) {
-        markSet.forEach(function(r) {
-          sheet.getRange(r, 1, 1, sheet.getLastColumn()).setFontWeight("bold");
-        }
-      )};
-    }
-
-    let senderName   = sheet.getRange(APPL_ACK_EMAIL_SENDER_NAME_RANGE).getValue();
-    let replyTo      = sheet.getRange(APPL_ACK_EMAIL_REPLY_TO_RANGE).getValue();
-    let subject      = sheet.getRange(APPL_ACK_EMAIL_SUBJECT_RANGE).getValue();
-    let bodyTemplate = HtmlService.createTemplateFromFile(sheet.getRange(APPL_ACK_EMAIL_BODY_TEMPLATE_RANGE).getValue());
-
-    let body = bodyTemplate.evaluate().getContent();
-
-    MailApp.sendEmail(
-      cellValue,
-      subject,
-      null,
-      {
-        htmlBody: body,
-        replyTo : replyTo,
-        name    : senderName
+    hits.forEach(function(h) {
+      if (h.getColumn() == columnIndex) {
+        markSet.push(h.getRow());
       }
-    );
+    });
+
+    if (markSet.length > 1) {
+      markSet.forEach(function(r) {
+        sheet.getRange(r, 1, 1, sheet.getLastColumn()).setFontWeight("bold");
+      }
+    )};
   }
+
+  let senderName   = sheet.getRange(APPL_ACK_EMAIL_SENDER_NAME_RANGE).getValue();
+  let replyTo      = sheet.getRange(APPL_ACK_EMAIL_REPLY_TO_RANGE).getValue();
+  let subject      = sheet.getRange(APPL_ACK_EMAIL_SUBJECT_RANGE).getValue();
+  let bodyTemplate = HtmlService.createTemplateFromFile(sheet.getRange(APPL_ACK_EMAIL_BODY_TEMPLATE_RANGE).getValue());
+
+  let body = bodyTemplate.evaluate().getContent();
+
+  MailApp.sendEmail(
+    cellValue,
+    subject,
+    null,
+    {
+      htmlBody: body,
+      replyTo : replyTo,
+      name    : senderName
+    }
+  );
 }
 
 function onSetDefaultPlantingDate() {
@@ -347,8 +343,30 @@ function onAbout() {
     ui.ButtonSet.OK);
 }
 
+function normalizeString_(value) {
+  return value.toString().trim();
+}
+
+function normalizeName_(name) {
+  let normalizedName = normalizeString_(name);
+
+  if (normalizedName.search(/\s+/) != -1) {
+    let tokens = normalizedName.trim().split(/\s+/);
+  
+    tokens[0] = tokens[0].trim().toLowerCase();
+    normalizedName = tokens.join(" ");
+  }
+  else {
+    normalizedName = normalizedName.toLowerCase();
+  }
+
+  normalizedName = normalizedName.charAt(0).toUpperCase() + normalizedName.slice(1);
+
+  return normalizedName;
+}
+
 function normalizeEmailAddress_(emailAddress) {
-  let normalizedEmailAddress = emailAddress;
+  let normalizedEmailAddress = normalizeString_(emailAddress);
 
   if (normalizedEmailAddress.length > 0) {
     while (!/[0-9a-zA-Z]$/.test(normalizedEmailAddress)) {
@@ -362,21 +380,26 @@ function normalizeEmailAddress_(emailAddress) {
 }
 
 function normalizeStreetAddress_(streetAddress) {
-  let normalizedValue = streetAddress.replaceAll("\n", " ").trim().toLowerCase().replaceAll(/[.,]/g, "");
-  let valueParts      = normalizedValue.split(/\s+/);
-  let valueIndex      = 0;
+  let normalizedValue = normalizeString_(streetAddress);
+  
+  if (normalizedValue.length > 0) {
+    normalizedValue = normalizedValue.replaceAll("\n", " ").trim().toLowerCase().replaceAll(/[.,]/g, "");
 
-  normalizedValue = "";
+    let valueParts = normalizedValue.split(/\s+/);
+    let valueIndex = 0;
 
-  valueParts.forEach(function(e) {
-    if (valueIndex > 0) {
-      normalizedValue += " ";  
-    }
+    normalizedValue = "";
 
-    normalizedValue += e.charAt(0).toUpperCase() + e.slice(1);
+    valueParts.forEach(function(e) {
+      if (valueIndex > 0) {
+        normalizedValue += " ";  
+      }
 
-    valueIndex++;
-  });
+      normalizedValue += e.charAt(0).toUpperCase() + e.slice(1);
+
+      valueIndex++;
+    });
+  }
 
   return normalizedValue;
 }

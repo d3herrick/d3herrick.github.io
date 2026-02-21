@@ -734,21 +734,26 @@ function normalizeCity_(city) {
 }
 
 function normalizeAddressValue_(value) {
-  let normalizedValue = value.replaceAll("\n", " ").trim().toLowerCase().replaceAll(/[.,]/g, "");
-  let valueParts      = normalizedValue.split(/\s+/);
-  let valueIndex      = 0;
+  let normalizedValue = normalizeString_(value);
 
-  normalizedValue = "";
+  if (normalizedValue.length > 0) {
+    normalizedValue = value.replaceAll("\n", " ").trim().toLowerCase().replaceAll(/[.,]/g, "");
 
-  valueParts.forEach(function(e) {
-    if (valueIndex > 0) {
-      normalizedValue += " ";  
-    }
+    let valueParts = normalizedValue.split(/\s+/);
+    let valueIndex = 0;
 
-    normalizedValue += e.charAt(0).toUpperCase() + e.slice(1);
+    normalizedValue = "";
 
-    valueIndex++;
-  });
+    valueParts.forEach(function(e) {
+      if (valueIndex > 0) {
+        normalizedValue += " ";  
+      }
+
+      normalizedValue += e.charAt(0).toUpperCase() + e.slice(1);
+
+      valueIndex++;
+    });
+  }
 
   return normalizedValue;
 }
