@@ -105,8 +105,8 @@ function onSubmit(e) {
   let rowIndex = e.range.getRow();
   let rowRange = sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn());
 
-  rowRange.setVerticalAlignment("top");
   rowRange.clearFormat();
+  rowRange.setVerticalAlignment("top");
 
   let columnIndex = sheet.getRange(GROUP_NAME_RANGE).getColumn();
   let cellRange   = sheet.getRange(rowIndex, columnIndex);
