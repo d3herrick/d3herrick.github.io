@@ -208,9 +208,7 @@ function onSubmit(e) {
 
   columnIndex = sheet.getRange(EMAIL_ADDRESS_RANGE).getColumn();
   cellRange   = sheet.getRange(rowIndex, columnIndex);
-  cellRange.setNumberFormat('@');
-  cellValue = normalizeEmailAddress_(cellRange.getValue());
-  cellRange.setValue(cellValue);
+  cellValue   = cellRange.getValue();
 
   let hits = sheet.getDataRange().createTextFinder(cellValue).matchEntireCell(true).findAll();
 
