@@ -13,7 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                       = "33";
+const DEPLOYMENT_VERSION                       = "34";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
 const GROUP_NAME_RANGE                         = "group_name";
@@ -101,8 +101,13 @@ function onEdit(e) {
 }
 
 function onSubmit(e) {
-  let sheet       = e.range.getSheet();
-  let rowIndex    = e.range.getRow();
+  let sheet    = e.range.getSheet();
+  let rowIndex = e.range.getRow();
+  let rowRange = sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn());
+
+  rowRange.setVerticalAlignment("top");
+  rowRange.clearFormat();
+
   let columnIndex = sheet.getRange(GROUP_NAME_RANGE).getColumn();
   let cellRange   = sheet.getRange(rowIndex, columnIndex);
   let cellValue   = normalizeString_(cellRange.getValue());
@@ -151,11 +156,10 @@ function onSubmit(e) {
       groupLeaderTreeRecipientRange.setValue("");
     }
     else {
-      sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn()).setFontWeight("bold").setFontStyle("italic");
+      rowRange.setFontWeight("bold").setFontStyle("italic");
     }
   }
 
-  cellRange.setNumberFormat('@');
   cellRange.setValue(cellValue);
   
   let defaultPlantingDate = PropertiesService.getDocumentProperties().getProperty(DEFAULT_PLANTING_DATE_NAME_PROP);
@@ -177,11 +181,9 @@ function onSubmit(e) {
   ];
 
   applicantContactDataRanges.forEach(function(r) {
-    r[0].setNumberFormat('@');
     r[0].setValue(r[1](r[0].getValue()));
   });
   planterContactDataRanges.forEach(function(r) {
-    r[0].setNumberFormat('@');
     r[0].setValue(r[1](r[0].getValue()));
   });
 
@@ -190,7 +192,6 @@ function onSubmit(e) {
   }
 
   cellRange = sheet.getRange(rowIndex, sheet.getRange(STREET_ADDRESS_RANGE).getColumn());
-  cellRange.setNumberFormat('@');
   cellRange.setValue(normalizeStreetAddress_(cellRange.getValue()));
   
   cellRange = sheet.getRange(rowIndex, sheet.getRange(NUMBER_OF_TREES_REQUESTED_RANGE).getColumn());
@@ -201,10 +202,7 @@ function onSubmit(e) {
   }
 
   cellRange = sheet.getRange(rowIndex, sheet.getRange(TREE_LOCATIONS_RANGE).getColumn());
-  cellRange.setNumberFormat('@');
   cellRange.setValue(normalizeString_(cellRange.getValue()));
-
-  sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn()).setVerticalAlignment("top");
 
   columnIndex = sheet.getRange(EMAIL_ADDRESS_RANGE).getColumn();
   cellRange   = sheet.getRange(rowIndex, columnIndex);
