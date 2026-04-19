@@ -19,7 +19,7 @@
 //                 "https://www.googleapis.com/auth/script.container.ui",
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
-const DEPLOYMENT_VERSION                     = "21";
+const DEPLOYMENT_VERSION                     = "22";
 const DONATION_DATA_RANGE                    = "donation_data";
 const LAST_NAME_RANGE                        = "last_name";
 const EMAIL_ADDRESS_RANGE                    = "email_address";
@@ -420,22 +420,27 @@ function normalizePaypalData_(data, firstDataRow) {
         row.push(normalizeDonationDate_(r[0]));
 
         // Shipping address tokenizes the its fields, including first and last "name", so it's the preferred source for those values
-        let shippingAddress = r[13].trim();
+        let shippingAddress = normalizeString_(r[13]);
+        let name            = normalizeString_(r[3]);
         let lastName        = "";
         let firstName       = "";
 
         if (shippingAddress.length > 0) {
           let tokens = shippingAddress.split(/\s*,\s*/)
 
+          if (tokens[0] == name) {
+            tokens = name.split(/\s+/);
+          }
+
           lastName  = tokens[1];
           firstName = tokens[0];
         }
         else if (donationType == PAYPAL_MASS_PAYMENT) {
-          lastName  = r[3].trim();
+          lastName  = name;
           firstName = "";
         }
         else {
-          let tokens = r[3].trim().split(/\s+/);
+          let tokens = name.split(/\s+/);
 
           if (tokens.length > 1) {
             lastName  = tokens[tokens.length - 1].trim();
