@@ -22,6 +22,7 @@
 const DEPLOYMENT_VERSION                     = "23";
 const DONATION_DATA_RANGE                    = "donation_data";
 const LAST_NAME_RANGE                        = "last_name";
+const FIRST_NAME_RANGE                       = "first_name";
 const EMAIL_ADDRESS_RANGE                    = "email_address";
 const STREET_ADDRESS_RANGE                   = "street_address";
 const ZIP_CODE_RANGE                         = "zip_code";
@@ -574,7 +575,6 @@ function normalizeCheckData_(data, firstDataRow) {
       let row = [];
 
       // search keys for possible email address lookup
-      let searchName    = "";
       let emailAddress  = normalizeEmailAddress_(r[10]);
       let streetAddress = normalizeString_(r[11]);
       let zipCode       = normalizeDonationZipcode_(r[14]);
@@ -588,14 +588,9 @@ function normalizeCheckData_(data, firstDataRow) {
       let lastName  = normalizeString_(r[1]);
       let firstName = normalizeString_(r[2]);
 
-      searchName = lastName;
-
       if (firstName.length == 0) {
         firstName = lastName;
         lastName  = "";
-      }
-      else if (lastName.length == 0) {
-        searchName = firstName;
       }
 
       // Last name
@@ -654,6 +649,7 @@ function normalizeCheckData_(data, firstDataRow) {
             let streetAddressColumn = sheet.getRange(STREET_ADDRESS_RANGE).getColumn();
             let zipCodeColumn       = sheet.getRange(ZIP_CODE_RANGE).getColumn();
             let lastNameColumn      = sheet.getRange(LAST_NAME_RANGE).getColumn();
+            let firstNameColumn     = sheet.getRange(FIRST_NAME_RANGE).getColumn();
 
             for (const h of hits) {
               if (h.getColumn() == streetAddressColumn) {
@@ -661,8 +657,17 @@ function normalizeCheckData_(data, firstDataRow) {
                 let op2 = zipCode.slice(0, 5);
 
                 if (op1 == op2) {
-                  op1 = sheet.getRange(h.getRow(), lastNameColumn).getValue();
-                  op2 = lastName;
+                  if (lastName.length > 0) {
+                    op1 = sheet.getRange(h.getRow(), lastNameColumn).getValue();
+                    op2 = lastName;
+                  }
+                  else if (firstName.length > 0) {
+                    op1 = sheet.getRange(h.getRow(), firstNameColumn).getValue();
+                    op2 = firstName;
+                  }
+                  else {
+                    continue;
+                  }
 
                   if (op1 == op2) {
                     emailAddress = sheet.getRange(h.getRow(), emailAddressColumn).getValue();
