@@ -44,16 +44,20 @@ P.O. Box 233
 <?!=Intl.DateTimeFormat("en-US", {year: 'numeric', month: 'long', day: 'numeric'}).format(Date.now())?>
 </p>
 <p>
+<? let fullName = firstName; ?>
+<? if (lastName.length > 0) { ?>
+<? fullName += ' ' + lastName; ?>
+<? } ?>
 <? let salutationTokens = []; ?>
 <? if (salutation.length > 0) { ?>
 <? salutationTokens = salutation.split(/\s+/); ?>
 <? if (salutationTokens.length == 1) { ?>
 <?!=firstName?> and <?!=salutation?> <?!=lastName?>
 <? } else if (salutationTokens.length >= 2) { ?>
-<?!=firstName?> <?!=lastName?> and <?!=salutation?>
+<?!=fullName?> and <?!=salutation?>
 <? } ?>
 <? } else { ?>
-<?!=firstName?> <?!=lastName?>
+<?!=fullName?>
 <? } ?>
 <? if (streetAddress.length > 0) { ?>
 <br><?!=streetAddress?>
@@ -130,9 +134,9 @@ For tax purposes, this letter is an acknowledgement of your donation to Newton T
 <? if (salutationTokens.length == 1) { ?>
 <?!=firstName?> and <?!=salutation?> <?!=lastName?>
 <? } else if (salutationTokens.length >= 2) { ?>
-<?!=firstName?> <?!=lastName?> and <?!=salutation?>
+<?!=fullName?> and <?!=salutation?>
 <? } else { ?>
-<?!=firstName?> <?!=lastName?>
+<?!=fullName?>
 <? } ?>
 <br><?!=streetAddress?>
 <br><?!=city?>, <?!=state?>, <?!=zipCode?>

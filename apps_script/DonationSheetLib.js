@@ -19,7 +19,7 @@
 //                 "https://www.googleapis.com/auth/script.container.ui",
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
-const DEPLOYMENT_VERSION                     = "22";
+const DEPLOYMENT_VERSION                     = "23";
 const DONATION_DATA_RANGE                    = "donation_data";
 const LAST_NAME_RANGE                        = "last_name";
 const EMAIL_ADDRESS_RANGE                    = "email_address";
@@ -419,7 +419,7 @@ function normalizePaypalData_(data, firstDataRow) {
         // Donation date
         row.push(normalizeDonationDate_(r[0]));
 
-        // Shipping address tokenizes the its fields, including first and last "name", so it's the preferred source for those values
+        // Shipping address tokenizes its fields, including first and last "name", so it's the preferred source for those values
         let shippingAddress = normalizeString_(r[13]);
         let name            = normalizeString_(r[3]);
         let lastName        = "";
@@ -452,11 +452,19 @@ function normalizePaypalData_(data, firstDataRow) {
           }
         }
 
+        lastName  = normalizeName_(lastName);
+        firstName = normalizeName_(firstName);
+
+        if (firstName.length == 0) {
+          firstName = lastName;
+          lastName  = "";
+        }
+
         // Last name
-        row.push(normalizeName_(lastName));
+        row.push(lastName);
 
         // First name
-        row.push(normalizeName_(firstName));
+        row.push(firstName);
 
         // Salutation/Other names
         row.push("");
@@ -565,8 +573,8 @@ function normalizeCheckData_(data, firstDataRow) {
     if (!isEmptyRow_(r)) {
       let row = [];
 
-      // gather search keys for possible email address lookup
-      let lastName      = normalizeString_(r[1]);
+      // search keys for possible email address lookup
+      let searchName    = "";
       let emailAddress  = normalizeEmailAddress_(r[10]);
       let streetAddress = normalizeString_(r[11]);
       let zipCode       = normalizeDonationZipcode_(r[14]);
@@ -577,11 +585,24 @@ function normalizeCheckData_(data, firstDataRow) {
       // Donation date
       row.push(normalizeDonationDate_(r[0]));
 
+      let lastName  = normalizeString_(r[1]);
+      let firstName = normalizeString_(r[2]);
+
+      searchName = lastName;
+
+      if (firstName.length == 0) {
+        firstName = lastName;
+        lastName  = "";
+      }
+      else if (lastName.length == 0) {
+        searchName = firstName;
+      }
+
       // Last name
       row.push(lastName);
 
       // First name
-      row.push(normalizeString_(r[2]));
+      row.push(firstName);
 
       // Salutation/Other names
       row.push(normalizeString_(r[3]));
@@ -1016,11 +1037,19 @@ function normalizeRollupData_(data, firstDataRow) {
       // Donation date
       row.push(normalizeDonationDate_(r[0]));
 
+      let lastName  = normalizeString_(r[1]);
+      let firstName = normalizeString_(r[2]);
+
+      if (firstName.length == 0) {
+        firstName = lastName;
+        lastName  = "";
+      }
+
       // Last name
-      row.push(normalizeString_(r[1]));
+      row.push(lastName);
 
       // First name
-      row.push(normalizeString_(r[2]));
+      row.push(firstName);
 
       // Salutation/Other names
       row.push("");
