@@ -43,7 +43,6 @@ const ANNUAL_DONATION_ROLLUPS_SUBJECT_RANGE  = "annual_donation_rollups_subject"
 const NTC_FIRST_DATA_ROW_RANGE               = "ntc_first_data_row";
 const PAYPAL_FIRST_DATA_ROW_RANGE            = "paypal_first_data_row";
 const ADDRESS_JOIN_SEPARATOR                 = ", ";
-const ANONYMOUS_DONATION_TAG                 = "Anonymous";
 const RECURRING_ROLLUP_TRIGGER_DATE_TEMPLATE = new Date(1970, 0, 15, 9, 0, 0);
 const PAYPAL_FILE_PREFIX                     = "paypal";
 const PAYPAL_FILE_FIELD_COUNT                = 41;
@@ -462,9 +461,6 @@ function normalizePaypalData_(data, firstDataRow) {
             firstName = lastName;
             lastName  = "";
           }
-          else {
-            lastName = ANONYMOUS_DONATION_TAG;
-          }
         }
 
         // Last name
@@ -598,9 +594,6 @@ function normalizeCheckData_(data, firstDataRow) {
         if (lastName.length > 0) {
           firstName = lastName;
           lastName  = "";
-        }
-        else {
-          lastName = ANONYMOUS_DONATION_TAG;
         }
       }
 
@@ -1247,7 +1240,7 @@ function isMatchingDonation_(donationObject) {
 }
 
 function isAnonymousDonation_(donationObject) {
-  return (donationObject.lastName.toLowerCase() == ANONYMOUS_DONATION_TAG.toLowerCase());
+  return ((donationObject.firstName.length == 0) && (donationObject.lastName.length == 0));
 }
 
 function sortPendingFiles_(unsortedFiles) {
