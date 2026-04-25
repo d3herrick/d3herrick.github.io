@@ -1042,19 +1042,11 @@ function normalizeRollupData_(data, firstDataRow) {
       // Donation date
       row.push(normalizeDonationDate_(r[0]));
 
-      let lastName  = normalizeString_(r[1]);
-      let firstName = normalizeString_(r[2]);
-
-      if (firstName.length == 0) {
-        firstName = lastName;
-        lastName  = "";
-      }
-
       // Last name
-      row.push(lastName);
+      row.push(normalizeString_(r[1]));
 
       // First name
-      row.push(firstName);
+      row.push(normalizeString_(r[2]));
 
       // Salutation/Other names
       row.push("");
