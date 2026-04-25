@@ -19,7 +19,7 @@
 //                 "https://www.googleapis.com/auth/script.container.ui",
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
-const DEPLOYMENT_VERSION                     = "23";
+const DEPLOYMENT_VERSION                     = "24";
 const DONATION_DATA_RANGE                    = "donation_data";
 const LAST_NAME_RANGE                        = "last_name";
 const FIRST_NAME_RANGE                       = "first_name";
@@ -30,6 +30,7 @@ const PENDING_FOLDER_RANGE                   = "pending_folder";
 const IMPORTED_FOLDER_RANGE                  = "imported_folder";
 const ACK_FOLDER_RANGE                       = "acknowledgement_folder";
 const ZIPCODE_MINIMUM_LENGTH                 = 5;
+const DONOR_NOT_NAMED                        = "Unnamed";
 const PROCESSING_EMAIL_DIST_LIST_RANGE       = "processing_email_dist_list"
 const PROCESSING_EMAIL_SENDER_NAME_RANGE     = "processing_email_sender_name"
 const PROCESSING_EMAIL_REPLY_TO_RANGE        = "processing_email_reply_to";
@@ -42,7 +43,7 @@ const ANNUAL_DONATION_ROLLUPS_SUBJECT_RANGE  = "annual_donation_rollups_subject"
 const NTC_FIRST_DATA_ROW_RANGE               = "ntc_first_data_row";
 const PAYPAL_FIRST_DATA_ROW_RANGE            = "paypal_first_data_row";
 const ADDRESS_JOIN_SEPARATOR                 = ", ";
-const ANONYMOUS_DONATION_TAG                 = "anonymous";
+const ANONYMOUS_DONATION_TAG                 = "Anonymous";
 const RECURRING_ROLLUP_TRIGGER_DATE_TEMPLATE = new Date(1970, 0, 15, 9, 0, 0);
 const PAYPAL_FILE_PREFIX                     = "paypal";
 const PAYPAL_FILE_FIELD_COUNT                = 41;
@@ -457,8 +458,13 @@ function normalizePaypalData_(data, firstDataRow) {
         firstName = normalizeName_(firstName);
 
         if (firstName.length == 0) {
-          firstName = lastName;
-          lastName  = "";
+          if (lastName.length > 0) {
+            firstName = lastName;
+            lastName  = "";
+          }
+          else {
+            lastName = ANONYMOUS_DONATION_TAG;
+          }
         }
 
         // Last name
@@ -589,8 +595,13 @@ function normalizeCheckData_(data, firstDataRow) {
       let firstName = normalizeString_(r[2]);
 
       if (firstName.length == 0) {
-        firstName = lastName;
-        lastName  = "";
+        if (lastName.length > 0) {
+          firstName = lastName;
+          lastName  = "";
+        }
+        else {
+          lastName = ANONYMOUS_DONATION_TAG;
+        }
       }
 
       // Last name
@@ -886,7 +897,7 @@ function generateDonationAcks_(sheet, ackFolder) {
       let donationObject    = toDonationObject_(donationRange.getValues()[0]);
       let ackProcessedRange = sheet.getRange(a[0], ntcFirstDataColumn);
 
-      if (isDonationAddressed_(donationObject)) {
+      if (isDonationAddressed_(donationObject) && !isAnonymousDonation_(donationObject)) {
         bodyTemplate.donationDate  = donationObject.donationDate;
         bodyTemplate.lastName      = donationObject.lastName;
         bodyTemplate.firstName     = donationObject.firstName;
@@ -1113,10 +1124,21 @@ function sendEmailAck_(donationObject, bodyTemplate, emailProperties) {
 function createDocumentAck_(donationObject, bodyTemplate, ackFolder) {
   bodyTemplate.isDocumentAck = true;
 
-  let body = bodyTemplate.evaluate().getContent();
+  let docPrefix = "";
 
-  let docName = `${donationObject.lastName}_${donationObject.firstName}_${Intl.DateTimeFormat("en-US").format(donationObject.donationDate)}.pdf`;
-  let docBlob = Utilities.newBlob(body, MimeType.HTML).getAs(MimeType.PDF).setName(docName);
+  if (donationObject.lastName.length > 0) {
+    docPrefix += donationObject.lastName + "_";
+  }
+
+  if (donationObject.firstName.length > 0) {
+    docPrefix += donationObject.firstName + "_";
+  }
+
+  docPrefix = docPrefix.replaceAll(" ", "_");
+
+  let docBody = bodyTemplate.evaluate().getContent();
+  let docName = `${docPrefix}${Intl.DateTimeFormat("en-US").format(donationObject.donationDate)}.pdf`;
+  let docBlob = Utilities.newBlob(docBody, MimeType.HTML).getAs(MimeType.PDF).setName(docName);
   let docFile = DriveApp.createFile(docBlob);
 
   docFile.moveTo(ackFolder);
@@ -1225,7 +1247,7 @@ function isMatchingDonation_(donationObject) {
 }
 
 function isAnonymousDonation_(donationObject) {
-  return (donationObject.lastName.toLowerCase() == ANONYMOUS_DONATION_TAG);
+  return (donationObject.lastName.toLowerCase() == ANONYMOUS_DONATION_TAG.toLowerCase());
 }
 
 function sortPendingFiles_(unsortedFiles) {
