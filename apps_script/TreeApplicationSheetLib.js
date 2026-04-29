@@ -297,50 +297,57 @@ function onArchiveDataForPlantingDate() {
     let plantingDate = response.getResponseText();
 
     if ((plantingDate != null) && (plantingDate.trim().length > 0)) {
-      let file   = SpreadsheetApp.getActiveSpreadsheet();
-      let range  = file.getRange(FORM_DATA_RANGE);
-      let sheet  = range.getSheet();
-      let index  = file.getRange(PLANTING_DATE_RANGE).getColumn() - 1;
-      let srcRow = sheet.getRange(HEADER_ROW_RANGE).getRow();
+      let file     = SpreadsheetApp.getActiveSpreadsheet();
+      let index    = file.getRange(PLANTING_DATE_RANGE).getColumn() - 1;
+      let srcRange = file.getRange(FORM_DATA_RANGE);
+      let srcSheet = srcRange.getSheet();
+      let srcRow   = srcSheet.getRange(HEADER_ROW_RANGE).getRow();
+      let srcName  = srcSheet.getName();
+      let dstName  = `${plantingDate} Archive`;
         
-      let appData     = range.getValues();
-      let archiveData = appData.filter(row => row[index] === plantingDate);
-      let currentData = appData.filter(row => row[index] !== plantingDate);
+      let appData = srcRange.getValues();
+      let srcData = appData.filter(row => row[index] !== plantingDate);
+      let dstData = appData.filter(row => row[index] === plantingDate);
 
-      if (archiveData.length > 0) {
-        let archive = file.insertSheet(`${plantingDate} Archive`, file.getSheets().length);
+      if (dstData.length > 0) {
+        let dstSheet = file.insertSheet(dstName, file.getSheets().length);
         
-        sheet.getRange(srcRow, 1, 1, sheet.getLastColumn()).copyTo(archive.getRange("A1"));
-        range.copyFormatToRange(archive, 1, archiveData[0].length, 2, archiveData.length);
-        archive.getRange(archive.getLastRow() + 1, 1, archiveData.length, archiveData[0].length).setValues(archiveData);
-        range.clear();
+        srcSheet.getRange(srcRow, 1, 1, srcSheet.getLastColumn()).copyTo(dstSheet.getRange("A1"));
+        srcRange.copyFormatToRange(dstSheet, 1, dstData[0].length, 2, dstData.length);
+        dstSheet.getRange(dstSheet.getLastRow() + 1, 1, dstData.length, dstData[0].length).setValues(dstData);
+        srcRange.clear();
 
-        if (currentData.length > 0) {
-          sheet.getRange(range.getRow(), 1, currentData.length, currentData[0].length).setValues(currentData);
+        if (srcData.length > 0) {
+          srcSheet.getRange(srcRange.getRow(), 1, srcData.length, srcData[0].length).setValues(srcData);
         }
       }
 
       let queryRollupRange = SpreadsheetApp.getActiveSpreadsheet().getRange(ALL_REQUESTS_BY_ZIP_CODE_QUERY_RANGE);
       let query            = queryRollupRange.getFormula();
-      let currentDataRef   = `'Form Data'!${ALL_REQUESTS_BY_ZIP_CODE_QUERY_REF};`;
-      let archiveDataRef   = `'${plantingDate} Archive'!${ALL_REQUESTS_BY_ZIP_CODE_QUERY_REF};`;
+      let srcDataRef       = `'${srcName}'!${ALL_REQUESTS_BY_ZIP_CODE_QUERY_REF};`;
+      let dstDataRef       = `'${dstName}'!${ALL_REQUESTS_BY_ZIP_CODE_QUERY_REF};`;
 
-      queryRollupRange.setFormula(query.replace(currentDataRef, currentDataRef + archiveDataRef));
+      queryRollupRange.setFormula(query.replace(srcDataRef, srcDataRef + dstDataRef));
 
-      let rootSpreadsheetFolderRange = file.getRange(ROOT_SPREADSHEET_FOLDER_RANGE);
+      let rootFolder      = DriveApp.getFolderById(file.getRange(ROOT_SPREADSHEET_FOLDER_RANGE).getValue());
+      let plantingFolders = rootFolder.getFoldersByName(plantingDate);
 
-      let rootFolder = DriveApp.getFolderById(rootSpreadsheetFolderRange.getValue());
-      let folders    = rootFolder.getFoldersByName(plantingDate);
+      if (plantingFolders.hasNext()) {
+        let plantingFolder = plantingFolders.next();
+        let plantingFiles  = plantingFolder.getFiles();
 
-      if (folders.hasNext()) {
-        let plantingDateFolder = folders.next();
+        while (plantingFiles.hasNext()) {
+          SpreadsheetApp.open(files.next());
+        }
 
-        setPermission(plantingDateFolder, SET_LIMITED_ACCESS);
-        plantingDateFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        SpreadsheetApp.flush();
+
+        setPermission(plantingFolder, SET_LIMITED_ACCESS);
+        plantingFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
       }
 
       ui.alert(COUNT_OF_ROWS_ARCHIVED_TITLE,
-        `Number of rows archived for ${plantingDate} is ${archiveData.length}.`,
+        `Number of rows archived for ${plantingDate} is ${dstData.length}.`,
         ui.ButtonSet.OK);
     }
   }
