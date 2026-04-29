@@ -19,7 +19,7 @@
 //                 "https://www.googleapis.com/auth/script.container.ui",
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
-const DEPLOYMENT_VERSION                     = "24";
+const DEPLOYMENT_VERSION                     = "25";
 const DONATION_DATA_RANGE                    = "donation_data";
 const LAST_NAME_RANGE                        = "last_name";
 const FIRST_NAME_RANGE                       = "first_name";
@@ -126,148 +126,122 @@ function onScheduledGenerateRecurringDonationRollups(e) {
 }
 
 function onImportDonationData(displayResult = true, emailResult = true) {
-  let sheet          = getDonationDataSheet_();
-  let pendingFolder  = null;
-  let importedFolder = null;
+  let sheet = getDonationDataSheet_();
 
-  let pendingFolderRange = sheet.getRange(PENDING_FOLDER_RANGE);
-
-  if (pendingFolderRange != undefined) {
-    pendingFolder = DriveApp.getFolderById(pendingFolderRange.getValue());
-  }
-  else {
-    throw Error(`${PENDING_FOLDER_RANGE} named range is not defined`);
-  }
-
+  let pendingFolderRange  = sheet.getRange(PENDING_FOLDER_RANGE);
+  let pendingFolder       = DriveApp.getFolderById(pendingFolderRange.getValue());
   let importedFolderRange = sheet.getRange(IMPORTED_FOLDER_RANGE);
+  let importedFolder      = DriveApp.getFolderById(importedFolderRange.getValue());
 
-  if (importedFolderRange != undefined) {
-    importedFolder = DriveApp.getFolderById(importedFolderRange.getValue());
-  }
-  else {
-    throw Error(`${IMPORTED_FOLDER_RANGE} named range is not defined`);
-  }
+  let stats  = importPendingFiles_(sheet, pendingFolder, importedFolder);
+  let result = "";
 
-  if ((pendingFolder != null) && (importedFolder != null)) {
-    let stats  = importPendingFiles_(sheet, pendingFolder, importedFolder);
-    let result = "";
+  if (stats.length > 0) {
+    result = `<p style="${STYLE_STANDARD_FONT}">The following files (total/payments) were imported:</p>`;
 
-    if (stats.length > 0) {
-      result = `<p style="${STYLE_STANDARD_FONT}">The following files (total/payments) were imported:</p>`;
+    result += "<ul>"
 
-      result += "<ul>"
+    let paymentNoteCount = 0;
 
-      let paymentNoteCount = 0;
+    stats.forEach(function(s) {
+      result += `<li style="${STYLE_MONOSPACED_FONT}">${s.fileStats[1]} (${s.fileStats[2]}/${s.fileStats[3]})</li>`;
+
+      paymentNoteCount += s.paymentNotes.length;
+    });
+
+    result += "</ul>"
+
+    if (paymentNoteCount > 0) {
+      result += 
+        `<p><p style="${STYLE_STANDARD_FONT}">The following donations included a payment note:</p></p>
+        <p>
+        <table style="${STYLE_STANDARD_FONT};${STYLE_TABLE}">
+        <tr>
+        <th style="${STYLE_TABLE_HEADER_CELL};${STYLE_NO_WRAP}">Donation date
+        <th style="${STYLE_TABLE_HEADER_CELL};">Last name
+        <th style="${STYLE_TABLE_HEADER_CELL};">First name
+        <th style="${STYLE_TABLE_HEADER_CELL};">Payment note
+        </tr>`;
 
       stats.forEach(function(s) {
-        result += `<li style="${STYLE_MONOSPACED_FONT}">${s.fileStats[1]} (${s.fileStats[2]}/${s.fileStats[3]})</li>`;
-
-        paymentNoteCount += s.paymentNotes.length;
+        if (s.paymentNotes.length > 0) {
+          s.paymentNotes.forEach(function (n) {
+            result +=
+              `<tr>
+              <td style="${STYLE_TABLE_ROW_CELL}">${n[0]}</td>
+              <td style="${STYLE_TABLE_ROW_CELL}">${n[1]}</td>
+              <td style="${STYLE_TABLE_ROW_CELL}">${n[2]}</td>
+              <td style="${STYLE_TABLE_ROW_CELL}">${n[3]}</td>
+              </tr>`;
+          });
+        }
       });
 
-      result += "</ul>"
-
-      if (paymentNoteCount > 0) {
-        result += 
-          `<p><p style="${STYLE_STANDARD_FONT}">The following donations included a payment note:</p></p>
-          <p>
-          <table style="${STYLE_STANDARD_FONT};${STYLE_TABLE}">
-          <tr>
-          <th style="${STYLE_TABLE_HEADER_CELL};${STYLE_NO_WRAP}">Donation date
-          <th style="${STYLE_TABLE_HEADER_CELL};">Last name
-          <th style="${STYLE_TABLE_HEADER_CELL};">First name
-          <th style="${STYLE_TABLE_HEADER_CELL};">Payment note
-          </tr>`;
-
-        stats.forEach(function(s) {
-          if (s.paymentNotes.length > 0) {
-            s.paymentNotes.forEach(function (n) {
-              result +=
-                `<tr>
-                <td style="${STYLE_TABLE_ROW_CELL}">${n[0]}</td>
-                <td style="${STYLE_TABLE_ROW_CELL}">${n[1]}</td>
-                <td style="${STYLE_TABLE_ROW_CELL}">${n[2]}</td>
-                <td style="${STYLE_TABLE_ROW_CELL}">${n[3]}</td>
-                </tr>`;
-            });
-          }
-        });
-
-        result += 
-          `</table>
-          </p>`;
-      }
-
-      if (emailResult) {
-        sendEmailProcessingResult_(sheet, sheet.getRange(IMPORT_RESULT_EMAIL_SUBJECT_RANGE).getValue(), result);
-      }
-    }
-    else {
-      result = `<p style="${STYLE_STANDARD_FONT}">No files were pending import.</p>`;
+      result += 
+        `</table>
+        </p>`;
     }
 
-    if (displayResult) {
-      displayProcessingResult_(IMPORT_DONATION_DATA_TITLE, result);
+    if (emailResult) {
+      sendEmailProcessingResult_(sheet, sheet.getRange(IMPORT_RESULT_EMAIL_SUBJECT_RANGE).getValue(), result);
     }
+  }
+  else {
+    result = `<p style="${STYLE_STANDARD_FONT}">No files were pending import.</p>`;
+  }
+
+  if (displayResult) {
+    displayProcessingResult_(IMPORT_DONATION_DATA_TITLE, result);
   }
 }
 
 function onGenerateDonationAcks(displayResult = true, emailResult = true) {
-  let sheet     = getDonationDataSheet_();
-  let ackFolder = null;
+  let sheet = getDonationDataSheet_();
 
   let ackFolderRange = sheet.getRange(ACK_FOLDER_RANGE);
+  let ackFolder      = DriveApp.getFolderById(ackFolderRange.getValue());
 
-  if (ackFolderRange != undefined) {
-    ackFolder = DriveApp.getFolderById(ackFolderRange.getValue());
-  }
-  else {
-    throw Error(`${ACK_FOLDER_RANGE} named range is not defined`);
-  }
+  let stats  = generateDonationAcks_(sheet, ackFolder)
+  let result = "";
 
-  if (ackFolder != null) {
-    let stats  = generateDonationAcks_(sheet, ackFolder)
-    let result = "";
+  if (stats.ackStats.length > 0) {
+    result = `<p style="${STYLE_STANDARD_FONT}">The following counts were recorded while processing donation acknowledgements:</p>`;
 
-    if (stats.ackStats.length > 0) {
-      result = `<p style="${STYLE_STANDARD_FONT}">The following counts were recorded while processing donation acknowledgements:</p>`;
+    result += "<ul>"
+
+    result += `<li style="${STYLE_MONOSPACED_FONT}">Total donations processed........: ${stats.ackStats[0]}</li>`;
+    result += `<li style="${STYLE_MONOSPACED_FONT}">Email acknowledgements sent......: ${stats.ackStats[1]}</li>`;
+    result += `<li style="${STYLE_MONOSPACED_FONT}">Document acknowledgements created: ${stats.ackStats[2]}</li>`;
+    result += `<li style="${STYLE_MONOSPACED_FONT}">Recurring donations skipped......: ${stats.ackStats[3]}</li>`;
+    result += `<li style="${STYLE_MONOSPACED_FONT}">Unaddressed donations skipped....: ${stats.ackStats[4]}</li>`;
+    result += `<li style="${STYLE_MONOSPACED_FONT}">Anonymous donations skipped......: ${stats.ackStats[5]}</li>`;
+
+    result += "</ul>"
+
+    let execErrors = stats.ackStats[6];
+
+    if (execErrors.length > 0) {
+      result += `<p style="${STYLE_STANDARD_FONT}">The following errors were encountered:</p>`;
 
       result += "<ul>"
 
-      result += `<li style="${STYLE_MONOSPACED_FONT}">Total donations processed........: ${stats.ackStats[0]}</li>`;
-      result += `<li style="${STYLE_MONOSPACED_FONT}">Email acknowledgements sent......: ${stats.ackStats[1]}</li>`;
-      result += `<li style="${STYLE_MONOSPACED_FONT}">Document acknowledgements created: ${stats.ackStats[2]}</li>`;
-      result += `<li style="${STYLE_MONOSPACED_FONT}">Recurring donations skipped......: ${stats.ackStats[3]}</li>`;
-      result += `<li style="${STYLE_MONOSPACED_FONT}">Unaddressed donations skipped....: ${stats.ackStats[4]}</li>`;
-      result += `<li style="${STYLE_MONOSPACED_FONT}">Anonymous donations skipped......: ${stats.ackStats[5]}</li>`;
+      execErrors.forEach(function(e) {
+        result += `<li style="${STYLE_MONOSPACED_FONT}">${e}</li>`;
+      });
 
       result += "</ul>"
-
-      let execErrors = stats.ackStats[6];
-
-      if (execErrors.length > 0) {
-        result += `<p style="${STYLE_STANDARD_FONT}">The following errors were encountered:</p>`;
-
-        result += "<ul>"
-
-        execErrors.forEach(function(e) {
-          result += `<li style="${STYLE_MONOSPACED_FONT}">${e}</li>`;
-        });
-
-        result += "</ul>"
-      }
-
-      if (emailResult) {
-        sendEmailProcessingResult_(sheet, sheet.getRange(ACK_RESULT_EMAIL_SUBJECT_RANGE).getValue(), result);
-      }
-    }
-    else {
-      result = `<p style="${STYLE_STANDARD_FONT}">No donations were pending processing.</p>`;
     }
 
-    if (displayResult) {
-      displayProcessingResult_(GENERATE_DONATION_ACKS_DATA_TITLE, result);
+    if (emailResult) {
+      sendEmailProcessingResult_(sheet, sheet.getRange(ACK_RESULT_EMAIL_SUBJECT_RANGE).getValue(), result);
     }
+  }
+  else {
+    result = `<p style="${STYLE_STANDARD_FONT}">No donations were pending processing.</p>`;
+  }
+
+  if (displayResult) {
+    displayProcessingResult_(GENERATE_DONATION_ACKS_DATA_TITLE, result);
   }
 }
 
@@ -313,29 +287,13 @@ function onAbout() {
 }
 
 function importPendingFiles_(sheet, pendingFolder, importedFolder) {
-  let ntcFirstDataRow    = undefined;
-  let ntcFirstDataColumn = 1;
-
   let ntcFirstDataRowRange = sheet.getRange(NTC_FIRST_DATA_ROW_RANGE);
-
-  if (ntcFirstDataRowRange != undefined) {
-    ntcFirstDataRow = ntcFirstDataRowRange.getValue();
-  }
-  else {
-    throw Error(`${NTC_FIRST_DATA_ROW_RANGE} named range is not defined`);
-  }  
-
-  let paypalFirstDataRow    = undefined;
-  let paypalFirstDataColumn = 1;
+  let ntcFirstDataRow      = ntcFirstDataRowRange.getValue();
+  let ntcFirstDataColumn   = 1;
 
   let paypalFirstDataRowRange = sheet.getRange(PAYPAL_FIRST_DATA_ROW_RANGE);
-
-  if (paypalFirstDataRowRange != undefined) {
-    paypalFirstDataRow = paypalFirstDataRowRange.getValue();
-  }
-  else {
-    throw Error(`${PAYPAL_FIRST_DATA_ROW_RANGE} named range is not defined`);
-  }
+  let paypalFirstDataRow      = paypalFirstDataRowRange.getValue();
+  let paypalFirstDataColumn = 1;
 
   let stats = [];
 
@@ -843,17 +801,9 @@ function tabulatePaymentNotes_(donations) {
 }
 
 function generateDonationAcks_(sheet, ackFolder) {
-  let ntcFirstDataRow    = undefined;
-  let ntcFirstDataColumn = 1;
-
   let ntcFirstDataRowRange = sheet.getRange(NTC_FIRST_DATA_ROW_RANGE);
-
-  if (ntcFirstDataRowRange != undefined) {
-    ntcFirstDataRow = ntcFirstDataRowRange.getValue();
-  }
-  else {
-    throw Error(`${NTC_FIRST_DATA_ROW_RANGE} named range is not defined`);
-  }
+  let ntcFirstDataRow      = ntcFirstDataRowRange.getValue();
+  let ntcFirstDataColumn   = 1;
 
   let spreadsheet   = sheet.getParent();
   let range         = sheet.getDataRange();
@@ -991,17 +941,9 @@ function generateDonationAcks_(sheet, ackFolder) {
 function generateRecurringDonationRollups_(sheet) {
   let aOkay = true;
 
-  let ntcFirstDataRow    = undefined;
-  let ntcFirstDataColumn = 1;
-
   let ntcFirstDataRowRange = sheet.getRange(NTC_FIRST_DATA_ROW_RANGE);
-
-  if (ntcFirstDataRowRange != undefined) {
-    ntcFirstDataRow = ntcFirstDataRowRange.getValue();
-  }
-  else {
-    throw Error(`${NTC_FIRST_DATA_ROW_RANGE} named range is not defined`);
-  }
+  let ntcFirstDataRow      = ntcFirstDataRowRange.getValue();
+  let ntcFirstDataColumn   = 1;
 
   let spreadsheet      = sheet.getParent();
   let range            = sheet.getDataRange();
