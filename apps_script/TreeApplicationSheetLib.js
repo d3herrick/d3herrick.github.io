@@ -44,6 +44,7 @@ const NEWTON_TREE_CONSERVANCY_MENU             = "Newton Tree Conservancy";
 const ABOUT_MENU_ITEM                          = "About...";
 const ARCHIVE_DATA_FOR_PLANTING_DATE_MENU_ITEM = "Archive data for planting date";
 const ARCHIVE_DATA_FOR_PLANTING_DATE_TITLE     = "Archive Data for Planting Date";
+const PLANTNG_DATE_FOLDER_NOT_FOUND_TITLE      = "Planting Date Folder Not Found";
 const COUNT_OF_ROWS_ARCHIVED_TITLE             = "Count of Rows Archived";
 const SPECIFIED_INVALID_COLUMN_VALUE_TITLE     = "Invalid Value Specified";
 const SET_DEFAULT_PLANTING_MENU_ITEM           = "Set default planting date";
@@ -297,20 +298,21 @@ function onArchiveDataForPlantingDate() {
     let plantingDate = response.getResponseText();
 
     if ((plantingDate != null) && (plantingDate.trim().length > 0)) {
-      let file     = SpreadsheetApp.getActiveSpreadsheet();
-      let index    = file.getRange(PLANTING_DATE_RANGE).getColumn() - 1;
-      let srcRange = file.getRange(FORM_DATA_RANGE);
-      let srcSheet = srcRange.getSheet();
-      let srcRow   = srcSheet.getRange(HEADER_ROW_RANGE).getRow();
-      let srcName  = srcSheet.getName();
-      let dstName  = `${plantingDate} Archive`;
+      let file        = SpreadsheetApp.getActiveSpreadsheet();
+      let searchIndex = file.getRange(PLANTING_DATE_RANGE).getColumn() - 1;
+      let srcRange    = file.getRange(FORM_DATA_RANGE);
+      let srcSheet    = srcRange.getSheet();
+      let srcRow      = srcSheet.getRange(HEADER_ROW_RANGE).getRow();
+      let srcName     = srcSheet.getName();
+      let dstName     = `${plantingDate} Archive`;
         
       let appData = srcRange.getValues();
-      let srcData = appData.filter(row => row[index] !== plantingDate);
-      let dstData = appData.filter(row => row[index] === plantingDate);
+      let srcData = appData.filter(row => row[searchIndex] !== plantingDate);
+      let dstData = appData.filter(row => row[searchIndex] === plantingDate);
 
       if (dstData.length > 0) {
-        let dstSheet = file.insertSheet(dstName, file.getSheets().length);
+        let queryRange = file.getRange(ALL_REQUESTS_BY_ZIP_CODE_QUERY_RANGE);
+        let dstSheet   = file.insertSheet(dstName, queryRange.getSheet().getIndex());
         
         srcSheet.getRange(srcRow, 1, 1, srcSheet.getLastColumn()).copyTo(dstSheet.getRange("A1"));
         srcRange.copyFormatToRange(dstSheet, 1, dstData[0].length, 2, dstData.length);
@@ -320,14 +322,13 @@ function onArchiveDataForPlantingDate() {
         if (srcData.length > 0) {
           srcSheet.getRange(srcRange.getRow(), 1, srcData.length, srcData[0].length).setValues(srcData);
         }
+
+        let query      = queryRange.getFormula();
+        let srcDataRef = `'${srcName}'!${ALL_REQUESTS_BY_ZIP_CODE_QUERY_REF};`;
+        let dstDataRef = `'${dstName}'!${ALL_REQUESTS_BY_ZIP_CODE_QUERY_REF};`;
+
+        queryRange.setFormula(query.replace(srcDataRef, srcDataRef + dstDataRef));
       }
-
-      let queryRollupRange = SpreadsheetApp.getActiveSpreadsheet().getRange(ALL_REQUESTS_BY_ZIP_CODE_QUERY_RANGE);
-      let query            = queryRollupRange.getFormula();
-      let srcDataRef       = `'${srcName}'!${ALL_REQUESTS_BY_ZIP_CODE_QUERY_REF};`;
-      let dstDataRef       = `'${dstName}'!${ALL_REQUESTS_BY_ZIP_CODE_QUERY_REF};`;
-
-      queryRollupRange.setFormula(query.replace(srcDataRef, srcDataRef + dstDataRef));
 
       let rootFolder      = DriveApp.getFolderById(file.getRange(ROOT_SPREADSHEET_FOLDER_RANGE).getValue());
       let plantingFolders = rootFolder.getFoldersByName(plantingDate);
@@ -344,6 +345,11 @@ function onArchiveDataForPlantingDate() {
 
         setPermission(plantingFolder, SET_LIMITED_ACCESS);
         plantingFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      }
+      else {
+        ui.alert(PLANTNG_DATE_FOLDER_NOT_FOUND_TITLE,
+          `Folder ${plantingDate} not found. Run ${ARCHIVE_DATA_FOR_PLANTING_DATE_MENU_ITEM}, specifying the correct name for the folder.`,
+          ui.ButtonSet.OK);
       }
 
       ui.alert(COUNT_OF_ROWS_ARCHIVED_TITLE,
