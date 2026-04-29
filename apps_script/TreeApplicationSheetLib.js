@@ -13,7 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                       = "34";
+const DEPLOYMENT_VERSION                       = "35";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
 const GROUP_NAME_RANGE                         = "group_name";
@@ -34,7 +34,10 @@ const NUMBER_OF_TREES_REQUESTED_RANGE          = "number_of_trees_requested";
 const TREE_LOCATIONS_RANGE                     = "tree_locations";
 const GROUP_LEADER_RANGE                       = "group_leader";
 const GROUP_LEADER_TREE_RECIPIENT_RANGE        = "group_leader_tree_recipient";
+const ROOT_SPREADSHEET_FOLDER_RANGE            = "root_spreadsheet_folder";
 const DEFAULT_GROUP_NAME_RANGE                 = "default_group_name";
+const ALL_REQUESTS_BY_ZIP_CODE_QUERY_RANGE     = "all_requests_by_zip_code_query";
+const ALL_REQUESTS_BY_ZIP_CODE_QUERY_REF       = "G4:N";
 const DEFAULT_PLANTING_DATE_NOT_SPECIFIED      = "Not specified";
 const DEFAULT_PLANTING_DATE_NAME_PROP          = "default_planting_date_prop";
 const NEWTON_TREE_CONSERVANCY_MENU             = "Newton Tree Conservancy";
@@ -61,6 +64,10 @@ const STREET_SUFFIXES = [
   ["Terr",  "Terrace"],
   ["Wy",    "Way"]
 ];
+
+const SET_LIMITED_ACCESS = {
+  inheritedPermissionsDisabled: true
+};
 
 function onOpen(e) {
   let ui = SpreadsheetApp.getUi();
@@ -290,33 +297,50 @@ function onArchiveDataForPlantingDate() {
     let plantingDate = response.getResponseText();
 
     if ((plantingDate != null) && (plantingDate.trim().length > 0)) {
-      let file  = SpreadsheetApp.getActiveSpreadsheet();
-      let range = file.getRange(PLANTING_DATE_RANGE);
-      let sheet = range.getSheet();
-      let hits  = range.createTextFinder(plantingDate).matchEntireCell(true).findAll();
+      let file   = SpreadsheetApp.getActiveSpreadsheet();
+      let range  = file.getRange(FORM_DATA_RANGE);
+      let sheet  = range.getSheet();
+      let index  = file.getRange(PLANTING_DATE_RANGE).getColumn() - 1;
+      let srcRow = sheet.getRange(HEADER_ROW_RANGE).getRow();
+        
+      let appData     = range.getValues();
+      let archiveData = appData.filter(row => row[index] === plantingDate);
+      let currentData = appData.filter(row => row[index] !== plantingDate);
 
-      if (hits.length > 0) {
-        let deletions = [];
-        let archive   = file.insertSheet(`${plantingDate} Archive`, file.getSheets().length);
-        let srcRow    = sheet.getRange(HEADER_ROW_RANGE).getRow();
-
+      if (archiveData.length > 0) {
+        let archive = file.insertSheet(`${plantingDate} Archive`, file.getSheets().length);
+        
         sheet.getRange(srcRow, 1, 1, sheet.getLastColumn()).copyTo(archive.getRange("A1"));
+        range.copyFormatToRange(archive, 1, archiveData[0].length, 2, archiveData.length);
+        archive.getRange(archive.getLastRow() + 1, 1, archiveData.length, archiveData[0].length).setValues(archiveData);
+        range.clear();
 
-        let dstRow = 2;
+        if (currentData.length > 0) {
+          sheet.getRange(range.getRow(), 1, currentData.length, currentData[0].length).setValues(currentData);
+        }
+      }
 
-        hits.forEach(function(h) {
-          srcRow = h.getRow();
+      let queryRollupRange = SpreadsheetApp.getActiveSpreadsheet().getRange(ALL_REQUESTS_BY_ZIP_CODE_QUERY_RANGE);
+      let query            = queryRollupRange.getFormula();
+      let currentDataRef   = `'Form Data'!${ALL_REQUESTS_BY_ZIP_CODE_QUERY_REF};`;
+      let archiveDataRef   = `'${plantingDate} Archive'!${ALL_REQUESTS_BY_ZIP_CODE_QUERY_REF};`;
 
-          sheet.getRange(srcRow, 1, 1, sheet.getLastColumn()).copyTo(archive.getRange(dstRow, 1));
-          deletions.push(srcRow);
-          dstRow++;
-        });
+      queryRollupRange.setFormula(query.replace(currentDataRef, currentDataRef + archiveDataRef));
 
-        deletions.reverse().forEach(d => sheet.deleteRow(d));
+      let rootSpreadsheetFolderRange = file.getRange(ROOT_SPREADSHEET_FOLDER_RANGE);
+
+      let rootFolder = DriveApp.getFolderById(rootSpreadsheetFolderRange.getValue());
+      let folders    = rootFolder.getFoldersByName(plantingDate);
+
+      if (folders.hasNext()) {
+        let plantingDateFolder = folders.next();
+
+        setPermission(plantingDateFolder, SET_LIMITED_ACCESS);
+        plantingDateFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
       }
 
       ui.alert(COUNT_OF_ROWS_ARCHIVED_TITLE,
-        `Number of rows archived for ${plantingDate} is ${hits.length}.`,
+        `Number of rows archived for ${plantingDate} is ${archiveData.length}.`,
         ui.ButtonSet.OK);
     }
   }
