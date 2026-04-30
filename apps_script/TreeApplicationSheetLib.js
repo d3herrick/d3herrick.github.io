@@ -71,6 +71,15 @@ const SET_LIMITED_ACCESS = {
   inheritedPermissionsDisabled: true
 };
 
+const SET_VIEW_ACCESS = {
+  type: 'anyone',
+  role: 'reader'
+}; 
+
+const SET_DRIVE_SUPPORT = {
+  supportsAllDrives: true
+};
+
 function onOpen(e) {
   let ui = SpreadsheetApp.getUi();
 
@@ -337,15 +346,16 @@ function onArchiveDataForPlantingDate() {
       let plantingFolders = rootFolder.getFoldersByName(plantingDate);
 
       if (plantingFolders.hasNext()) {
-        let plantingFolder = plantingFolders.next();
-        let plantingFiles  = plantingFolder.getFiles();
+        let plantingFolder   = plantingFolders.next();
+        let plantingFolderId = plantingFolder.getId();
+        let plantingFiles    = plantingFolder.getFiles();
 
         while (plantingFiles.hasNext()) {
           SpreadsheetApp.open(plantingFiles.next());
         }
 
-        Drive.Files.update(SET_LIMITED_ACCESS, plantingFolder.getId());
-        plantingFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        Drive.Files.update(SET_LIMITED_ACCESS, plantingFolderId);
+        Drive.Permissions.create(SET_VIEW_ACCESS, plantingFolderId, SET_DRIVE_SUPPORT);
       }
       else {
         ui.alert(PLANTNG_DATE_FOLDER_NOT_FOUND_TITLE,
