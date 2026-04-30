@@ -14,13 +14,14 @@
 // @OnlyCurrentDoc
 //
 const DEPLOYMENT_VERSION                       = "35";
+const FORM_DATA_RANGE                          = "form_data";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
 const GROUP_NAME_RANGE                         = "group_name";
 const FIRST_NAME_RANGE                         = "first_name";
 const LAST_NAME_RANGE                          = "last_name";
 const STREET_ADDRESS_RANGE                     = "street_address";
-const FORM_DATA_RANGE                          = "form_data";
+const ZIP_CODE_RANGE                           = "zip_code";
 const FORM_HEADINGS_RANGE                      = "form_headings"
 const APPL_ACK_EMAIL_SENDER_NAME_RANGE         = "application_ack_email_sender_name"
 const APPL_ACK_EMAIL_REPLY_TO_RANGE            = "application_ack_email_reply_to";
@@ -311,15 +312,17 @@ function onArchiveDataForPlantingDate() {
       let dstData = appData.filter(row => row[searchIndex] === plantingDate);
 
       if (dstData.length > 0) {
-        let queryRange = file.getRange(ALL_REQUESTS_BY_ZIP_CODE_QUERY_RANGE);
-        let dstSheet   = file.insertSheet(dstName, queryRange.getSheet().getIndex());
+        let queryRange   = file.getRange(ALL_REQUESTS_BY_ZIP_CODE_QUERY_RANGE);
+        let dstSheet     = file.insertSheet(dstName, queryRange.getSheet().getIndex());
+        let zipCodeA1    = srcSheet.getRange(ZIP_CODE_RANGE).getA1Notation().replace(/\d+/g, "");
         
+        dstSheet.getRange(zipCodeA1).setNumberFormat("@");
         srcSheet.getRange(srcRow, 1, 1, srcSheet.getLastColumn()).copyTo(dstSheet.getRange("A1"));
-        srcRange.copyFormatToRange(dstSheet, 1, dstData[0].length, 2, dstData.length);
         dstSheet.getRange(dstSheet.getLastRow() + 1, 1, dstData.length, dstData[0].length).setValues(dstData);
         srcRange.clear();
 
         if (srcData.length > 0) {
+          srcSheet.getRange(zipCodeA1).setNumberFormat("@");
           srcSheet.getRange(srcRange.getRow(), 1, srcData.length, srcData[0].length).setValues(srcData);
         }
 
@@ -338,12 +341,10 @@ function onArchiveDataForPlantingDate() {
         let plantingFiles  = plantingFolder.getFiles();
 
         while (plantingFiles.hasNext()) {
-          SpreadsheetApp.open(files.next());
+          SpreadsheetApp.open(plantingFiles.next());
         }
 
-        SpreadsheetApp.flush();
-
-        setPermission(plantingFolder, SET_LIMITED_ACCESS);
+        Drive.Files.update(SET_LIMITED_ACCESS, plantingFolder.getId());
         plantingFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
       }
       else {
