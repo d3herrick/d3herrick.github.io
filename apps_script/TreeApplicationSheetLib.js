@@ -348,11 +348,6 @@ function onArchiveDataForPlantingDate() {
       if (plantingFolders.hasNext()) {
         let plantingFolder   = plantingFolders.next();
         let plantingFolderId = plantingFolder.getId();
-        let plantingFiles    = plantingFolder.getFiles();
-
-        while (plantingFiles.hasNext()) {
-          SpreadsheetApp.open(plantingFiles.next());
-        }
 
         Drive.Files.update(SET_LIMITED_ACCESS, plantingFolderId);
         Drive.Permissions.create(SET_VIEW_ACCESS, plantingFolderId, SET_DRIVE_SUPPORT);
