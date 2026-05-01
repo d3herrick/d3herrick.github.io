@@ -13,7 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                       = "35";
+const DEPLOYMENT_VERSION                       = "36";
 const FORM_DATA_RANGE                          = "form_data";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
@@ -43,8 +43,9 @@ const DEFAULT_PLANTING_DATE_NOT_SPECIFIED      = "Not specified";
 const DEFAULT_PLANTING_DATE_NAME_PROP          = "default_planting_date_prop";
 const NEWTON_TREE_CONSERVANCY_MENU             = "Newton Tree Conservancy";
 const ABOUT_MENU_ITEM                          = "About...";
-const ARCHIVE_DATA_FOR_PLANTING_DATE_MENU_ITEM = "Archive data for planting date";
-const ARCHIVE_DATA_FOR_PLANTING_DATE_TITLE     = "Archive Data for Planting Date";
+const ARCHIVE_PLANTING_DATE_MENU_ITEM          = "Archive planting date";
+const ARCHIVE_PLANTING_DATE_TITLE              = "Archive Planting Date";
+const ARCHIVED_DATA_NOTE                       = "Because it has concluded, data associated with the planting date has been archived.";
 const PLANTNG_DATE_FOLDER_NOT_FOUND_TITLE      = "Planting Date Folder Not Found";
 const COUNT_OF_ROWS_ARCHIVED_TITLE             = "Count of Rows Archived";
 const SPECIFIED_INVALID_COLUMN_VALUE_TITLE     = "Invalid Value Specified";
@@ -67,6 +68,26 @@ const STREET_SUFFIXES = [
   ["Wy",    "Way"]
 ];
 
+const DEFAULT_COLUMN_WIDTHS = [
+  130,
+  175,
+  180,
+  180,
+  105,
+  40,
+  50,
+  175,
+  35,
+  35,
+  35,
+  35,
+  40,
+  40,
+  50,
+  175,
+  175
+];
+
 const SET_LIMITED_ACCESS = {
   inheritedPermissionsDisabled: true
 };
@@ -87,7 +108,7 @@ function onOpen(e) {
     createMenu(NEWTON_TREE_CONSERVANCY_MENU).
       addItem(SET_DEFAULT_PLANTING_MENU_ITEM, "onSetDefaultPlantingDate").
       addSeparator().
-      addItem(ARCHIVE_DATA_FOR_PLANTING_DATE_MENU_ITEM, "onArchiveDataForPlantingDate").
+      addItem(ARCHIVE_PLANTING_DATE_MENU_ITEM, "onArchivePlantingDate").
       addSeparator().
       addItem(ABOUT_MENU_ITEM, "onAbout").
       addToUi();
@@ -297,17 +318,17 @@ function onSetDefaultPlantingDate() {
   }
 }
 
-function onArchiveDataForPlantingDate() {
+function onArchivePlantingDate() {
   let ui = SpreadsheetApp.getUi();
 
-  let response = ui.prompt(ARCHIVE_DATA_FOR_PLANTING_DATE_TITLE,
+  let response = ui.prompt(ARCHIVE_PLANTING_DATE_TITLE,
     "Enter the planting date you want to archive. Please specify \"YYYY\" followed by \"Spring\" or \"Fall\" with one space between the year and season, and the first letter of the season capitalized.\n\nExample: 2024 Spring",
     ui.ButtonSet.OK_CANCEL);
 
   if (response.getSelectedButton() == ui.Button.OK) {
-    let plantingDate = response.getResponseText();
+    let plantingDate = resolvePlantingDate_(response.getResponseText());
 
-    if ((plantingDate != null) && (plantingDate.trim().length > 0)) {
+    if (plantingDate != undefined) {
       let file        = SpreadsheetApp.getActiveSpreadsheet();
       let searchIndex = file.getRange(PLANTING_DATE_RANGE).getColumn() - 1;
       let srcRange    = file.getRange(FORM_DATA_RANGE);
@@ -349,18 +370,25 @@ function onArchiveDataForPlantingDate() {
         let plantingFolder   = plantingFolders.next();
         let plantingFolderId = plantingFolder.getId();
 
+        archiveFolder_(plantingFolder);
+        
         Drive.Files.update(SET_LIMITED_ACCESS, plantingFolderId);
         Drive.Permissions.create(SET_VIEW_ACCESS, plantingFolderId, SET_DRIVE_SUPPORT);
       }
       else {
         ui.alert(PLANTNG_DATE_FOLDER_NOT_FOUND_TITLE,
-          `Folder ${plantingDate} not found. Run ${ARCHIVE_DATA_FOR_PLANTING_DATE_MENU_ITEM}, specifying the correct name for the folder.`,
+          `Folder ${plantingDate} not found. Run ${ARCHIVE_PLANTING_DATE_MENU_ITEM}, specifying the correct name for the folder.`,
           ui.ButtonSet.OK);
       }
 
       ui.alert(COUNT_OF_ROWS_ARCHIVED_TITLE,
         `Number of rows archived for ${plantingDate} is ${dstData.length}.`,
         ui.ButtonSet.OK);
+    }
+    else if (plantingDate == undefined) {
+      ui.alert(`${ARCHIVE_PLANTING_DATE_TITLE}`,
+        `Value "${response.getResponseText()}" is invalid. Please specify "YYYY" followed by "Spring" or "Fall" with one space between the year and season, and the first letter of the season capitalized.\n\nExample: 2024 Spring`,
+          ui.ButtonSet.OK);
     }
   }
 }
@@ -464,4 +492,32 @@ function resolvePlantingDate_(value) {
   }
 
   return resolvedValue
+}
+
+function archiveFolder_(folder) {
+  let files = folder.getFiles();
+
+  while (files.hasNext()) {
+    let file = files.next();
+    let type = file.getMimeType();
+
+    if (type == MimeType.GOOGLE_SHEETS) {
+      archiveSpreadsheet_(file);
+    }
+  }
+
+  let folders = folder.getFolders();
+
+  while (folders.hasNext()) {
+    archiveFolder_(folders.next());
+  }
+}
+
+function archiveSpreadsheet_(file) {
+  try {
+    DirectorSheetLib.onArchiveSpreadsheet(file);
+  }
+  catch (e) {
+    // might be a spreadsheet, but not specifically a director spreadsheet
+  }
 }

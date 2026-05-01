@@ -13,7 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                     = "51";
+const DEPLOYMENT_VERSION                     = "53";
 const FORM_DATA_SHEET_ID_RANGE               = "form_data_spreadsheet_id";
 const FORM_DATA_SHEET_RANGE                  = "form_data";
 const PLANTING_DATE_RANGE                    = "planting_date";
@@ -146,7 +146,7 @@ function onOpen(e) {
       setSpreadsheetFileName_();
     }
     else {
-      archiveSpreadsheet_();
+      onArchiveSpreadsheet();
     }
   }
 }
@@ -405,6 +405,24 @@ function onToggleDataFilterVisibility() {
 
     properties.setProperty(PLANTING_DATA_FILTER_VISIBILITY, "true");
   }
+}
+
+function onArchiveSpreadsheet(file = SpreadsheetApp.getActiveSpreadsheet()) {
+  let sheet        = getGroupDataSheet_(file);
+  let plantingDate = sheet.getRange(PLANTING_DATE_RANGE);
+  let groupName    = sheet.getRange(GROUP_NAME_RANGE);
+  
+  for (let i = 0; i < DEFAULT_COLUMN_WIDTHS.length; i++) {
+    sheet.setColumnWidth((i + 1), DEFAULT_COLUMN_WIDTHS[i]);
+  }
+  
+  plantingDate.setDataValidation(null);
+  plantingDate.protect().setWarningOnly(true);
+  plantingDate.setNote(ARCHIVED_DATA_NOTE);
+  
+  groupName.setDataValidation(null);
+  groupName.protect().setWarningOnly(true);
+  groupName.setNote(ARCHIVED_DATA_NOTE);
 }
 
 function onAbout() {
@@ -892,24 +910,6 @@ function isPlantingDateActive_() {
   return (plantingDateValidation.getCriteriaValues()[0].getValues().find((v) => (v[0] == plantingDate.getValue())) != undefined);
 }
 
-function archiveSpreadsheet_() {
-  let sheet        = getGroupDataSheet_();
-  let plantingDate = sheet.getRange(PLANTING_DATE_RANGE);
-  let groupName    = sheet.getRange(GROUP_NAME_RANGE);
-  
-  for (let i = 0; i < DEFAULT_COLUMN_WIDTHS.length; i++) {
-    sheet.setColumnWidth((i + 1), DEFAULT_COLUMN_WIDTHS[i]);
-  }
-  
-  plantingDate.setDataValidation(null);
-  plantingDate.protect().setWarningOnly(true);
-  plantingDate.setNote(ARCHIVED_DATA_NOTE);
-  
-  groupName.setDataValidation(null);
-  groupName.protect().setWarningOnly(true);
-  groupName.setNote(ARCHIVED_DATA_NOTE);
-}
-
 function executeQuery_(spreadsheet, query) {
   let queryResults = spreadsheet.insertSheet().hideSheet();
   let resultData   = null;
@@ -930,9 +930,9 @@ function isApplicationDataEmpty_(rows) {
   return !((rows != null) && (rows.length > 0) && (rows[0] != "#N/A") && (rows[0] != "#VALUE!") && (rows[0] != "#ERROR!"));
 }
 
-function getGroupDataSheet_() {
+function getGroupDataSheet_(file = SpreadsheetApp.getActiveSpreadsheet()) {
   let sheet = undefined;
-  let range = SpreadsheetApp.getActiveSpreadsheet().getRangeByName(GROUP_DATA_RANGE);
+  let range = file.getRangeByName(GROUP_DATA_RANGE);
 
   if (range != null) {
     sheet = range.getSheet();
