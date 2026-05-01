@@ -68,26 +68,6 @@ const STREET_SUFFIXES = [
   ["Wy",    "Way"]
 ];
 
-const DEFAULT_COLUMN_WIDTHS = [
-  130,
-  175,
-  180,
-  180,
-  105,
-  40,
-  50,
-  175,
-  35,
-  35,
-  35,
-  35,
-  40,
-  40,
-  50,
-  175,
-  175
-];
-
 const SET_LIMITED_ACCESS = {
   inheritedPermissionsDisabled: true
 };
