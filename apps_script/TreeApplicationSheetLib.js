@@ -495,9 +495,9 @@ function archiveFolder_(folder) {
 
 function archiveSpreadsheet_(file) {
   try {
-    DirectorSheetLib.onArchiveSpreadsheet(file);
+    DirectorSheetLib.onArchiveSpreadsheet(SpreadsheetApp.open(file));
   }
   catch (e) {
-    // might be a spreadsheet, but not specifically a director spreadsheet
+    // might be a spreadsheet, but perhaps not an instrumented director spreadsheet
   }
 }
