@@ -318,8 +318,8 @@ function onArchivePlantingDate() {
       let dstName     = `${plantingDate} Archive`;
         
       let appData = srcRange.getValues();
-      let srcData = appData.filter(row => row[searchIndex] !== plantingDate);
-      let dstData = appData.filter(row => row[searchIndex] === plantingDate);
+      let srcData = appData.filter(row => row[searchIndex] != plantingDate);
+      let dstData = appData.filter(row => row[searchIndex] == plantingDate);
 
       if (dstData.length > 0) {
         let queryRange   = file.getRange(ALL_REQUESTS_BY_ZIP_CODE_QUERY_RANGE);
@@ -330,6 +330,7 @@ function onArchivePlantingDate() {
         srcSheet.getRange(srcRow, 1, 1, srcSheet.getLastColumn()).copyTo(dstSheet.getRange("A1"));
         dstSheet.getRange(dstSheet.getLastRow() + 1, 1, dstData.length, dstData[0].length).setValues(dstData);
         srcRange.clear();
+        srcSheet.deleteRows(srcRange.getRowIndex() + 1, dstData.length);
 
         if (srcData.length > 0) {
           srcSheet.getRange(zipCodeA1).setNumberFormat("@");
