@@ -19,7 +19,7 @@
 //                 "https://www.googleapis.com/auth/script.container.ui",
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
-const DEPLOYMENT_VERSION                     = "25";
+const DEPLOYMENT_VERSION                     = "26";
 const DONATION_DATA_RANGE                    = "donation_data";
 const LAST_NAME_RANGE                        = "last_name";
 const FIRST_NAME_RANGE                       = "first_name";
@@ -588,11 +588,18 @@ function normalizeCheckData_(data, firstDataRow) {
       // Net
       row.push(net);
 
+      let paymentType   = normalizeString_(r[7]);
+      let paymentSource = normalizeString_(r[8]);
+
+      if (paymentType == PAYMENT_TYPE_C1) {
+        paymentSource = paymentSource.replace(/[^0-9]/g, "");
+      }
+
       // Payment type
-      row.push(normalizeString_(r[7]));
+      row.push(paymentType);
 
       // Payment source
-      row.push(normalizeString_(r[8]));
+      row.push(paymentSource);
 
       // Payment note
       row.push(normalizeString_(r[9]));
