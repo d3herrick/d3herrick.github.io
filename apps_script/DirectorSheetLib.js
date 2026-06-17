@@ -13,7 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                     = "53";
+const DEPLOYMENT_VERSION                     = "54";
 const FORM_DATA_SHEET_ID_RANGE               = "form_data_spreadsheet_id";
 const FORM_DATA_SHEET_RANGE                  = "form_data";
 const PLANTING_DATE_RANGE                    = "planting_date";
@@ -75,7 +75,7 @@ const BOOLEAN_VALIDATION_FILTERS = [
   [CURB_DATA_FILTER, ""]
 ];
 
-const INTEGRER_VALIDATION_FILTERS = [
+const INTEGER_VALIDATION_FILTERS = [
   [LARGE_TREE_COUNT_FILTER,  ""],
   [MEDIUM_TREE_COUNT_FILTER, ""],
   [SMALL_TREE_COUNT_FILTER,  ""],
@@ -193,7 +193,7 @@ function onEdit(e) {
           }
 
           if (isValidValue) {
-            for (r of INTEGRER_VALIDATION_FILTERS) {
+            for (r of INTEGER_VALIDATION_FILTERS) {
               let range = sheet.getRange(r[0]);
 
               if (range.getLastColumn() == e.range.columnEnd) {
@@ -560,7 +560,7 @@ function listApplicationData_(sheet) {
     dataRange.offset(1, 0, (lastRow - firstRow - 1)).
       getValues().
       forEach(function(e) {
-        if (e[0] != '') {
+        if (e[0] != "") {
           currentRowKeys.add(e[0].getTime());
         }
       });
