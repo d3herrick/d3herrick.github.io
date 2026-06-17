@@ -13,7 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                       = "36";
+const DEPLOYMENT_VERSION                       = "37";
 const FORM_DATA_RANGE                          = "form_data";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
@@ -141,6 +141,10 @@ function onSubmit(e) {
     let cellToken = "";
 
     cellValue = "";
+
+    if (Number.isInteger(Number(cellParts[0]))) {
+      cellParts.splice(0, 1);
+    }
 
     cellParts.forEach(function(e) {
       if (cellIndex > 0) {
