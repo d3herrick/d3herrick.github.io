@@ -13,7 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                       = "37";
+const DEPLOYMENT_VERSION                       = "38";
 const FORM_DATA_RANGE                          = "form_data";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
@@ -35,6 +35,8 @@ const NUMBER_OF_TREES_REQUESTED_RANGE          = "number_of_trees_requested";
 const TREE_LOCATIONS_RANGE                     = "tree_locations";
 const GROUP_LEADER_RANGE                       = "group_leader";
 const GROUP_LEADER_TREE_RECIPIENT_RANGE        = "group_leader_tree_recipient";
+const GROUP_NAME_LEADER_RANGE                  = "group_name_leader";
+const GROUP_NAME_MEMBER_RANGE                  = "group_name_member";
 const ROOT_SPREADSHEET_FOLDER_RANGE            = "root_spreadsheet_folder";
 const DEFAULT_GROUP_NAME_RANGE                 = "default_group_name";
 const ALL_REQUESTS_BY_ZIP_CODE_QUERY_RANGE     = "all_requests_by_zip_code_query";
@@ -127,9 +129,24 @@ function onSubmit(e) {
   rowRange.clearFormat();
   rowRange.setVerticalAlignment("top");
 
-  let columnIndex = sheet.getRange(GROUP_NAME_RANGE).getColumn();
+  let columnIndex = sheet.getRange(GROUP_LEADER_RANGE).getColumn();
   let cellRange   = sheet.getRange(rowIndex, columnIndex);
-  let cellValue   = normalizeString_(cellRange.getValue());
+  let cellValue   = cellRange.getValue();
+
+  if ("Yes" == cellValue) {
+    columnIndex = sheet.getRange(GROUP_NAME_LEADER_RANGE).getColumn();
+    cellRange   = sheet.getRange(rowIndex, columnIndex);
+    cellValue   = cellRange.getValue();
+  }
+  else {
+    columnIndex = sheet.getRange(GROUP_NAME_MEMBER_RANGE).getColumn();
+    cellRange   = sheet.getRange(rowIndex, columnIndex);
+    cellValue   = cellRange.getValue();
+  }
+
+  columnIndex = sheet.getRange(GROUP_NAME_RANGE).getColumn();
+  cellRange   = sheet.getRange(rowIndex, columnIndex);
+  cellValue   = normalizeString_(cellValue);
 
   if (cellValue.length > 0) {
     cellValue = cellValue.toLowerCase().
