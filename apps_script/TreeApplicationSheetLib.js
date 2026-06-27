@@ -13,7 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                       = "39";
+const DEPLOYMENT_VERSION                       = "40";
 const FORM_DATA_RANGE                          = "form_data";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
@@ -210,14 +210,14 @@ function onSubmit(e) {
   }
 
   let applicantContactDataRanges = [
+    [sheet.getRange(rowIndex, sheet.getRange(EMAIL_ADDRESS_RANGE).getColumn()), normalizeEmailAddress_],
     [sheet.getRange(rowIndex, sheet.getRange(FIRST_NAME_RANGE).getColumn()),    normalizeName_],
-    [sheet.getRange(rowIndex, sheet.getRange(LAST_NAME_RANGE).getColumn()),     normalizeName_],
-    [sheet.getRange(rowIndex, sheet.getRange(EMAIL_ADDRESS_RANGE).getColumn()), normalizeEmailAddress_]
+    [sheet.getRange(rowIndex, sheet.getRange(LAST_NAME_RANGE).getColumn()),     normalizeName_]
   ];
   let planterContactDataRanges = [
+    [sheet.getRange(rowIndex, sheet.getRange(PLANTER_EMAIL_ADDRESS_RANGE).getColumn()), normalizeEmailAddress_],
     [sheet.getRange(rowIndex, sheet.getRange(PLANTER_FIRST_NAME_RANGE).getColumn()),    normalizeName_],
-    [sheet.getRange(rowIndex, sheet.getRange(PLANTER_LAST_NAME_RANGE).getColumn()),     normalizeName_],
-    [sheet.getRange(rowIndex, sheet.getRange(PLANTER_EMAIL_ADDRESS_RANGE).getColumn()), normalizeEmailAddress_]
+    [sheet.getRange(rowIndex, sheet.getRange(PLANTER_LAST_NAME_RANGE).getColumn()),     normalizeName_]
   ];
 
   applicantContactDataRanges.forEach(function(r) {
@@ -227,7 +227,7 @@ function onSubmit(e) {
     r[0].setValue(r[1](r[0].getValue()));
   });
 
-  if (applicantContactDataRanges.every((e, i) => e[0].getValue().toString().toLowerCase() == planterContactDataRanges[i][0].getValue().toString().toLowerCase())) {
+  if (applicantContactDataRanges[0][0].getValue() == planterContactDataRanges[0][0].getValue()) {
     planterContactDataRanges.forEach((r) => r[0].setValue(""));
   }
 
