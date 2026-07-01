@@ -13,7 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                       = "40";
+const DEPLOYMENT_VERSION                       = "41";
 const FORM_DATA_RANGE                          = "form_data";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
@@ -242,7 +242,7 @@ function onSubmit(e) {
   }
 
   cellRange = sheet.getRange(rowIndex, sheet.getRange(TREE_LOCATIONS_RANGE).getColumn());
-  cellRange.setValue(normalizeString_(cellRange.getValue()));
+  cellRange.setValue(normalizeTreeLocations_(cellRange.getValue()));
 
   columnIndex = sheet.getRange(EMAIL_ADDRESS_RANGE).getColumn();
   cellRange   = sheet.getRange(rowIndex, columnIndex);
@@ -452,28 +452,38 @@ function normalizeEmailAddress_(emailAddress) {
 }
 
 function normalizeStreetAddress_(streetAddress) {
-  let normalizedValue = normalizeString_(streetAddress);
+  let normalizedStreetAddress = normalizeString_(streetAddress);
   
-  if (normalizedValue.length > 0) {
-    normalizedValue = normalizedValue.replaceAll("\n", " ").trim().toLowerCase().replaceAll(/[.,]/g, "");
+  if (normalizedStreetAddress.length > 0) {
+    normalizedStreetAddress = normalizedStreetAddress.replaceAll("\n", " ").trim().toLowerCase().replaceAll(/[.,]/g, "");
 
-    let valueParts = normalizedValue.split(/\s+/);
+    let valueParts = normalizedStreetAddress.split(/\s+/);
     let valueIndex = 0;
 
-    normalizedValue = "";
+    normalizedStreetAddress = "";
 
     valueParts.forEach(function(e) {
       if (valueIndex > 0) {
-        normalizedValue += " ";  
+        normalizedStreetAddress += " ";  
       }
 
-      normalizedValue += e.charAt(0).toUpperCase() + e.slice(1);
+      normalizedStreetAddress += e.charAt(0).toUpperCase() + e.slice(1);
 
       valueIndex++;
     });
   }
 
-  return normalizedValue;
+  return normalizedStreetAddress;
+}
+
+function normalizeTreeLocations_(treeLocations) {
+  let normalizedTreeLocations = normalizeString_(treeLocations);
+
+  if (normalizedTreeLocations.length > 0) {
+    normalizedTreeLocations = normalizedTreeLocations.charAt(0).toUpperCase() + normalizedTreeLocations.slice(1);
+  }
+
+  return normalizedTreeLocations;
 }
 
 function resolvePlantingDate_(value) {
