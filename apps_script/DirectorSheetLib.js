@@ -13,7 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                     = "54";
+const DEPLOYMENT_VERSION                     = "55";
 const FORM_DATA_SHEET_ID_RANGE               = "form_data_spreadsheet_id";
 const FORM_DATA_SHEET_RANGE                  = "form_data";
 const PLANTING_DATE_RANGE                    = "planting_date";
@@ -39,7 +39,7 @@ const TOTAL_REQUESTED_TREE_COUNT_RANGE       = "total_requested_tree_count";
 const TOTAL_RECOMMENDED_TREE_COUNT_RANGE     = "total_recommended_tree_count";
 const VIEW_DOCUMENTATION_RANGE               = "view_documentation";
 const PLANTING_DATA_FILTER_VISIBILITY        = "is_planting_data_filter_visible";
-const INSERT_EMPTRY_ROWS_MAX                 = 30;
+const INSERT_EMPTY_ROWS_MAX                  = 30;
 const DIRECTOR_NAME_PROP                     = "director_name_prop";
 const DIRECTOR_NAME_NOT_SPECIFIED            = "Not specified";
 const DUPLICATE_ROW_COLOR                    = "darkgray";
@@ -48,10 +48,10 @@ const DUPLICATE_ROW_REQUESTED_FONT_SIZE      = 45;
 const RETRIEVING_DATA_STATUS                 = "Retrieving data..."
 const NEWTON_TREE_CONSERVANCY_MENU           = "Newton Tree Conservancy";
 const GET_APPLICATION_DATA_MENU_ITEM         = "Get application data";
-const TOGGLE_DATA_FILTER_MENU_ITEM           = "Toggle data filter visibility";
 const SET_DIRECTOR_FILE_NAME_MENU_ITEM       = "Set director for spreadsheet file name";
 const DUPLICATE_ROW_FOR_CORNER_LOT_MENU_ITEM = "Duplicate application row for corner lot"
 const INSERT_EMPTY_ROWS_MENU_ITEM            = "Insert empty rows";
+const TOGGLE_DATA_FILTER_MENU_ITEM           = "Toggle data filter visibility";
 const ABOUT_MENU_ITEM                        = "About...";
 const ADDITIONAL_DATA_AVAILABLE_TITLE        = "Additional Application Data Available";
 const SET_DIRECTOR_FILE_NAME_TITLE           = "Set Director for Spreadsheet File Name";
@@ -117,17 +117,17 @@ function onOpen(e) {
   let sheet = getGroupDataSheet_();
   let ui    = SpreadsheetApp.getUi();
 
-  ui
-    .createMenu(NEWTON_TREE_CONSERVANCY_MENU)
-      .addItem(GET_APPLICATION_DATA_MENU_ITEM, "onGetApplicationData")
-      .addItem(SET_DIRECTOR_FILE_NAME_MENU_ITEM, "onSetDirectorFileName")
-      .addSeparator()
-      .addItem(DUPLICATE_ROW_FOR_CORNER_LOT_MENU_ITEM, "onDuplicateRowForCornerLot")
-      .addItem(INSERT_EMPTY_ROWS_MENU_ITEM, "onInsertEmptyRows")
-      .addItem(TOGGLE_DATA_FILTER_MENU_ITEM, "onToggleDataFilterVisibility")
-      .addSeparator()
-      .addItem(ABOUT_MENU_ITEM, "onAbout")
-      .addToUi();
+  ui.
+    createMenu(NEWTON_TREE_CONSERVANCY_MENU).
+      addItem(GET_APPLICATION_DATA_MENU_ITEM, "onGetApplicationData").
+      addItem(SET_DIRECTOR_FILE_NAME_MENU_ITEM, "onSetDirectorFileName").
+      addSeparator().
+      addItem(DUPLICATE_ROW_FOR_CORNER_LOT_MENU_ITEM, "onDuplicateRowForCornerLot").
+      addItem(INSERT_EMPTY_ROWS_MENU_ITEM, "onInsertEmptyRows").
+      addItem(TOGGLE_DATA_FILTER_MENU_ITEM, "onToggleDataFilterVisibility").
+      addSeparator().
+      addItem(ABOUT_MENU_ITEM, "onAbout").
+      addToUi();
 
   if (hasDataFilterValidators_()) {
     if (isPlantingDateActive_()) {
@@ -348,14 +348,14 @@ function onInsertEmptyRows() {
   let rowIndex = sheet.getRange(GROUP_DATA_RANGE).getLastRow();
 
   let response = ui.prompt(INSERT_EMPTY_ROWS_TITLE,
-    `Enter the number of empty rows to insert. You may specify up to ${INSERT_EMPTRY_ROWS_MAX} rows. The empty rows will be inserted starting at row ${rowIndex}:`,
+    `Enter the number of empty rows to insert. You may specify up to ${INSERT_EMPTY_ROWS_MAX} rows. The empty rows will be inserted starting at row ${rowIndex}:`,
     ui.ButtonSet.OK_CANCEL);
 
   if (response.getSelectedButton() == ui.Button.OK) {
     let rowCount = Number.parseInt(response.getResponseText());
 
     if (Number.isInteger(rowCount) && (rowCount > 0)) {
-      if (rowCount <= INSERT_EMPTRY_ROWS_MAX) {
+      if (rowCount <= INSERT_EMPTY_ROWS_MAX) {
         let rowTimestamp = new Date();
 
         while (true) {
@@ -373,7 +373,7 @@ function onInsertEmptyRows() {
       }
       else {
         ui.alert(INSERT_EMPTY_ROWS_TITLE,
-          `You may not specify more than ${INSERT_EMPTRY_ROWS_MAX} rows.`,
+          `You may not specify more than ${INSERT_EMPTY_ROWS_MAX} rows.`,
           ui.ButtonSet.OK);
       }
     }
