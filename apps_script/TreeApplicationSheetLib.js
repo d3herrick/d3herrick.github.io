@@ -13,7 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                       = "41";
+const DEPLOYMENT_VERSION                       = "42";
 const FORM_DATA_RANGE                          = "form_data";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
@@ -41,18 +41,21 @@ const ROOT_SPREADSHEET_FOLDER_RANGE            = "root_spreadsheet_folder";
 const DEFAULT_GROUP_NAME_RANGE                 = "default_group_name";
 const ALL_REQUESTS_BY_ZIP_CODE_QUERY_RANGE     = "all_requests_by_zip_code_query";
 const ALL_REQUESTS_BY_ZIP_CODE_QUERY_REF       = "G4:N";
+const INSERT_EMPTY_ROWS_MAX                    = 30;
+const ARCHIVED_DATA_NOTE                       = "Because it has concluded, data associated with the planting date has been archived.";
 const DEFAULT_PLANTING_DATE_NOT_SPECIFIED      = "Not specified";
 const DEFAULT_PLANTING_DATE_NAME_PROP          = "default_planting_date_prop";
 const NEWTON_TREE_CONSERVANCY_MENU             = "Newton Tree Conservancy";
-const ABOUT_MENU_ITEM                          = "About...";
+const SET_DEFAULT_PLANTING_MENU_ITEM           = "Set default planting date";
+const INSERT_EMPTY_ROWS_MENU_ITEM              = "Insert empty rows";
 const ARCHIVE_PLANTING_DATE_MENU_ITEM          = "Archive planting date";
-const ARCHIVE_PLANTING_DATE_TITLE              = "Archive Planting Date";
-const ARCHIVED_DATA_NOTE                       = "Because it has concluded, data associated with the planting date has been archived.";
+const ABOUT_MENU_ITEM                          = "About...";
 const PLANTNG_DATE_FOLDER_NOT_FOUND_TITLE      = "Planting Date Folder Not Found";
 const COUNT_OF_ROWS_ARCHIVED_TITLE             = "Count of Rows Archived";
 const SPECIFIED_INVALID_COLUMN_VALUE_TITLE     = "Invalid Value Specified";
-const SET_DEFAULT_PLANTING_MENU_ITEM           = "Set default planting date";
 const SET_DEFAULT_PLANTING_DATE_TITLE          = "Set Default Planting Date";
+const ARCHIVE_PLANTING_DATE_TITLE              = "Archive Planting Date";
+const INSERT_EMPTY_ROWS_TITLE                  = "Insert Empty Rows";
 const ABOUT_TITLE                              = "About Tree Application Spreadsheet";
 
 const STREET_SUFFIXES = [ 
@@ -75,8 +78,8 @@ const SET_LIMITED_ACCESS = {
 };
 
 const SET_VIEW_ACCESS = {
-  type: 'anyone',
-  role: 'reader'
+  type: "anyone",
+  role: "reader"
 }; 
 
 const SET_DRIVE_SUPPORT = {
@@ -89,6 +92,7 @@ function onOpen(e) {
   ui.
     createMenu(NEWTON_TREE_CONSERVANCY_MENU).
       addItem(SET_DEFAULT_PLANTING_MENU_ITEM, "onSetDefaultPlantingDate").
+      addItem(INSERT_EMPTY_ROWS_MENU_ITEM, "onInsertEmptyRows").
       addSeparator().
       addItem(ARCHIVE_PLANTING_DATE_MENU_ITEM, "onArchivePlantingDate").
       addSeparator().
@@ -314,6 +318,50 @@ function onSetDefaultPlantingDate() {
 
       ui.alert(SET_DEFAULT_PLANTING_DATE_TITLE,
         `You did not specify a default planting date. Consequently, automatic assignment of planting date for incoming applications will be disabled.`,
+        ui.ButtonSet.OK);
+    }
+  }
+}
+
+function onInsertEmptyRows() {
+  let range    = SpreadsheetApp.getActiveSpreadsheet().getRange(PLANTING_DATE_RANGE);
+  let sheet    = range.getSheet();
+  let ui       = SpreadsheetApp.getUi();
+  let rowIndex = range.getLastRow();
+
+  let response = ui.prompt(INSERT_EMPTY_ROWS_TITLE,
+    `Enter the number of empty rows to insert. You may specify up to ${INSERT_EMPTY_ROWS_MAX} rows. The empty rows will be inserted starting at row ${rowIndex}:`,
+    ui.ButtonSet.OK_CANCEL);
+
+  if (response.getSelectedButton() == ui.Button.OK) {
+    let rowCount = Number.parseInt(response.getResponseText());
+
+    if (Number.isInteger(rowCount) && (rowCount > 0)) {
+      if (rowCount <= INSERT_EMPTY_ROWS_MAX) {
+        let rowTimestamp = new Date();
+
+        while (true) {
+          if (rowCount-- > 0) {
+            sheet.insertRowsBefore(rowIndex, 1);
+            sheet.getRange(rowIndex, 1).setValue(rowTimestamp);
+
+            rowIndex++;
+            rowTimestamp.setSeconds(rowTimestamp.getSeconds() + 1);
+          }
+          else {
+            break;
+          }
+        }
+      }
+      else {
+        ui.alert(INSERT_EMPTY_ROWS_TITLE,
+          `You may not specify more than ${INSERT_EMPTY_ROWS_MAX} rows.`,
+          ui.ButtonSet.OK);
+      }
+    }
+    else {
+      ui.alert(INSERT_EMPTY_ROWS_TITLE,
+        `${response.getResponseText()} is not a valid number.`,
         ui.ButtonSet.OK);
     }
   }
