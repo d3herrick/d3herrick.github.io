@@ -13,7 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                       = "42";
+const DEPLOYMENT_VERSION                       = "43";
 const FORM_DATA_RANGE                          = "form_data";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
@@ -340,17 +340,11 @@ function onInsertEmptyRows() {
       if (rowCount <= INSERT_EMPTY_ROWS_MAX) {
         let rowTimestamp = new Date();
 
-        while (true) {
-          if (rowCount-- > 0) {
-            sheet.insertRowsBefore(rowIndex, 1);
-            sheet.getRange(rowIndex, 1).setValue(rowTimestamp);
+        while (rowCount-- > 0) {
+          sheet.insertRowsBefore(rowIndex, 1);
+          sheet.getRange(rowIndex++, 1).setValue(rowTimestamp);
 
-            rowIndex++;
-            rowTimestamp.setSeconds(rowTimestamp.getSeconds() + 1);
-          }
-          else {
-            break;
-          }
+          rowTimestamp.setSeconds(rowTimestamp.getSeconds() + 1);
         }
       }
       else {
