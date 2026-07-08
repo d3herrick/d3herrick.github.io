@@ -13,7 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                       = "43";
+const DEPLOYMENT_VERSION                       = "44";
 const FORM_DATA_RANGE                          = "form_data";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
@@ -120,6 +120,34 @@ function onEdit(e) {
       }
       else {
         e.range.setValue(resolvedValue);    
+      }
+    }
+    else {
+      range = sheet.getRange(GROUP_LEADER_RANGE);
+      
+      if (sheet.getSheetId() == range.getSheet().getSheetId()) {
+        if ((e.range.rowEnd > 1) && (range.getLastColumn() == e.range.columnEnd)) {
+          if (e.value != undefined) {
+            if (e.value.toLowerCase() == "no") {
+              e.range.setValue("No");    
+              sheet.getRange(e.range.rowEnd, sheet.getRange(GROUP_LEADER_TREE_RECIPIENT_RANGE).getColumn()).setValue("");
+            }
+            else if (e.value.toLowerCase() == "yes") {
+              e.range.setValue("Yes");
+
+              let columnIndex = sheet.getRange(GROUP_LEADER_TREE_RECIPIENT_RANGE).getColumn();
+              let numTreesReq = sheet.getRange(e.range.rowEnd, sheet.getRange(NUMBER_OF_TREES_REQUESTED_RANGE).getColumn()).getValue();
+
+              sheet.getRange(e.range.rowEnd, columnIndex).setValue((numTreesReq > 0 ? "Yes" : "No"));
+            }
+            else {
+              e.range.setValue(e.oldValue);    
+            }
+          }
+          else {
+            e.range.setValue(e.oldValue);    
+          }
+        }
       }
     }
   }
