@@ -13,7 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                     = "56";
+const DEPLOYMENT_VERSION                     = "57";
 const FORM_DATA_SHEET_ID_RANGE               = "form_data_spreadsheet_id";
 const FORM_DATA_SHEET_RANGE                  = "form_data";
 const PLANTING_DATE_RANGE                    = "planting_date";
@@ -134,7 +134,7 @@ function onOpen(e) {
       let rows = listApplicationData_(sheet);
 
       if (!isApplicationDataEmpty_(rows)) {
-        let response = ui.alert(ADDITIONAL_DATA_AVAILABLE_TITLE, 
+        let response = ui.alert(ADDITIONAL_DATA_AVAILABLE_TITLE,
           `There ${((rows.length > 1) ? "are" : "is")} ${rows.length} additional ${((rows.length > 1) ? "applications" : "application")} available for the ${PLANTING_DATE_FILTER_LABEL} and  ${GROUP_NAME_FILTER_LABEL} you selected. Do you want to refresh your applicaton data now? If not, you may do so later by clicking menu item ${GET_APPLICATION_DATA_MENU_ITEM}.`,
           ui.ButtonSet.YES_NO);
 
@@ -184,7 +184,7 @@ function onEdit(e) {
                   `Value "${e.value}" is invalid. Please specify either "Yes", or the letter "Y", or "No", or the letter "N". ${r[1]}`,
                   ui.ButtonSet.OK);
 
-                e.range.setValue("");    
+                e.range.setValue("");
                 isValidValue = false;
 
                 break;
@@ -205,7 +205,7 @@ function onEdit(e) {
                     `Value "${e.value}" is invalid. Please specify an integer greater than or equal to zero. ${r[1]}`,
                     ui.ButtonSet.OK);
 
-                  e.range.setValue("");    
+                  e.range.setValue("");
                   isValidValue = false;
 
                   break;
@@ -229,8 +229,8 @@ function onEdit(e) {
     }
     else {
       let range = sheet.getRange(DATA_SELECTION_LABELS_RANGE);
-    
-      if ((range.getLastColumn() == e.range.columnEnd) && 
+
+      if ((range.getLastColumn() == e.range.columnEnd) &&
           (range.getRow() <= e.range.rowStart) &&
           (range.getLastRow() >= e.range.rowEnd)) {
         range.setValues(DATA_FILTER_LABELS);
@@ -241,7 +241,7 @@ function onEdit(e) {
     }
   }
   else {
-    if (hasDataFilterValidators_()) { 
+    if (hasDataFilterValidators_()) {
       let range          = sheet.getRange(GROUP_NAME_RANGE);
       let dataValidation = range.getDataValidation();
 
@@ -257,7 +257,7 @@ function onGetApplicationData(rows) {
 
   if (criteria.isComplete) {
     let range  = sheet.getRange(LAST_DATA_RETRIEVAL_RANGE);
-    let format = range.getNumberFormat(); 
+    let format = range.getNumberFormat();
 
     try {
       range.setValue(RETRIEVING_DATA_STATUS);
@@ -268,7 +268,7 @@ function onGetApplicationData(rows) {
     }
   }
   else {
-    ui.alert(SPECIFY_DATA_FILTER_TITLE, 
+    ui.alert(SPECIFY_DATA_FILTER_TITLE,
       `Please select ${criteria.message} and then click menu item ${GET_APPLICATION_DATA_MENU_ITEM} again.`,
       ui.ButtonSet.OK);
   }
@@ -302,7 +302,7 @@ function onSetDirectorFileName() {
     }
   }
   else {
-    ui.alert(SET_DIRECTOR_FILE_NAME_TITLE, 
+    ui.alert(SET_DIRECTOR_FILE_NAME_TITLE,
       `Please select ${criteria.message} and then click menu item ${SET_DIRECTOR_FILE_NAME_MENU_ITEM} again.`,
       ui.ButtonSet.OK);
   }
@@ -336,7 +336,7 @@ function onDuplicateRowForCornerLot() {
     range.setValue(CORNER_LOT_STREET_TAG);
   }
   else {
-    ui.alert(DUPLICATE_ROW_FOR_CORNER_LOT_TITLE, 
+    ui.alert(DUPLICATE_ROW_FOR_CORNER_LOT_TITLE,
       `Please select one of the applications located in rows ${(dataRange.getRow() + 1)} through  ${(dataRange.getLastRow() - 1)}.`,
       ui.ButtonSet.OK);
   }
@@ -405,15 +405,15 @@ function onArchiveSpreadsheet(file = SpreadsheetApp.getActiveSpreadsheet()) {
   let sheet        = getGroupDataSheet_(file);
   let plantingDate = sheet.getRange(PLANTING_DATE_RANGE);
   let groupName    = sheet.getRange(GROUP_NAME_RANGE);
-  
+
   for (let i = 0; i < DEFAULT_COLUMN_WIDTHS.length; i++) {
     sheet.setColumnWidth((i + 1), DEFAULT_COLUMN_WIDTHS[i]);
   }
-  
+
   plantingDate.setDataValidation(null);
   plantingDate.protect().setWarningOnly(true);
   plantingDate.setNote(ARCHIVED_DATA_NOTE);
-  
+
   groupName.setDataValidation(null);
   groupName.protect().setWarningOnly(true);
   groupName.setNote(ARCHIVED_DATA_NOTE);
@@ -719,7 +719,7 @@ function compareApplicationData_(d1, d2) {
             }
           }
           else if (t2.length > 1 ) {
-            rc = -1;  
+            rc = -1;
           }
 
           if (rc == 0) {
@@ -900,7 +900,7 @@ function isPlantingDateActive_() {
   let sheet                  = getGroupDataSheet_();
   let plantingDate           = sheet.getRange(PLANTING_DATE_RANGE);
   let plantingDateValidation = plantingDate.getDataValidation();
-  
+
   return (plantingDateValidation.getCriteriaValues()[0].getValues().find((v) => (v[0] == plantingDate.getValue())) != undefined);
 }
 
