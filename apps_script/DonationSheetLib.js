@@ -114,7 +114,7 @@ function onScheduledGenerateRecurringDonationRollups(e) {
   let trigger = ScriptApp.getProjectTriggers().find(function(t) {return t.getUniqueId() == e.triggerUid});
 
   ScriptApp.deleteTrigger(trigger);
-  
+
   let runAt = new Date(RECURRING_ROLLUP_TRIGGER_DATE_TEMPLATE);
 
   runAt.setFullYear(new Date().getFullYear() + 1);
@@ -152,7 +152,7 @@ function onImportDonationData(displayResult = true, emailResult = true) {
     result += "</ul>"
 
     if (paymentNoteCount > 0) {
-      result += 
+      result +=
         `<p><p style="${STYLE_STANDARD_FONT}">The following donations included a payment note:</p></p>
         <p>
         <table style="${STYLE_STANDARD_FONT};${STYLE_TABLE}">
@@ -177,7 +177,7 @@ function onImportDonationData(displayResult = true, emailResult = true) {
         }
       });
 
-      result += 
+      result +=
         `</table>
         </p>`;
     }
@@ -451,7 +451,7 @@ function normalizePaypalData_(data, firstDataRow) {
 
         row.push(paymentType);
 
-        // Payment source 
+        // Payment source
         row.push(PAYMENT_SOURCE_PAYPAL);
 
         // Payment note
@@ -465,7 +465,7 @@ function normalizePaypalData_(data, firstDataRow) {
 
         if (streetAddress2.length > 0) {
           streetAddress1 += ADDRESS_JOIN_SEPARATOR + streetAddress2;
-        } 
+        }
 
         // Street address
         row.push(normalizeStreetAddress_(streetAddress1));
@@ -649,7 +649,7 @@ function normalizeCheckData_(data, firstDataRow) {
               }
             }
           }
-        }        
+        }
       }
 
       // Email address
@@ -698,7 +698,7 @@ function normalizeName_(name) {
 
   if (normalizedName.search(/\s+/) != -1) {
     let tokens = normalizedName.trim().split(/\s+/);
-  
+
     tokens[0] = tokens[0].trim().toLowerCase();
     normalizedName = tokens.join(" ");
   }
@@ -746,7 +746,7 @@ function normalizeAddressValue_(value) {
 
     valueParts.forEach(function(e) {
       if (valueIndex > 0) {
-        normalizedValue += " ";  
+        normalizedValue += " ";
       }
 
       normalizedValue += e.charAt(0).toUpperCase() + e.slice(1);
@@ -937,7 +937,7 @@ function generateDonationAcks_(sheet, ackFolder) {
       }
     });
 
-    stats = [totalAcks, numEmailAcks, numDocAcks, numRecurring, numUnaddressed, numAnonymous, execErrors]; 
+    stats = [totalAcks, numEmailAcks, numDocAcks, numRecurring, numUnaddressed, numAnonymous, execErrors];
   }
 
   return {
@@ -1166,7 +1166,7 @@ function toDonationObject_(donationRow) {
 }
 
 function isPayPalDonation_(donationType) {
-  return ((donationType == PAYPAL_DONATION_PAYMENT) || 
+  return ((donationType == PAYPAL_DONATION_PAYMENT) ||
           (donationType == PAYPAL_SUBSCRIPTION_PAYMENT) ||
           (donationType == PAYPAL_MOBILE_PAYMENT) ||
           (donationType == PAYPAL_MASS_PAYMENT))
