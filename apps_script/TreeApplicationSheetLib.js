@@ -58,14 +58,14 @@ const ARCHIVE_PLANTING_DATE_TITLE              = "Archive Planting Date";
 const INSERT_EMPTY_ROWS_TITLE                  = "Insert Empty Rows";
 const ABOUT_TITLE                              = "About Tree Application Spreadsheet";
 
-const STREET_SUFFIXES = [ 
-  ["Ave",   "Avenue"], 
-  ["Cir",   "Circle"], 
-  ["Ln",    "Lane"], 
-  ["Pk",    "Park"], 
-  ["Prk",   "Park"], 
-  ["Pl",    "Place"], 
-  ["Rd",    "Road"], 
+const STREET_SUFFIXES = [
+  ["Ave",   "Avenue"],
+  ["Cir",   "Circle"],
+  ["Ln",    "Lane"],
+  ["Pk",    "Park"],
+  ["Prk",   "Park"],
+  ["Pl",    "Place"],
+  ["Rd",    "Road"],
   ["Sq",    "Square"],
   ["St",    "Street"],
   ["Ter",   "Terrace"],
@@ -80,7 +80,7 @@ const SET_LIMITED_ACCESS = {
 const SET_VIEW_ACCESS = {
   type: "anyone",
   role: "reader"
-}; 
+};
 
 const SET_DRIVE_SUPPORT = {
   supportsAllDrives: true
@@ -116,20 +116,20 @@ function onEdit(e) {
           `Value "${e.value}" is invalid. Please specify "YYYY" followed by "Spring" or "Fall" with one space between the year and season, and the first letter of the season capitalized.\n\nExample: 2024 Spring`,
           ui.ButtonSet.OK);
 
-        e.range.setValue("");    
+        e.range.setValue("");
       }
       else {
-        e.range.setValue(resolvedValue);    
+        e.range.setValue(resolvedValue);
       }
     }
     else {
       range = sheet.getRange(GROUP_LEADER_RANGE);
-      
+
       if (sheet.getSheetId() == range.getSheet().getSheetId()) {
         if ((e.range.rowEnd > 1) && (range.getLastColumn() == e.range.columnEnd)) {
           if (e.value != undefined) {
             if (e.value.toLowerCase() == "no") {
-              e.range.setValue("No");    
+              e.range.setValue("No");
               sheet.getRange(e.range.rowEnd, sheet.getRange(GROUP_LEADER_TREE_RECIPIENT_RANGE).getColumn()).setValue("");
             }
             else if (e.value.toLowerCase() == "yes") {
@@ -141,11 +141,11 @@ function onEdit(e) {
               sheet.getRange(e.range.rowEnd, columnIndex).setValue((numTreesReq > 0 ? "Yes" : "No"));
             }
             else {
-              e.range.setValue(e.oldValue);    
+              e.range.setValue(e.oldValue);
             }
           }
           else {
-            e.range.setValue(e.oldValue);    
+            e.range.setValue(e.oldValue);
           }
         }
       }
@@ -197,7 +197,7 @@ function onSubmit(e) {
 
     cellParts.forEach(function(e) {
       if (cellIndex > 0) {
-        cellValue += " ";  
+        cellValue += " ";
       }
 
       cellToken = e.charAt(0).toUpperCase() + e.slice(1);
@@ -223,7 +223,7 @@ function onSubmit(e) {
 
     if (!((groupLeaderRange.getValue() == "Yes") && (groupLeaderTreeRecipientRange.getValue() == "No"))) {
       cellValue = sheet.getRange(DEFAULT_GROUP_NAME_RANGE).getValue();
-      
+
       groupLeaderRange.setValue("No");
       groupLeaderTreeRecipientRange.setValue("");
     }
@@ -233,7 +233,7 @@ function onSubmit(e) {
   }
 
   cellRange.setValue(cellValue);
-  
+
   let defaultPlantingDate = PropertiesService.getDocumentProperties().getProperty(DEFAULT_PLANTING_DATE_NAME_PROP);
 
   if ((defaultPlantingDate != null) && (defaultPlantingDate.trim().length > 0)) {
@@ -265,7 +265,7 @@ function onSubmit(e) {
 
   cellRange = sheet.getRange(rowIndex, sheet.getRange(STREET_ADDRESS_RANGE).getColumn());
   cellRange.setValue(normalizeStreetAddress_(cellRange.getValue()));
-  
+
   cellRange = sheet.getRange(rowIndex, sheet.getRange(NUMBER_OF_TREES_REQUESTED_RANGE).getColumn());
   cellValue = cellRange.getValue();
 
@@ -407,7 +407,7 @@ function onArchivePlantingDate() {
       let srcRow      = srcSheet.getRange(HEADER_ROW_RANGE).getRow();
       let srcName     = srcSheet.getName();
       let dstName     = `${plantingDate} Archive`;
-        
+
       let appData = srcRange.getValues();
       let srcData = appData.filter(row => row[searchIndex] != plantingDate);
       let dstData = appData.filter(row => row[searchIndex] == plantingDate);
@@ -416,7 +416,7 @@ function onArchivePlantingDate() {
         let queryRange   = file.getRange(ALL_REQUESTS_BY_ZIP_CODE_QUERY_RANGE);
         let dstSheet     = file.insertSheet(dstName, queryRange.getSheet().getIndex());
         let zipCodeA1    = srcSheet.getRange(ZIP_CODE_RANGE).getA1Notation().replace(/\d+/g, "");
-        
+
         dstSheet.getRange(zipCodeA1).setNumberFormat("@");
         srcSheet.getRange(srcRow, 1, 1, srcSheet.getLastColumn()).copyTo(dstSheet.getRange("A1"));
         dstSheet.getRange(dstSheet.getLastRow() + 1, 1, dstData.length, dstData[0].length).setValues(dstData);
@@ -446,7 +446,7 @@ function onArchivePlantingDate() {
         let plantingFolderId = plantingFolder.getId();
 
         archiveFolder_(plantingFolder);
-        
+
         Drive.Files.update(SET_LIMITED_ACCESS, plantingFolderId);
         Drive.Permissions.create(SET_VIEW_ACCESS, plantingFolderId, SET_DRIVE_SUPPORT);
       }
@@ -479,7 +479,7 @@ function onAbout() {
     Default planting date
     ${defaultPlantingDate}
 
-  
+
     Newton Tree Conservancy
     www.newtontreeconservancy.org`,
     ui.ButtonSet.OK);
@@ -494,7 +494,7 @@ function normalizeName_(name) {
 
   if (normalizedName.search(/\s+/) != -1) {
     let tokens = normalizedName.trim().split(/\s+/);
-  
+
     tokens[0] = tokens[0].trim().toLowerCase();
     normalizedName = tokens.join(" ");
   }
@@ -523,7 +523,7 @@ function normalizeEmailAddress_(emailAddress) {
 
 function normalizeStreetAddress_(streetAddress) {
   let normalizedStreetAddress = normalizeString_(streetAddress);
-  
+
   if (normalizedStreetAddress.length > 0) {
     normalizedStreetAddress = normalizedStreetAddress.replaceAll("\n", " ").trim().toLowerCase().replaceAll(/[.,]/g, "");
 
@@ -534,7 +534,7 @@ function normalizeStreetAddress_(streetAddress) {
 
     valueParts.forEach(function(e) {
       if (valueIndex > 0) {
-        normalizedStreetAddress += " ";  
+        normalizedStreetAddress += " ";
       }
 
       normalizedStreetAddress += e.charAt(0).toUpperCase() + e.slice(1);
