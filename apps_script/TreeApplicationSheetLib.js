@@ -13,7 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                       = "44";
+const DEPLOYMENT_VERSION                       = "45";
 const FORM_DATA_RANGE                          = "form_data";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
@@ -413,6 +413,10 @@ function onArchivePlantingDate() {
       let dstData = appData.filter(row => row[searchIndex] == plantingDate);
 
       if (dstData.length > 0) {
+        dstData.forEach(function(e) {
+          e.splice(-2, 2);
+        });
+
         let queryRange   = file.getRange(ALL_REQUESTS_BY_ZIP_CODE_QUERY_RANGE);
         let dstSheet     = file.insertSheet(dstName, queryRange.getSheet().getIndex());
         let zipCodeA1    = srcSheet.getRange(ZIP_CODE_RANGE).getA1Notation().replace(/\d+/g, "");
