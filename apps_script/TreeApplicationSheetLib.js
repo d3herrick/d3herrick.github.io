@@ -13,7 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                       = "45";
+const DEPLOYMENT_VERSION                       = "46";
 const FORM_DATA_RANGE                          = "form_data";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
@@ -429,9 +429,9 @@ function onArchivePlantingDate() {
 
         srcRange.clear();
         srcSheet.deleteRows(srcRange.getRowIndex() + 1, dstData.length);
+        srcSheet.getRange(zipCodeA1).setNumberFormat("@");
 
         if (srcData.length > 0) {
-          srcSheet.getRange(zipCodeA1).setNumberFormat("@");
           srcSheet.getRange(srcRange.getRow(), 1, srcData.length, srcData[0].length).setValues(srcData);
         }
 
