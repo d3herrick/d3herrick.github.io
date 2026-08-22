@@ -428,8 +428,8 @@ function onArchivePlantingDate() {
         dstSheet.deleteColumn(srcSheet.getRange(GROUP_NAME_LEADER_RANGE).getColumn());
 
         srcRange.clear();
-        srcSheet.deleteRows(srcRange.getRowIndex() + 1, dstData.length);
         srcSheet.getRange(zipCodeA1).setNumberFormat("@");
+        srcSheet.deleteRows(srcRange.getRowIndex() + 1, dstData.length);
 
         if (srcData.length > 0) {
           srcSheet.getRange(srcRange.getRow(), 1, srcData.length, srcData[0].length).setValues(srcData);
