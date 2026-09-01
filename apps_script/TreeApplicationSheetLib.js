@@ -166,6 +166,7 @@ function onSubmit(e) {
   let cellValue   = cellRange.getValue();
 
   let isLeaderApp = undefined;
+  let groupName   = undefined;
 
   if ("Yes" == cellValue) {
     columnIndex = sheet.getRange(GROUP_NAME_LEADER_RANGE).getColumn();
@@ -235,6 +236,8 @@ function onSubmit(e) {
       rowRange.setFontWeight("bold").setFontStyle("italic");
     }
   }
+
+  groupName = cellValue;
 
   cellRange.setValue(cellValue);
 
@@ -308,6 +311,7 @@ function onSubmit(e) {
   let bodyTemplate = HtmlService.createTemplateFromFile(sheet.getRange(APPL_ACK_EMAIL_BODY_TEMPLATE_RANGE).getValue());
 
   bodyTemplate.isLeaderApp = isLeaderApp;
+  bodyTemplate.groupName   = groupName;
    
   let body = bodyTemplate.evaluate().getContent();
 
