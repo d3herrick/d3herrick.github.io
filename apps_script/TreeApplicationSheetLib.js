@@ -108,7 +108,7 @@ function onEdit(e) {
     if ((e.value != undefined) && (e.range.rowEnd > 1) && (range.getLastColumn() == e.range.columnEnd)) {
       let resolvedValue = resolvePlantingDate_(e.value);
 
-      if (resolvedValue == undefined) {
+      if (resolvedValue == null) {
         let ui         = SpreadsheetApp.getUi();
         let columnName = sheet.getRange(sheet.getRange(FORM_HEADINGS_RANGE).getLastRow(), range.getColumn()).getValue();
 
@@ -341,7 +341,7 @@ function onSetDefaultPlantingDate() {
     if (defaultPlantingDate.length > 0) {
       let resolvedValue = resolvePlantingDate_(defaultPlantingDate);
 
-      if (resolvedValue == undefined) {
+      if (resolvedValue == null) {
         ui.alert(`${SET_DEFAULT_PLANTING_DATE_TITLE}`,
           `Value "${defaultPlantingDate}" is invalid. Please specify "YYYY" followed by "Spring" or "Fall" with one space between the year and season, and the first letter of the season capitalized.\n\nExample: 2024 Spring`,
           ui.ButtonSet.OK);
@@ -408,7 +408,7 @@ function onArchivePlantingDate() {
   if (response.getSelectedButton() == ui.Button.OK) {
     let plantingDate = resolvePlantingDate_(response.getResponseText());
 
-    if (plantingDate != undefined) {
+    if (plantingDate != null) {
       let file        = SpreadsheetApp.getActiveSpreadsheet();
       let searchIndex = file.getRange(PLANTING_DATE_RANGE).getColumn() - 1;
       let srcRange    = file.getRange(FORM_DATA_RANGE);
@@ -570,7 +570,7 @@ function normalizeTreeLocations_(treeLocations) {
 }
 
 function resolvePlantingDate_(value) {
-  let resolvedValue = undefined;
+  let resolvedValue = null;
 
   if ((value != undefined) && (value != null)) {
     let parts = value.trim().split(/\s+/);
