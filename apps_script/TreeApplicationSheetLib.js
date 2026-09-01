@@ -13,7 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                       = "46";
+const DEPLOYMENT_VERSION                       = "47";
 const FORM_DATA_RANGE                          = "form_data";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
@@ -165,15 +165,19 @@ function onSubmit(e) {
   let cellRange   = sheet.getRange(rowIndex, columnIndex);
   let cellValue   = cellRange.getValue();
 
+  let isLeaderApp = undefined;
+
   if ("Yes" == cellValue) {
     columnIndex = sheet.getRange(GROUP_NAME_LEADER_RANGE).getColumn();
     cellRange   = sheet.getRange(rowIndex, columnIndex);
     cellValue   = cellRange.getValue();
+    isLeaderApp = true;
   }
   else {
     columnIndex = sheet.getRange(GROUP_NAME_MEMBER_RANGE).getColumn();
     cellRange   = sheet.getRange(rowIndex, columnIndex);
     cellValue   = cellRange.getValue();
+    isLeaderApp = false;
   }
 
   columnIndex = sheet.getRange(GROUP_NAME_RANGE).getColumn();
@@ -303,6 +307,8 @@ function onSubmit(e) {
   let subject      = sheet.getRange(APPL_ACK_EMAIL_SUBJECT_RANGE).getValue();
   let bodyTemplate = HtmlService.createTemplateFromFile(sheet.getRange(APPL_ACK_EMAIL_BODY_TEMPLATE_RANGE).getValue());
 
+  bodyTemplate.isLeaderApp = isLeaderApp;
+   
   let body = bodyTemplate.evaluate().getContent();
 
   MailApp.sendEmail(
