@@ -19,7 +19,7 @@
 //                 "https://www.googleapis.com/auth/script.container.ui",
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
-const DEPLOYMENT_VERSION                     = "26";
+const DEPLOYMENT_VERSION                     = "27";
 const DONATION_DATA_RANGE                    = "donation_data";
 const LAST_NAME_RANGE                        = "last_name";
 const FIRST_NAME_RANGE                       = "first_name";
@@ -1221,7 +1221,7 @@ function insertDonationData_(sheet, donations, firstInsertionRow, firstInsertion
 }
 
 function getDonationDataSheet_() {
-  let sheet = undefined;
+  let sheet = null;
   let range = SpreadsheetApp.getActiveSpreadsheet().getRangeByName(DONATION_DATA_RANGE);
 
   if (range != null) {

@@ -13,7 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                     = "59";
+const DEPLOYMENT_VERSION                     = "60";
 const FORM_DATA_SHEET_ID_RANGE               = "form_data_spreadsheet_id";
 const FORM_DATA_SHEET_RANGE                  = "form_data";
 const PLANTING_DATE_RANGE                    = "planting_date";
@@ -756,7 +756,7 @@ function parseStreetAddress_(streetAddress) {
     }
     else if ((/^[a-z]/.test(c))) {
       if (i < (length - 1)) {
-        if (tokens.charAt(i + 1) == ' ') {
+        if (tokens.charAt(i + 1) == " ") {
           end++;
           break;
         }
@@ -768,9 +768,9 @@ function parseStreetAddress_(streetAddress) {
         break;
       }
     }
-    else if (c == ' ') {
+    else if (c == " ") {
       if (i < (length - 2)) {
-        if ((/^[a-z]/.test(tokens.charAt(i + 1)) && (tokens.charAt(i + 2) == ' '))) {
+        if ((/^[a-z]/.test(tokens.charAt(i + 1)) && (tokens.charAt(i + 2) == " "))) {
           apt = tokens.charAt(i + 1);
           end += 2;
           break;
@@ -801,7 +801,7 @@ function parseStreetAddress_(streetAddress) {
   for (let i = end; i < length; i++) {
     let c = tokens.charAt(i);
 
-    if ((c == ' ') || (c == '-')) {
+    if ((c == " ") || (c == '-')) {
       end++;
     }
     else if (Number.isInteger(Number.parseInt(c))) {
@@ -925,7 +925,7 @@ function isApplicationDataEmpty_(rows) {
 }
 
 function getGroupDataSheet_(file = SpreadsheetApp.getActiveSpreadsheet()) {
-  let sheet = undefined;
+  let sheet = null;
   let range = file.getRangeByName(GROUP_DATA_RANGE);
 
   if (range != null) {
