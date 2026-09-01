@@ -165,8 +165,8 @@ function onSubmit(e) {
   let cellRange   = sheet.getRange(rowIndex, columnIndex);
   let cellValue   = cellRange.getValue();
 
-  let isLeaderApp = undefined;
-  let groupName   = undefined;
+  let isLeaderApp = null;
+  let groupName   = null;
 
   if ("Yes" == cellValue) {
     columnIndex = sheet.getRange(GROUP_NAME_LEADER_RANGE).getColumn();
@@ -238,8 +238,7 @@ function onSubmit(e) {
   }
 
   groupName = cellValue;
-
-  cellRange.setValue(cellValue);
+  cellRange.setValue(groupName);
 
   let defaultPlantingDate = PropertiesService.getDocumentProperties().getProperty(DEFAULT_PLANTING_DATE_NAME_PROP);
 
