@@ -1,5 +1,5 @@
 //
-// Copyright 2025 Douglas Herrick
+// Copyright 2026 Douglas Herrick
 //
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file or at
@@ -8,7 +8,8 @@
 //
 // This library includes functions to help manage processing of reservation requests for tree sapling giveaways.
 //
-// Note: The email body text includes the specific dates of a giveaway. Be sure to UPDATE THE DATES FOR EACH GIVEAWAY.
+// Note: The email body text includes the specific dates of a giveaway. Be sure to UPDATE THE DATE AND
+// ANNOUNCEMENT LINK FOR EACH GIVEAWAY.
 //
 // @OnlyCurrentDoc
 //
@@ -22,15 +23,18 @@ const RES_ACK_EMAIL_BODY_TEMPLATE =
   <html>
   <body>
   <p>
-  Thank you for submitting a reservation to receive tree saplings during the Newton Tree Conservancy's giveaway at Nahanton Park's Community Gardens on October 18, 2025. <strong>Your reservation specified a time slot at <?!=timeSlot?></strong> to receive your saplings.
-  To view information about the giveaway, please visit
-  <a href="https://www.newtontreeconservancy.org/news-content/2025-tree-sapling-giveaway">2025 Tree Sapling Giveaway</a>.
+  Thank you for submitting a reservation to receive tree saplings during the Newton Tree Conservancy's giveaway at Nahanton Park's Community Gardens on <strong>October 24, 2026</strong>. Your reservation specified a <strong>time slot at <?!=timeSlot?></strong> to select your saplings.
   </p>
-  <p><br></p>
   <p>
-  Newton Tree Conservancy
-  <br>
-  www.newtontreeconservancy.org
+  To view information about the giveaway, visit
+  <a href="https://mailchi.mp/094d1fab6b72/2026-nahanton-sapling-giveaway">2026 Tree Sapling Giveaway</a>.
+  </p>
+  <p>
+  See you soon,
+  </p>
+  <p>
+  Your friends at Newton Tree Conservancy
+  <br><a href="https://www.newtontreeconservancy.org/">www.newtontreeconservancy.org</a>
   </p>
   </body>
   </html>`;
