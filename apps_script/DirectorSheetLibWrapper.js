@@ -23,14 +23,14 @@ function onGetApplicationData() {
   DirectorSheetLib.onGetApplicationData();
 }
 
-function onSetDirectorFileName() {
-  DirectorSheetLib.onSetDirectorFileName();
+function onSetDirector() {
+  DirectorSheetLib.onSetDirector();
 }
 
 function onDuplicateRowForCornerLot() {
   DirectorSheetLib.onDuplicateRowForCornerLot();
 }
-
+  
 function onInsertEmptyRows() {
   DirectorSheetLib.onInsertEmptyRows();
 }

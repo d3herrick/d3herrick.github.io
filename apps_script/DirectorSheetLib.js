@@ -13,7 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                     = "60";
+const DEPLOYMENT_VERSION                     = "61";
 const FORM_DATA_SHEET_ID_RANGE               = "form_data_spreadsheet_id";
 const FORM_DATA_SHEET_RANGE                  = "form_data";
 const PLANTING_DATE_RANGE                    = "planting_date";
@@ -41,26 +41,26 @@ const VIEW_DOCUMENTATION_RANGE               = "view_documentation";
 const PLANTING_DATA_FILTER_VISIBILITY        = "is_planting_data_filter_visible";
 const INSERT_EMPTY_ROWS_MAX                  = 30;
 const DIRECTOR_NAME_PROP                     = "director_name_prop";
-const DIRECTOR_NAME_NOT_SPECIFIED            = "Not specified";
+const DIRECTOR_NAME_UNASSIGNED               = "Unassigned";
 const DUPLICATE_ROW_COLOR                    = "darkgray";
 const DUPLICATE_ROW_REQUESTED_VALUE          = "X";
 const DUPLICATE_ROW_REQUESTED_FONT_SIZE      = 45;
 const RETRIEVING_DATA_STATUS                 = "Retrieving data..."
 const NEWTON_TREE_CONSERVANCY_MENU           = "Newton Tree Conservancy";
 const GET_APPLICATION_DATA_MENU_ITEM         = "Get application data";
-const SET_DIRECTOR_FILE_NAME_MENU_ITEM       = "Set director for spreadsheet file name";
+const SET_DIRECTOR_MENU_ITEM                 = "Set director assigned to planting group";
 const DUPLICATE_ROW_FOR_CORNER_LOT_MENU_ITEM = "Duplicate application row for corner lot"
 const INSERT_EMPTY_ROWS_MENU_ITEM            = "Insert empty rows";
 const TOGGLE_DATA_FILTER_MENU_ITEM           = "Toggle data filter visibility";
 const ABOUT_MENU_ITEM                        = "About...";
 const ADDITIONAL_DATA_AVAILABLE_TITLE        = "Additional Application Data Available";
-const SET_DIRECTOR_FILE_NAME_TITLE           = "Set Director for Spreadsheet File Name";
+const SET_DIRECTOR_TITLE                     = "Set Director Assigned to Planting Group";
 const DUPLICATE_ROW_FOR_CORNER_LOT_TITLE     = "Duplicate Application Row for Corner Lot"
 const INSERT_EMPTY_ROWS_TITLE                = "Insert Empty Rows";
 const SPECIFY_DATA_FILTER_TITLE              = "Specify Application Data Filter Criteria";
 const SPECIFIED_INVALID_COLUMN_VALUE_TITLE   = "Invalid Value Specified";
 const ABOUT_TITLE                            = "About Community Tree Planting Spreadsheet";
-const DATA_FILTER_TITLE_LABEL                = "Select Planting date and Group name and click menu item Get application data";
+const DATA_FILTER_TITLE_LABEL                = "Select Planting date and Group name and then click menu item Get application data";
 const PLANTING_DATE_FILTER_LABEL             = "Planting date";
 const GROUP_NAME_FILTER_LABEL                = "Group name";
 const LAST_DATA_RETRIEVAL_LABEL              = "Last data retrieval";
@@ -120,7 +120,7 @@ function onOpen(e) {
   ui.
     createMenu(NEWTON_TREE_CONSERVANCY_MENU).
       addItem(GET_APPLICATION_DATA_MENU_ITEM, "onGetApplicationData").
-      addItem(SET_DIRECTOR_FILE_NAME_MENU_ITEM, "onSetDirectorFileName").
+      addItem(SET_DIRECTOR_MENU_ITEM, "onSetDirector").
       addSeparator().
       addItem(DUPLICATE_ROW_FOR_CORNER_LOT_MENU_ITEM, "onDuplicateRowForCornerLot").
       addItem(INSERT_EMPTY_ROWS_MENU_ITEM, "onInsertEmptyRows").
@@ -274,37 +274,29 @@ function onGetApplicationData(rows) {
   }
 }
 
-function onSetDirectorFileName() {
-  let sheet    = getGroupDataSheet_();
-  let ui       = SpreadsheetApp.getUi();
-  let criteria = validateDataFilterCriteria_();
+function onSetDirector() {
+  let sheet = getGroupDataSheet_();
+  let ui    = SpreadsheetApp.getUi();
 
-  if (criteria.isComplete) {
-    let response = ui.prompt(SET_DIRECTOR_FILE_NAME_TITLE,
-      `Enter the first name of the director assigned to this planting group. If multiple directors are assigned, separate their first names with "and":`,
-      ui.ButtonSet.OK_CANCEL);
+  let response = ui.prompt(SET_DIRECTOR_TITLE,
+    `Enter the first name of the director assigned to this planting group. If multiple directors are assigned, separate their first names with "and":`,
+    ui.ButtonSet.OK_CANCEL);
 
-    let directorName = response.getResponseText();
+  if (response.getSelectedButton() == ui.Button.OK) {
+    let directorName = response.getResponseText().trim();
 
-    if (response.getSelectedButton() == ui.Button.OK) {
-      if (directorName.length > 0) {
-        PropertiesService.getDocumentProperties().setProperty(DIRECTOR_NAME_PROP, directorName);
-
-        setSpreadsheetFileName_();
-      }
-      else {
-        PropertiesService.getDocumentProperties().deleteProperty(DIRECTOR_NAME_PROP);
-
-        ui.alert(SET_DIRECTOR_FILE_NAME_TITLE,
-          `You did not specify the name of a director. Consequently, automatic update of the spreadsheet file name will be disabled.`,
-          ui.ButtonSet.OK);
-      }
+    if (directorName.length > 0) {
+      PropertiesService.getDocumentProperties().setProperty(DIRECTOR_NAME_PROP, directorName);
     }
-  }
-  else {
-    ui.alert(SET_DIRECTOR_FILE_NAME_TITLE,
-      `Please select ${criteria.message} and then click menu item ${SET_DIRECTOR_FILE_NAME_MENU_ITEM} again.`,
-      ui.ButtonSet.OK);
+    else {
+      PropertiesService.getDocumentProperties().deleteProperty(DIRECTOR_NAME_PROP);
+    }
+
+    let criteria = validateDataFilterCriteria_();
+
+    if (criteria.isComplete) {
+      setSpreadsheetFileName_();
+    }
   }
 }
 
@@ -421,7 +413,7 @@ function onArchiveSpreadsheet(file = SpreadsheetApp.getActiveSpreadsheet()) {
 
 function onAbout() {
   let ui           = SpreadsheetApp.getUi();
-  let directorName = PropertiesService.getDocumentProperties().getProperty(DIRECTOR_NAME_PROP) ?? DIRECTOR_NAME_NOT_SPECIFIED;
+  let directorName = PropertiesService.getDocumentProperties().getProperty(DIRECTOR_NAME_PROP) ?? DIRECTOR_NAME_UNASSIGNED;
 
   ui.alert(ABOUT_TITLE,
     `Version
@@ -446,13 +438,12 @@ function setSpreadsheetFileName_() {
     let sheet          = getGroupDataSheet_();
     let plantingDate   = sheet.getRange(PLANTING_DATE_RANGE).getValue();
     let groupName      = sheet.getRange(GROUP_NAME_RANGE).getValue();
-    let totalTreeCount = sheet.getRange(TOTAL_RECOMMENDED_TREE_COUNT_RANGE).getValue() ?? 0;
-    let directorName   = PropertiesService.getDocumentProperties().getProperty(DIRECTOR_NAME_PROP);
 
     if (((plantingDate != null) && (plantingDate.trim().length > 0)) &&
-        ((groupName != null)    && (groupName.trim().length > 0)) &&
-        ((directorName != null) && (directorName.trim().length > 0)))
+        ((groupName != null)    && (groupName.trim().length > 0)))
     {
+      let directorName    = PropertiesService.getDocumentProperties().getProperty(DIRECTOR_NAME_PROP) ?? DIRECTOR_NAME_UNASSIGNED;
+      let totalTreeCount  = sheet.getRange(TOTAL_RECOMMENDED_TREE_COUNT_RANGE).getValue() ?? 0;
       let spreadSheetName = `${plantingDate}-${groupName} (${directorName}) (${totalTreeCount})`;
 
       SpreadsheetApp.getActiveSpreadsheet().rename(spreadSheetName);
