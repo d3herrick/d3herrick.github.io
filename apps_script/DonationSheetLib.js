@@ -19,7 +19,7 @@
 //                 "https://www.googleapis.com/auth/script.container.ui",
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
-const DEPLOYMENT_VERSION                     = "27";
+const DEPLOYMENT_VERSION                     = "28";
 const DONATION_DATA_RANGE                    = "donation_data";
 const LAST_NAME_RANGE                        = "last_name";
 const FIRST_NAME_RANGE                       = "first_name";
@@ -683,11 +683,18 @@ function normalizeNumber_(value) {
 }
 
 function normalizeDonationDate_(date) {
-  let normalizedDate = date;
+  let normalizedDate = (date != null) ? date : new Date();
 
-  if (Number.isInteger(normalizedDate)) {
-    normalizedDate = normalizedDate.toString();
-    normalizedDate = `${normalizedDate.substring(0, 4)}/${normalizedDate.substring(4, 6)}/${normalizedDate.substring(6, 8)}`;
+  if (!Number.isInteger(date)) {
+    normalizedDate = [
+      date.getFullYear(),
+      (date.getMonth() + 1).toString().padStart(2, '0'),
+      date.getDate().toString().padStart(2, '0')
+    ].join('-');
+  }
+  else {
+    normalizedDate = date.toString();
+    normalizedDate = `${normalizedDate.substring(0, 4)}-${normalizedDate.substring(4, 6)}-${normalizedDate.substring(6, 8)}`;
   }
 
   return normalizedDate;
