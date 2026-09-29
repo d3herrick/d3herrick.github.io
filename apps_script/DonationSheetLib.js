@@ -684,22 +684,36 @@ function normalizeNumber_(value) {
 
 function normalizeDonationDate_(date) {
   let normalizedDate = date;
+  
+  if (isString_(normalizedDate)) {
+    let timestamp = Date.parse(normalizedDate);
 
-  if ((typeof normalizedDate == "string") || (normalizedDate instanceof String)) {
-    normalizedDate = new Date(normalizedDate);
-  }
-
-  if (normalizedDate instanceof Date) {
-    normalizedDate = [
-      normalizedDate.getFullYear(),
-      (normalizedDate.getMonth() + 1).toString().padStart(2, '0'),
-      normalizedDate.getDate().toString().padStart(2, '0')
-    ].join('-');
+    if (!Number.isNaN(timestamp)) {
+      normalizedDate = new Date(timestamp);
+    }
+    else {
+      normalizedDate = new Date();
+    }
   }
   else if (Number.isInteger(normalizedDate)) {
     normalizedDate = normalizedDate.toString();
-    normalizedDate = `${normalizedDate.substring(0, 4)}-${normalizedDate.substring(4, 6)}-${normalizedDate.substring(6, 8)}`;
+
+    if (normalizedDate.length == 8) {
+      normalizedDate = new Date(`${normalizedDate.substring(0, 4)}/${normalizedDate.substring(4, 6)}/${normalizedDate.substring(6, 8)}`);
+    }
+    else {
+      normalizedDate = new Date();
+    }
   }
+  else if (normalizedDate == null) {
+    normalizedDate = new Date();
+  }
+
+  normalizedDate = [
+    normalizedDate.getFullYear(),
+    (normalizedDate.getMonth() + 1).toString().padStart(2, '0'),
+    normalizedDate.getDate().toString().padStart(2, '0')
+  ].join('-');
 
   return normalizedDate;
 }
@@ -781,6 +795,10 @@ function normalizeDonationZipcode_(zipCode) {
   }
 
   return normalizedZipcode;
+}
+
+function isString_(value) {
+  return ((typeof value == "string") || (value instanceof String));
 }
 
 function isEmptyRow_(row) {
