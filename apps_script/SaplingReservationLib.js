@@ -23,7 +23,7 @@ const RES_ACK_EMAIL_BODY_TEMPLATE =
   <html>
   <body>
   <p>
-  Thank you for submitting a reservation to receive tree saplings during the Newton Tree Conservancy's giveaway at Nahanton Park's Community Gardens on <strong>October 24, 2026</strong>. Your reservation specified a <strong>time slot at <?!=timeSlot?></strong> to select your saplings.
+  Thank you for submitting a reservation to receive tree saplings during the Newton Tree Conservancy's giveaway at Nahanton Park's Community Gardens on <strong>October 24, 2026</strong>. Your reservation specified a <strong>time slot at <?!=timeSlot?></strong> to select your saplings. If you have to cancel or change the time of your reservation, please inform the Newton Tree Conservancy in a reply to this email.
   </p>
   <p>
   To view information about the giveaway, visit
