@@ -7,15 +7,38 @@
 // https://opensource.org/licenses/MIT.
 //
 // This library includes functions to help manage processing of reservation requests for
-// tree sapling giveaways.
+// tree sapling giveaways, including sending reservation acknowledgements.
 //
-// Note: The email body text references the date and information of a giveaway. Be sure to
-// UPDATE RES_ACK_EVENT_DATE and RES_ACK_EVENT_INFO_LINK for each giveaway.
+// For each sapling giveaway, you must do the following once before the giveaway
+// reservation period begins:
+//
+// 1. As indicated below, update the values of variables RES_ACK_EVENT_DATE and
+// RES_ACK_EVENT_INFO_LINK to reflect the giveaway date and its information link.
+//
+// 2. Create a trigger for this spreadsheet, by specifying the following:
+//
+//    Choose which function to run
+//      onSubmit
+//
+//    Which runs at deployment
+//      Head
+//
+//    Select event source
+//      From spreadsheet
+//
+//    Select event type
+//      On form submit
+//
+//    Failure notification settings
+//      Notify me immediately
 //
 // @OnlyCurrentDoc
 //
+// UPDATE THESE VARIABLE VALUES (THE TEXT IN QUOTES) ONCE BEFORE A GIVEAWAY REGISTRATION PERIOD BEGINS
 const RES_ACK_EVENT_DATE           = "October 24, 2026";
 const RES_ACK_EVENT_INFO_LINK      = "https://mailchi.mp/094d1fab6b72/2026-nahanton-sapling-giveaway"; 
+
+// DO NOT UPDATE THESE VARIABLE VALUES
 const RES_ACK_EMAIL_SENDER_NAME    = "Newton Tree Conservancy";
 const RES_ACK_EMAIL_REPLY_TO       = "newtontreeconservancy@gmail.com";
 const RES_ACK_EMAIL_SUBJECT        = "Reservation received for the Newton Tree Conservancy tree sapling giveaway";
@@ -39,7 +62,6 @@ const RES_ACK_EMAIL_BODY_TEMPLATE  =
   </p>
   </body>
   </html>`;
-
 const EMAIL_ADDRESS_RANGE = "email_address";
 const TIME_SLOT_RANGE     = "time_slot";
 
