@@ -19,7 +19,7 @@
 //                 "https://www.googleapis.com/auth/script.container.ui",
 //                 "https://www.googleapis.com/auth/script.send_mail"]
 //
-const DEPLOYMENT_VERSION                     = "29";
+const DEPLOYMENT_VERSION                     = "30";
 const DONATION_DATA_RANGE                    = "donation_data";
 const LAST_NAME_RANGE                        = "last_name";
 const FIRST_NAME_RANGE                       = "first_name";
@@ -684,7 +684,7 @@ function normalizeNumber_(value) {
 
 function normalizeDonationDate_(date) {
   let normalizedDate = date;
-  
+
   if (isString_(normalizedDate)) {
     let timestamp = Date.parse(normalizedDate);
 
@@ -721,17 +721,38 @@ function normalizeDonationDate_(date) {
 function normalizeName_(name) {
   let normalizedName = normalizeString_(name);
 
-  if (normalizedName.search(/\s+/) != -1) {
-    let tokens = normalizedName.trim().split(/\s+/);
+  if (normalizedName.search(/[\s+\-]/) != -1) {
+    let parts     = [];
+    let separator = null;
 
-    tokens[0] = tokens[0].trim().toLowerCase();
-    normalizedName = tokens.join(" ");
+    let tokens = normalizedName.trim().split(/([\s+\-])/);
+
+    tokens.forEach(function(t) {
+      if (t.length > 0) {
+        if ((t != " ") && (t != "-")) {
+          let part = t.trim().toLowerCase();
+
+          part = part.charAt(0).toUpperCase() + part.slice(1);
+
+          if (parts.length > 0) {
+            parts.push(parts.pop() + separator + part);
+            separator = null;
+          }
+          else {
+            parts.push(part);
+          }
+        }
+        else if (separator == null) {
+          separator = t;
+        }
+      }
+    });
+
+    normalizedName = parts.pop();
   }
   else {
-    normalizedName = normalizedName.toLowerCase();
+    normalizedName = normalizedName.charAt(0).toUpperCase() + normalizedName.slice(1);
   }
-
-  normalizedName = normalizedName.charAt(0).toUpperCase() + normalizedName.slice(1);
 
   return normalizedName;
 }
@@ -758,6 +779,20 @@ function normalizeCity_(city) {
   return normalizeAddressValue_(city);
 }
 
+function normalizeState_(state) {
+  return normalizeString_(state).toUpperCase();
+}
+
+function normalizeDonationZipcode_(zipCode) {
+  let normalizedZipcode = zipCode;
+
+  if ((normalizedZipcode.length > 0) && (normalizedZipcode.length == (ZIPCODE_MINIMUM_LENGTH - 1))) {
+    normalizedZipcode = "0" + normalizedZipcode;
+  }
+
+  return normalizedZipcode;
+}
+
 function normalizeAddressValue_(value) {
   let normalizedValue = normalizeString_(value);
 
@@ -781,20 +816,6 @@ function normalizeAddressValue_(value) {
   }
 
   return normalizedValue;
-}
-
-function normalizeState_(state) {
-  return normalizeString_(state).toUpperCase();
-}
-
-function normalizeDonationZipcode_(zipCode) {
-  let normalizedZipcode = zipCode;
-
-  if ((normalizedZipcode.length > 0) && (normalizedZipcode.length == (ZIPCODE_MINIMUM_LENGTH - 1))) {
-    normalizedZipcode = "0" + normalizedZipcode;
-  }
-
-  return normalizedZipcode;
 }
 
 function isString_(value) {

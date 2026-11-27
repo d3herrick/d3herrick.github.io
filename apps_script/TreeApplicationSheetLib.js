@@ -13,7 +13,7 @@
 //
 // @OnlyCurrentDoc
 //
-const DEPLOYMENT_VERSION                       = "47";
+const DEPLOYMENT_VERSION                       = "48";
 const FORM_DATA_RANGE                          = "form_data";
 const HEADER_ROW_RANGE                         = "header_row";
 const PLANTING_DATE_RANGE                      = "planting_date";
@@ -311,7 +311,7 @@ function onSubmit(e) {
 
   bodyTemplate.isLeaderApp = isLeaderApp;
   bodyTemplate.groupName   = groupName;
-   
+
   let body = bodyTemplate.evaluate().getContent();
 
   MailApp.sendEmail(
@@ -505,17 +505,38 @@ function normalizeString_(value) {
 function normalizeName_(name) {
   let normalizedName = normalizeString_(name);
 
-  if (normalizedName.search(/\s+/) != -1) {
-    let tokens = normalizedName.trim().split(/\s+/);
+  if (normalizedName.search(/[\s+\-]/) != -1) {
+    let parts     = [];
+    let separator = null;
 
-    tokens[0] = tokens[0].trim().toLowerCase();
-    normalizedName = tokens.join(" ");
+    let tokens = normalizedName.trim().split(/([\s+\-])/);
+
+    tokens.forEach(function(t) {
+      if (t.length > 0) {
+        if ((t != " ") && (t != "-")) {
+          let part = t.trim().toLowerCase();
+
+          part = part.charAt(0).toUpperCase() + part.slice(1);
+
+          if (parts.length > 0) {
+            parts.push(parts.pop() + separator + part);
+            separator = null;
+          }
+          else {
+            parts.push(part);
+          }
+        }
+        else if (separator == null) {
+          separator = t;
+        }
+      }
+    });
+
+    normalizedName = parts.pop();
   }
   else {
-    normalizedName = normalizedName.toLowerCase();
+    normalizedName = normalizedName.charAt(0).toUpperCase() + normalizedName.slice(1);
   }
-
-  normalizedName = normalizedName.charAt(0).toUpperCase() + normalizedName.slice(1);
 
   return normalizedName;
 }
@@ -535,28 +556,7 @@ function normalizeEmailAddress_(emailAddress) {
 }
 
 function normalizeStreetAddress_(streetAddress) {
-  let normalizedStreetAddress = normalizeString_(streetAddress);
-
-  if (normalizedStreetAddress.length > 0) {
-    normalizedStreetAddress = normalizedStreetAddress.replaceAll("\n", " ").trim().toLowerCase().replaceAll(/[.,]/g, "");
-
-    let valueParts = normalizedStreetAddress.split(/\s+/);
-    let valueIndex = 0;
-
-    normalizedStreetAddress = "";
-
-    valueParts.forEach(function(e) {
-      if (valueIndex > 0) {
-        normalizedStreetAddress += " ";
-      }
-
-      normalizedStreetAddress += e.charAt(0).toUpperCase() + e.slice(1);
-
-      valueIndex++;
-    });
-  }
-
-  return normalizedStreetAddress;
+  return normalizeAddressValue_(streetAddress);
 }
 
 function normalizeTreeLocations_(treeLocations) {
@@ -567,6 +567,31 @@ function normalizeTreeLocations_(treeLocations) {
   }
 
   return normalizedTreeLocations;
+}
+
+function normalizeAddressValue_(value) {
+  let normalizedValue = normalizeString_(value);
+
+  if (normalizedValue.length > 0) {
+    normalizedValue = value.replaceAll("\n", " ").trim().toLowerCase().replaceAll(/[.,]/g, "");
+
+    let valueParts = normalizedValue.split(/\s+/);
+    let valueIndex = 0;
+
+    normalizedValue = "";
+
+    valueParts.forEach(function(e) {
+      if (valueIndex > 0) {
+        normalizedValue += " ";
+      }
+
+      normalizedValue += e.charAt(0).toUpperCase() + e.slice(1);
+
+      valueIndex++;
+    });
+  }
+
+  return normalizedValue;
 }
 
 function resolvePlantingDate_(value) {
